@@ -1,0 +1,40 @@
+---
+description: SpecPilot repository governance and OpenSpec operating rules
+alwaysApply: true
+---
+
+# SpecPilot Cursor Rules (candidate baseline)
+
+These rules are **candidate baseline artifacts**. Formal adoption is owned by
+`chg-w00-s01-repository-governance-and-openspec-foundation`. Do not treat this file as
+completed delivery for `w00-s01`.
+
+## Immutable generated integrations
+
+Do not manually edit:
+
+- `.cursor/commands/`
+- `.cursor/skills/`
+- `.codex/skills/`
+- `.opencode/commands/`
+- `.opencode/skills/`
+
+Refresh only via official `openspec update`.
+
+## Identifiers
+
+Use lowercase kebab-case for machine IDs, paths used as IDs, branch names, and OpenSpec
+change names. Expected change naming: `chg-<slice-id>`.
+
+## Scope discipline
+
+- One change binds to one wave, one slice, and its declared User Stories.
+- Reject later-slice or future-wave scope.
+- `w00-s01` excludes Nx, Angular, PrimeNG, NestJS, PostgreSQL, Prisma, Docker, DeepSeek,
+  authentication, and `w00-s02+`.
+
+## Evidence
+
+- Verify must be exactly `PASS`.
+- Do not mark work complete without evidence.
+- Imported docs and candidate baseline files are not completed implementation.

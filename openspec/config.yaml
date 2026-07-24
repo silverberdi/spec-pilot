@@ -1,0 +1,30 @@
+schema: spec-driven
+context: |
+  SpecPilot is a local-first multi-project assurance console for OpenSpec-governed delivery.
+  Initial platform: macOS. Initial user model: single local user without authentication.
+  Frontend: Angular 22 with PrimeNG and PrimeIcons, Spanish-first and i18n-ready.
+  Backend: NestJS with Fastify. Persistence: PostgreSQL with Prisma. Monorepo: Nx.
+  DeepSeek V4 Flash and Pro provide supervised analysis under a USD 10 monthly hard cap.
+  Every registered repository must contain .specpilot/project.yaml.
+  Initial release is read-only: it does not edit target repositories or execute delivery commands.
+  Delivery hierarchy is Roadmap -> Wave -> Slice -> User Stories -> OpenSpec tasks.
+  Machine identifiers and change names are lowercase kebab-case.
+  Verify must be exactly PASS. No PASS WITH NOTES closure.
+  Imported bootstrap documents are not implementation completion.
+rules:
+  proposal:
+    - Bind every change to one wave, one slice, included User Stories, implementer, reviewer, dependencies, and explicit exclusions.
+    - State business value, security/privacy impact, persistence impact, UI/API impact, tests, migration, rollback, and human validation.
+    - Reject later-slice or future-wave scope.
+  design:
+    - Document domain boundaries, data model, API/UI contracts, failure modes, security, observability, test strategy, migration, and rollback.
+    - Prefer modular-monolith boundaries and ports/adapters over premature infrastructure coupling.
+    - Explain alternatives and trade-offs for consequential decisions.
+  specs:
+    - Use normative SHALL/MUST requirements and concrete WHEN/THEN scenarios.
+    - Cover success, blocked, validation, security/privacy, budget, and recovery behavior where applicable.
+    - Requirements must be independently testable and traceable to User Stories.
+  tasks:
+    - Organize tasks by User Story/capability and implementation sequence.
+    - Include deterministic tests, evidence, docs/context synchronization, Verify, cross-review, sync, archive, and final integrity gates.
+    - Do not mark work complete without evidence.

@@ -1,0 +1,60 @@
+# Dependencies and build
+node_modules/
+.npm/
+.pnpm-store/
+.yarn/
+.yarn/cache/
+dist/
+build/
+out/
+tmp/
+temp/
+coverage/
+.nyc_output/
+*.tsbuildinfo
+.angular/
+.nx/cache/
+.nx/workspace-data/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.p12
+*.key
+credentials.json
+**/secrets/**
+!.gitkeep
+
+# Logs and local runtime
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Editors and local tooling
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+*.swp
+*.swo
+
+# Test / Docker local state
+.docker-data/
+postgres-data/
+*.sqlite
+*.db
+
+# OpenSpec local scratch (keep config and committed specs)
+openspec/changes/**/.openspec-scratch/
+
+# Generated context packs that contain ephemeral machine state
+# (committed manifests/indexes are allowed; regenerate via scripts)
+docs/context/generated/*.tmp
