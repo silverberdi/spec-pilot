@@ -1,0 +1,26 @@
+# Failure-path: invalid machine ID
+
+Timestamp: 2026-07-24T07:29:21Z
+
+## Fixture
+
+Temporarily replaced the first-slice expected change id in
+`docs/waves/w00-project-foundation/wave-contract.md` with a non-kebab value
+(`CHG_W00_S01_Invalid`), then restored the file.
+
+## Command
+
+```bash
+python3 scripts/validate-delivery-graph.py
+```
+
+## Outcome
+
+- Exit code: `1` (non-zero as required)
+- Explicit FAIL lines reported:
+  - change id mismatch vs `chg-<slice-id>`
+  - non-kebab change id
+  - first change mismatch
+- Final stderr summary: `FAIL delivery-graph (3 issue(s))`
+
+Tree restored after capture (see `restore-confirmation.txt`).

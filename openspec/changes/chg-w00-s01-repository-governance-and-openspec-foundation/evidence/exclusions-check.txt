@@ -1,0 +1,15 @@
+=== exclusions check 2026-07-24T07:26:28Z ===
+branch: slice/w00-s01-repository-governance-and-openspec-foundation
+PASS absent: apps
+PASS absent: packages
+PASS absent: package.json
+PASS absent: nx.json
+PASS absent: angular.json
+PASS absent: nest-cli.json
+PASS absent: docker-compose.yml
+PASS absent: Dockerfile
+PASS absent: prisma
+PASS absent: .github/workflows
+./README.md
+./scripts/scan-secrets.py
+PASS: no product scaffolding / CI workflows / excluded runtime under in-scope paths

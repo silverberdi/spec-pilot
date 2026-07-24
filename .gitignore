@@ -16,7 +16,7 @@ coverage/
 .nx/cache/
 .nx/workspace-data/
 
-# Environment and secrets
+# Environment and secrets (aligned with scripts/scan-secrets.py policy)
 .env
 .env.*
 !.env.example
@@ -24,7 +24,11 @@ coverage/
 *.pem
 *.p12
 *.key
+*.keystore
+id_rsa
+id_ed25519
 credentials.json
+**/credentials/**
 **/secrets/**
 !.gitkeep
 

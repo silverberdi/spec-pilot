@@ -1,12 +1,15 @@
 # SpecPilot Agent Operating Contract
 
-This file is a **candidate baseline artifact**. Formal adoption, verification, and completion happen through `w00-s01` / `chg-w00-s01-repository-governance-and-openspec-foundation`. Presence here does not complete that slice or its User Stories.
+Adopted operating contract for Cursor, Codex, and OpenCode on this repository.
+Formal adoption is delivered by `chg-w00-s01-repository-governance-and-openspec-foundation`
+(`w00` / `w00-s01-repository-governance-and-openspec-foundation`). Presence of later-wave
+product docs does **not** complete `w00-s02+` or future waves.
 
 ## Product
 
 SpecPilot is a local-first macOS multi-project assurance console for OpenSpec-governed delivery.
 
-Canonical stack (future waves; not in `w00-s01`):
+Canonical stack (future waves; **not** in `w00-s01`):
 
 - Nx monorepo
 - Angular 22 + PrimeNG + PrimeIcons
@@ -21,30 +24,37 @@ Canonical stack (future waves; not in `w00-s01`):
 
 - Hierarchy: `Roadmap → Wave → Slice → User Stories → OpenSpec tasks`
 - Machine IDs and change names: lowercase kebab-case (`chg-<slice-id>`)
+- Branch model: `slice/* → wave/* → main` (slice PRs target the wave branch)
 - Verify must be exactly `PASS` (no PASS WITH NOTES)
-- Imported/package docs are planning candidates until adopted by a change with evidence
+- Imported/package docs remain planning context until adopted by a change with evidence
+- Deviations require synchronized roadmap/backlog/wave/User Story/OpenSpec updates before work resumes
 
-## OpenSpec environment (already initialized)
+## OpenSpec environment (authority)
 
-- OpenSpec 1.6.0, schema `spec-driven`, profile `custom`, delivery `both`
+- OpenSpec CLI `1.6.0`, schema `spec-driven`, profile `custom`, delivery `both`
 - Active workflows include `update` plus propose, explore, new, continue, apply, ff, sync, archive, bulk-archive, verify, onboard
-- Generated integrations under `.cursor/`, `.codex/`, and `.opencode/` are immutable; refresh only with `openspec update`
+- Generated integrations under `.cursor/commands/`, `.cursor/skills/`, `.codex/skills/`, `.opencode/commands/`, and `.opencode/skills/` are **immutable**; refresh only with official `openspec update` (never hand-edit)
 
 ## Roles
 
 - Implementer (default): Cursor
 - Mandatory reviewer (default): Codex
-- OpenCode is an available integration surface; do not invent ownership without an approved change
+- OpenCode is an available integration surface; do not invent ownership or multi-agent orchestration without an approved change
 
-## Baseline vs delivery
+## Scope for this foundation slice
 
-1. Baseline reconciliation reconciles docs and candidate artifacts only.
-2. Do not create the first OpenSpec change until the governed baseline is committed and published.
-3. First expected change: `chg-w00-s01-repository-governance-and-openspec-foundation`
-4. That change excludes Nx, Angular, PrimeNG, NestJS, PostgreSQL, Prisma, Docker, DeepSeek, authentication, and all `w00-s02+` / future-wave implementation.
+Bound User Stories:
+
+- `us-w00-s01-repository-governance-and-openspec-foundation-001`
+- `us-w00-s01-repository-governance-and-openspec-foundation-002`
+- `us-w00-s01-repository-governance-and-openspec-foundation-003`
+
+**Persistence impact:** none. **Product UI/API impact:** none.
+
+**Exclusions:** Nx, Angular, PrimeNG, NestJS, PostgreSQL, Prisma, Docker, DeepSeek, authentication, application runtime, GitHub Actions implementation, and all `w00-s02+` / future-wave implementation.
 
 ## Safety
 
 - Never commit secrets, credentials, or live `.env` files.
 - Prefer deterministic validation scripts under `scripts/`.
-- Do not treat checkbox completion as evidence.
+- Do not treat checkbox completion as evidence; retain file/transcript evidence for success and failure paths.

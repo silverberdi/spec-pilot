@@ -1,6 +1,7 @@
 # SpecPilot Canonical File Index
 
-Candidate baseline index for operator orientation. Formal integrity/generation adoption is owned by `w00-s01`.
+Context index for operator orientation. Integrity regeneration is part of
+`chg-w00-s01-repository-governance-and-openspec-foundation`.
 
 ## Package inventory (imported)
 
@@ -36,9 +37,9 @@ Candidate baseline index for operator orientation. Formal integrity/generation a
 | OpenCode commands | `.opencode/commands/` | 12 |
 | OpenCode skills | `.opencode/skills/` | 12 |
 
-Refresh only with `openspec update`.
+Refresh only with `openspec update`. Never hand-edit these trees.
 
-## Candidate baseline artifacts (reconciliation)
+## Adopted baseline artifacts (`w00-s01`)
 
 | Artifact | Path |
 |---|---|
@@ -51,9 +52,12 @@ Refresh only with `openspec update`.
 | Package summary regenerator | `scripts/regenerate-package-summary.py` |
 | This index | `docs/context/file-index.md` |
 | Summary semantics | `docs/context/package-summary-semantics.md` |
+| Current state | `docs/context/current-state.md` |
 
-## First change (not created during baseline reconciliation)
+## Active first change
 
+- Wave: `w00`
 - Slice: `w00-s01-repository-governance-and-openspec-foundation`
 - Change: `chg-w00-s01-repository-governance-and-openspec-foundation`
-- Stories: `...-001`, `...-002`, `...-003`
+- Stories: `us-w00-s01-repository-governance-and-openspec-foundation-001`, `us-w00-s01-repository-governance-and-openspec-foundation-002`, `us-w00-s01-repository-governance-and-openspec-foundation-003`
+- Persistence / UI-API impact: none

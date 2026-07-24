@@ -3,11 +3,10 @@ description: SpecPilot repository governance and OpenSpec operating rules
 alwaysApply: true
 ---
 
-# SpecPilot Cursor Rules (candidate baseline)
+# SpecPilot Cursor Rules
 
-These rules are **candidate baseline artifacts**. Formal adoption is owned by
-`chg-w00-s01-repository-governance-and-openspec-foundation`. Do not treat this file as
-completed delivery for `w00-s01`.
+Adopted with `chg-w00-s01-repository-governance-and-openspec-foundation`. Does not complete
+`w00-s02+` or future-wave work.
 
 ## Immutable generated integrations
 
@@ -21,20 +20,30 @@ Do not manually edit:
 
 Refresh only via official `openspec update`.
 
-## Identifiers
+## Identifiers and hierarchy
 
-Use lowercase kebab-case for machine IDs, paths used as IDs, branch names, and OpenSpec
-change names. Expected change naming: `chg-<slice-id>`.
+- Delivery hierarchy: `Roadmap → Wave → Slice → User Stories → OpenSpec tasks`
+- Use lowercase kebab-case for machine IDs, paths used as IDs, branch names, and OpenSpec
+  change names. Expected change naming: `chg-<slice-id>`.
+- Branch model: `slice/* → wave/* → main`
+
+## OpenSpec authority
+
+- CLI `1.6.0`, schema `spec-driven`, profile `custom`, delivery `both`
+- Workflows include `update` plus propose, explore, new, continue, apply, ff, sync,
+  archive, bulk-archive, verify, onboard
+- Verify must be exactly `PASS` (reject `PASS WITH NOTES`)
 
 ## Scope discipline
 
 - One change binds to one wave, one slice, and its declared User Stories.
 - Reject later-slice or future-wave scope.
 - `w00-s01` excludes Nx, Angular, PrimeNG, NestJS, PostgreSQL, Prisma, Docker, DeepSeek,
-  authentication, and `w00-s02+`.
+  authentication, application runtime, GitHub Actions implementation, and `w00-s02+`.
+- Persistence impact for `w00-s01`: none. Product UI/API impact: none.
 
 ## Evidence
 
-- Verify must be exactly `PASS`.
-- Do not mark work complete without evidence.
-- Imported docs and candidate baseline files are not completed implementation.
+- Do not mark work complete without evidence (file/transcript, Verify, review, or human validation).
+- Checkbox completion alone is not evidence.
+- Imported package docs are not completed implementation until adopted with evidence.

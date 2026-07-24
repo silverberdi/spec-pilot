@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Candidate baseline validation for SpecPilot.
-# Formal adoption is owned by w00-s01; running this script does not complete that slice.
+# SpecPilot deterministic validation entrypoint (phase-aware).
+# Adopted by chg-w00-s01-repository-governance-and-openspec-foundation.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -11,7 +11,9 @@ pass() { printf 'PASS  %s\n' "$*"; }
 warn() { printf 'WARN  %s\n' "$*"; }
 bad()  { printf 'FAIL  %s\n' "$*"; fail=1; }
 
-echo "=== SpecPilot baseline validation ==="
+FIRST_CHANGE="chg-w00-s01-repository-governance-and-openspec-foundation"
+
+echo "=== SpecPilot baseline validation (phase-aware) ==="
 echo "root: $ROOT"
 
 # OpenSpec CLI
@@ -24,12 +26,12 @@ else
 fi
 
 if command -v openspec >/dev/null 2>&1; then
-  openspec schema validate spec-driven >/dev/null && pass "openspec schema validate spec-driven"
-  openspec validate --all >/dev/null && pass "openspec validate --all"
-  openspec doctor >/dev/null && pass "openspec doctor"
+  openspec schema validate spec-driven >/dev/null && pass "openspec schema validate spec-driven" || bad "openspec schema validate spec-driven"
+  openspec validate --all >/dev/null && pass "openspec validate --all" || bad "openspec validate --all"
+  openspec doctor >/dev/null && pass "openspec doctor" || bad "openspec doctor"
 fi
 
-# Integration inventories
+# Integration inventories (immutable surfaces; refresh only via openspec update)
 count_files() { find "$1" -type f 2>/dev/null | wc -l | tr -d ' '; }
 cc="$(count_files .cursor/commands)"; cs="$(count_files .cursor/skills)"
 oc="$(count_files .codex/skills)"
@@ -41,25 +43,38 @@ opc="$(count_files .opencode/commands)"; ops="$(count_files .opencode/skills)"
 [[ "$ops" == "12" ]] && pass "opencode skills: $ops" || bad "opencode skills: $ops (expected 12)"
 
 # Delivery graph + kebab IDs
-python3 "$ROOT/scripts/validate-delivery-graph.py" && pass "delivery graph + machine IDs" || bad "delivery graph + machine IDs"
-
-# No OpenSpec changes / no product apps yet
-# openspec/changes/archive is the empty CLI scaffold, not an active change.
-active_changes="$(find openspec/changes -mindepth 1 -maxdepth 1 ! -name archive 2>/dev/null | wc -l | tr -d ' ')"
-if [[ "${active_changes}" != "0" ]]; then
-  bad "active OpenSpec change directories present under openspec/changes (baseline must have none)"
+if python3 "$ROOT/scripts/validate-delivery-graph.py"; then
+  pass "delivery graph + machine IDs"
 else
-  pass "no OpenSpec change present"
+  bad "delivery graph + machine IDs"
 fi
 
+# Phase-aware OpenSpec change expectation:
+# - pre-first-change: zero active changes
+# - first-change delivery: exactly the expected first change (+ archive scaffold)
+# openspec/changes/archive is the empty CLI scaffold, not an active change.
+active_changes=()
+while IFS= read -r line; do
+  active_changes+=("$line")
+done < <(find openspec/changes -mindepth 1 -maxdepth 1 ! -name archive -exec basename {} \; 2>/dev/null | sort)
+
+if [[ ${#active_changes[@]} -eq 0 ]]; then
+  pass "no OpenSpec change present (pre-first-change phase)"
+elif [[ ${#active_changes[@]} -eq 1 && "${active_changes[0]}" == "$FIRST_CHANGE" ]]; then
+  pass "active OpenSpec change allowed: $FIRST_CHANGE"
+else
+  bad "unexpected active OpenSpec changes: ${active_changes[*]:-none} (allowed: none or only $FIRST_CHANGE)"
+fi
+
+# Excluded product scaffolding for w00-s01
 if [[ -d apps ]] || [[ -d packages ]] || [[ -f package.json ]]; then
-  warn "product scaffolding files present; ensure they were not introduced before w00-s02"
+  bad "excluded product scaffolding present (apps/, packages/, and/or package.json)"
 else
   pass "no product scaffolding (apps/packages/package.json) present"
 fi
 
 # package-summary semantics
-python3 - <<'PY' && pass "package-summary semantics" || bad "package-summary semantics"
+if python3 - <<'PY'
 import json
 from pathlib import Path
 s = json.loads(Path("package-summary.json").read_text())
@@ -69,33 +84,31 @@ assert s["fileCount"] == len(s["files"])
 assert "package-summary.json" not in {f["path"] for f in s["files"]}
 print(f"fileCount={s['fileCount']} waves={s['waveCount']} slices={s['sliceCount']} stories={s['userStoryCount']}")
 PY
+then
+  pass "package-summary semantics"
+else
+  bad "package-summary semantics"
+fi
 
-# Secret scan (heuristic)
+# Secret scan (heuristic, fail-closed)
 if python3 "$ROOT/scripts/scan-secrets.py"; then
   pass "secret scan"
 else
   bad "secret scan"
 fi
 
-# Git hygiene
+# Git hygiene (phase-aware: do not require main-only / no-commits / no wave-slice branches)
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   branch="$(git branch --show-current 2>/dev/null || true)"
-  [[ "$branch" == "main" ]] && pass "git branch: main" || bad "git branch: ${branch:-unknown} (expected main)"
-  if git rev-parse HEAD >/dev/null 2>&1; then
-    warn "commits already exist; baseline reconciliation expected an uncommitted first commit state"
-  else
-    pass "no commits yet (ready for reviewed first baseline commit)"
-  fi
-  wave_branches="$(git branch --list 'wave/*' 'slice/*' 2>/dev/null | wc -l | tr -d ' ')"
-  [[ "$wave_branches" == "0" ]] && pass "no wave/slice branches" || bad "wave/slice branches exist"
+  pass "git repository on branch: ${branch:-detached}"
 else
   bad "not a git repository"
 fi
 
 echo "=== summary ==="
 if [[ "$fail" -eq 0 ]]; then
-  echo "READY_FOR_FIRST_COMMIT"
+  echo "PASS"
   exit 0
 fi
-echo "CHANGES_REQUIRED"
+echo "FAIL"
 exit 1

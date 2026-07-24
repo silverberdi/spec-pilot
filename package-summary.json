@@ -3,47 +3,48 @@
   "generated": "2026-07-24",
   "fileCount": 172,
   "fileCountExcludesSelf": true,
-  "semantics": "fileCount and files list the imported canonical package inventory and intentionally exclude package-summary.json itself. Generated OpenSpec integrations are excluded. candidateBaselineFiles lists reconciliation candidates for formal adoption via w00-s01 and are outside fileCount.",
+  "semantics": "fileCount and files list the imported canonical package inventory and intentionally exclude package-summary.json itself. Generated OpenSpec integrations are excluded. adoptedBaselineFiles lists artifacts formally adopted via w00-s01 / chg-w00-s01-repository-governance-and-openspec-foundation and remain outside fileCount. This does not complete w00-s02+.",
   "waveCount": 12,
   "sliceCount": 42,
   "userStoryCount": 126,
-  "candidateBaselineFiles": [
+  "adoptedBaselineFiles": [
     {
       "path": ".gitignore",
-      "bytes": 880,
-      "sha256": "d6de19fa8138191eae29ef11af198a135e8eed1f1b3e2455216985ec486d6525"
+      "bytes": 973,
+      "sha256": "47991369bd6fd5f58b265144248a89b3cf8790b855bc671c9f746def7436a4c1"
     },
     {
       "path": "AGENTS.md",
-      "bytes": 2230,
-      "sha256": "469dbd3ef31024673c85967592706ae5be9f85dbef864e186cf40f880cd299a1"
+      "bytes": 2758,
+      "sha256": "d022f1262442b62be3ca24fd244a248f8e30f48cb6ba65c9981d39f828609a6c"
     },
     {
       "path": ".cursor/rules/spec-pilot-governance.mdc",
-      "bytes": 1156,
-      "sha256": "9414d1251d0962f71445a85ba3a8a7467be9735b8e87f1f602d8975e6e266183"
+      "bytes": 1687,
+      "sha256": "b1fbc9fb77412a39fdf45ae90789d252248bfe2d58722c6e02aa5b6a598572ed"
     },
     {
       "path": "scripts/validate-baseline.sh",
-      "bytes": 4078,
-      "sha256": "c2342c4d7d1366649bd2f4fb5096511f3658264ba684a90df4465d5024750c5a"
+      "bytes": 4353,
+      "sha256": "8464c8f0ee03f8d9b97bdbe164be29cad9a41da4c6b31926482117091f383a35"
     },
     {
       "path": "scripts/validate-delivery-graph.py",
-      "bytes": 5274,
-      "sha256": "697473524936fc61123a6e1f3b5b229c1c510458fdb9467dca6f1ac8b22339fa"
+      "bytes": 5493,
+      "sha256": "f67a14f19737eda9c55fd63e4c3b10941999fae0673e3ee75f4f28ebe3617557"
     },
     {
       "path": "scripts/scan-secrets.py",
-      "bytes": 2821,
-      "sha256": "366a986882f392f927cc76df87b6b3781885f2e5068b5f371c54bbb3f43e3f12"
+      "bytes": 2878,
+      "sha256": "2b2ec2e9855129f021f7f60b124cc73c58c3dd3759f875c030303c3ba9be400a"
     },
     {
       "path": "scripts/regenerate-package-summary.py",
-      "bytes": 3732,
-      "sha256": "0ae88ea47eb9352934b9f9f6685195421c183a752f8db4c8ba9250966095b8b9"
+      "bytes": 3687,
+      "sha256": "b88820c905c1da669e9e071d60f339f8ef758846cfea8c3e2970cb292208c452"
     }
   ],
+  "candidateBaselineFiles": [],
   "files": [
     {
       "path": "README.md",
@@ -737,18 +738,18 @@
     },
     {
       "path": "docs/context/current-state.md",
-      "bytes": 1121,
-      "sha256": "ea5ee2a36e2f794f3f2431af88541b7fbda5f72ec5e953c901762d1a115d61cc"
+      "bytes": 1601,
+      "sha256": "c47457ec01c03a79a879a6dd9734487e8eb31b9458347b9a8aee374692d2427f"
     },
     {
       "path": "docs/context/file-index.md",
-      "bytes": 2208,
-      "sha256": "a65824ec5441b36cdab84b5fd1e9f81c970398e55ff140457905376979ba2974"
+      "bytes": 2477,
+      "sha256": "1d1b4833b85e3a5ae8e8584773c355f6f51c336e157e922f32dba6f98f462616"
     },
     {
       "path": "docs/context/package-summary-semantics.md",
-      "bytes": 1430,
-      "sha256": "7fd554ad1fc5946826b2fb18e6368b5eb559fd5dbea188398239b36830b33953"
+      "bytes": 1705,
+      "sha256": "ee802041978f4cbb1dc241e8469a89a93aa47ccd6e908be22ba47d793cc918b2"
     },
     {
       "path": "docs/decisions/adr-001-local-first-modular-monolith.md",
@@ -777,23 +778,23 @@
     },
     {
       "path": "docs/governance/definition-of-done.md",
-      "bytes": 500,
-      "sha256": "ec4b6281c80bcbaec3c376b73c0754529e6e1c6499524cb62ad8ba0335f892e9"
+      "bytes": 858,
+      "sha256": "1cd11f344c31487376802fe1554acfb2772e74f4ac5e541d57bf1b2033691b76"
     },
     {
       "path": "docs/governance/definition-of-ready.md",
-      "bytes": 548,
-      "sha256": "4b6a66ae5bb911619636abbba662fe5be2e2b2e22caca6a9925a5dce248e8222"
+      "bytes": 804,
+      "sha256": "83ad9c206d145ce930e5423556e121e77120288c12d3a41ca3c87eb9f289715e"
     },
     {
       "path": "docs/governance/delivery-methodology.md",
-      "bytes": 851,
-      "sha256": "5f85f01a5a7641b3480b2ce00985aed7d275074f5fd1c4f7ceb47d9e3889f191"
+      "bytes": 1772,
+      "sha256": "7d8eedb62f24f6a748fe4e3361ba85e3f87384989d6cfaaf00e617ea864a3a48"
     },
     {
       "path": "docs/governance/review-contract.md",
-      "bytes": 891,
-      "sha256": "40497be6473498e0dcbb4129ea0594b7505b91ddae87caacb7d2bb572e8b0595"
+      "bytes": 1682,
+      "sha256": "9edbc29ed696f8f326b8a0d41ba4ff843005d28574ef4b2b0ae4803d1bdb192b"
     },
     {
       "path": "docs/product/business-intent.md",
