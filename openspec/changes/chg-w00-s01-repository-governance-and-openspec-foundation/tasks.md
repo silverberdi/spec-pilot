@@ -28,7 +28,7 @@
 
 ## 4. `us-w00-s01-repository-governance-and-openspec-foundation-003` — Operational experience and closure
 
-- [ ] 4.1 Open or update a draft PR from the slice branch to the wave branch for visibility only; record that it is non-merge-eligible until closure gates pass
+- [x] 4.1 Open or update a draft PR from the slice branch to the wave branch for visibility only; record that it is non-merge-eligible until closure gates pass
 - [x] 4.2 Produce a closure evidence checklist that maps AC1–AC5 for `us-w00-s01-repository-governance-and-openspec-foundation-001`, `us-w00-s01-repository-governance-and-openspec-foundation-002`, and `us-w00-s01-repository-governance-and-openspec-foundation-003` to concrete evidence paths (use proposal coverage matrix; no checkbox-only claims)
 - [ ] 4.3 Record human validation evidence for GitHub settings that cannot be proven locally (branch protection / required reviewers / integration-branch push restrictions as applicable)
 - [x] 4.4 Confirm no hidden deferred acceptance criteria remain for the three bound User Stories
@@ -40,5 +40,5 @@
 
 ## 5. Final non-completion guard
 
-- [ ] 5.1 Confirm planning/apply artifacts never claim User Story/slice/wave completion without the evidence gates above for `us-w00-s01-repository-governance-and-openspec-foundation-001`, `us-w00-s01-repository-governance-and-openspec-foundation-002`, and `us-w00-s01-repository-governance-and-openspec-foundation-003`
-- [ ] 5.2 Confirm excluded future scope remains absent from the diff (no app scaffolding, no CI workflows implementation, no auth/DeepSeek)
+- [x] 5.1 Confirm planning/apply artifacts never claim User Story/slice/wave completion without the evidence gates above for `us-w00-s01-repository-governance-and-openspec-foundation-001`, `us-w00-s01-repository-governance-and-openspec-foundation-002`, and `us-w00-s01-repository-governance-and-openspec-foundation-003`
+- [x] 5.2 Confirm excluded future scope remains absent from the diff (no app scaffolding, no CI workflows implementation, no auth/DeepSeek)
