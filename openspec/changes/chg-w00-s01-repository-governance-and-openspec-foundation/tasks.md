@@ -32,8 +32,8 @@
 - [x] 4.2 Produce a closure evidence checklist that maps AC1–AC5 for `us-w00-s01-repository-governance-and-openspec-foundation-001`, `us-w00-s01-repository-governance-and-openspec-foundation-002`, and `us-w00-s01-repository-governance-and-openspec-foundation-003` to concrete evidence paths (use proposal coverage matrix; no checkbox-only claims)
 - [ ] 4.3 Record human validation evidence for GitHub settings that cannot be proven locally (branch protection / required reviewers / integration-branch push restrictions as applicable)
 - [x] 4.4 Confirm no hidden deferred acceptance criteria remain for the three bound User Stories
-- [ ] 4.5 Run OpenSpec Verify for this change and require exact result `PASS` (reject `PASS WITH NOTES` or any other result); retain Verify output as evidence
-- [ ] 4.6 Request mandatory Codex cross-review and obtain verdict `READY_TO_MERGE` or resolve all findings on `CHANGES_REQUIRED` and re-review; retain the verdict artifact
+- [x] 4.5 Run OpenSpec Verify for this change and require exact result `PASS` (reject `PASS WITH NOTES` or any other result); retain Verify output as evidence
+- [x] 4.6 Request mandatory Codex cross-review and obtain verdict `READY_TO_MERGE` or resolve all findings on `CHANGES_REQUIRED` and re-review; retain the verdict artifact
 - [ ] 4.7 Sync delta specs to main specs, then archive the change only after Verify `PASS` and required gates are satisfied
 - [ ] 4.8 Regenerate final context/package integrity (`regenerate-package-summary.py`, current-state/file-index coherence) and re-run validators as final integrity evidence
 - [ ] 4.9 Only after DoD + Codex `READY_TO_MERGE` + human GitHub validation, mark the PR merge-eligible; do not merge prematurely during apply

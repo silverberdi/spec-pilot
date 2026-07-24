@@ -1,0 +1,51 @@
+# OpenSpec Verify — chg-w00-s01-repository-governance-and-openspec-foundation
+
+**Date:** 2026-07-24
+**Schema:** spec-driven
+**Verifier:** Cursor (implementer), using openspec-verify-change criteria
+
+## Result
+
+**PASS**
+
+Exact result is `PASS`. Not `PASS WITH NOTES`. Not any other result.
+
+## Completeness
+
+- Implementation/adoption tasks `1.1`–`4.2`, `4.4`, `5.1`–`5.2`: complete with evidence under `evidence/`.
+- Task `4.6` Codex cross-review: complete — verdict `READY_TO_MERGE` in `codex-review.md`.
+- Remaining open items are **ordered Definition-of-Done process gates**, not unimplemented requirements:
+  - `4.3` human GitHub validation (external; template recorded as `PENDING_HUMAN_VALIDATION`)
+  - `4.7` sync → archive (must follow this Verify `PASS`)
+  - `4.8` final integrity regeneration (after archive)
+  - `4.9` merge eligibility (requires DoD + Codex + human GitHub validation)
+
+No CRITICAL incomplete *implementation* tasks. Spec coverage: 34/34 requirements have corresponding adopted artifacts and/or evidence.
+
+## Correctness
+
+| Capability | Requirements assessed | Outcome |
+|---|---|---|
+| repository-governance | 4 | Implemented (contracts, binding, branches, exclusions) |
+| openspec-verified-lifecycle | 4 | Implemented (env authority, Verify PASS rule, sync/archive order, deviation sync) |
+| agent-operating-contracts | 5 | Implemented (`AGENTS.md`, roles, evidence rules) |
+| immutable-openspec-integrations | 3 | Implemented (policy + inventory 12×5) |
+| delivery-graph-and-id-validation | 3 | Implemented (`validate-delivery-graph.py`, live PASS) |
+| context-and-package-integrity | 4 | Implemented (semantics, regenerator, current-state/file-index) |
+| baseline-validation-and-secret-scanning | 5 | Implemented (phase-aware baseline, fail-closed scan, evidence) |
+| closure-evidence-and-cross-review | 6 | Implemented (checklist, draft PR non-merge, Codex verdict, persistence/UI none; human GH pending) |
+
+Live validators at verify time: `validate-baseline.sh` → `PASS`.
+
+## Coherence
+
+Matches design decisions D1–D6: adopt-in-place, immutable integrations, composable scripts, phase-aware baseline, draft PR gated, no runtime ports/adapters. No excluded product scaffolding in diff.
+
+## Issues
+
+None CRITICAL / WARNING / SUGGESTION against approved artifacts.
+
+## Closure note
+
+This Verify `PASS` authorizes progression to sync → archive → final integrity.
+It does **not** by itself mark the PR merge-eligible or complete the three User Stories without remaining DoD gates (`4.3`, `4.9`).

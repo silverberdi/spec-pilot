@@ -37,8 +37,8 @@ Commands covered: `regenerate-package-summary.py`, `validate-delivery-graph.py`,
 | Closure AC checklist | `evidence/closure-checklist.md` |
 | Draft PR / non-merge note | `evidence/draft-pr.md` |
 | Human GitHub validation | `evidence/human-github-validation.md` |
-| OpenSpec Verify output | `evidence/verify.txt` (pending exact `PASS`) |
-| Codex cross-review verdict | `evidence/codex-review.md` (pending) |
+| OpenSpec Verify output | `evidence/verify.txt` (**PASS**) |
+| Codex cross-review verdict | `evidence/codex-review.md` (**READY_TO_MERGE**) |
 | Final integrity re-run | `evidence/final-integrity.txt` (pending) |
 | Deferred-AC confirmation | `evidence/no-deferred-ac.md` |
 | Non-completion / exclusion guard | `evidence/final-guards.md` |
