@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Validate SpecPilot roadmap/wave/slice/user-story/change relationships and kebab-case IDs."""
+"""Validate SpecPilot roadmap/wave/slice/user-story/change relationships and kebab-case IDs.
+
+Adopted by chg-w00-s01-repository-governance-and-openspec-foundation.
+Enforces Roadmap → Wave → Slice → User Story → chg-<slice-id> integrity (12/42/126).
+"""
 from __future__ import annotations
 
 import re
@@ -10,7 +14,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 KEBAB = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 US_FILE = re.compile(r"^us-(w\d{2})-(s\d{2}-[a-z0-9-]+)-(\d{3})\.md$")
-SLICE_HEAD = re.compile(r"^### `(w\d{2}-s\d{2}-[a-z0-9-]+)`\s*$", re.M)
 CHG_RE = re.compile(r"Expected change:\s*`([^`]+)`")
 
 issues: list[str] = []
@@ -100,7 +103,10 @@ def main() -> int:
     idx_ids = set(re.findall(r"`(us-[a-z0-9-]+)`", idx))
     file_ids = {p.stem for p in stories}
     if idx_ids != file_ids:
-        fail(f"backlog-index mismatch: missing={sorted(file_ids-idx_ids)[:5]} extra={sorted(idx_ids-file_ids)[:5]}")
+        fail(
+            f"backlog-index mismatch: missing={sorted(file_ids - idx_ids)[:5]} "
+            f"extra={sorted(idx_ids - file_ids)[:5]}"
+        )
 
     # First change binding
     first_slice = "w00-s01-repository-governance-and-openspec-foundation"
@@ -119,7 +125,7 @@ def main() -> int:
         fail(f"completed user stories found: {completed}")
 
     print(
-        f"waves={len(waves)} slices={len(slices)} stories={len(stories)} "
+        f"PASS waves={len(waves)} slices={len(slices)} stories={len(stories)} "
         f"changes={len(changes)} first_change={first_change}"
     )
     if len(waves) != 12:
@@ -131,7 +137,8 @@ def main() -> int:
 
     if issues:
         for item in issues:
-            print(f"ERROR: {item}", file=sys.stderr)
+            print(f"FAIL: {item}", file=sys.stderr)
+        print(f"FAIL delivery-graph ({len(issues)} issue(s))", file=sys.stderr)
         return 1
     return 0
 

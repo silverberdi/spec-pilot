@@ -1,0 +1,32 @@
+=== post-failure restore confirmation 2026-07-24T07:29:51Z ===
+PASS waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+delivery-graph exit=0
+PASS no heuristic secrets found
+secret-scan exit=0
+=== SpecPilot baseline validation (phase-aware) ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+PASS  openspec --version => 1.6.0
+Note: Schema commands are experimental and may change.
+PASS  openspec schema validate spec-driven
+- Validating...
+PASS  openspec validate --all
+PASS  openspec doctor
+PASS  cursor commands: 12
+PASS  cursor skills: 12
+PASS  codex skills: 12
+PASS  opencode commands: 12
+PASS  opencode skills: 12
+PASS waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+PASS  delivery graph + machine IDs
+PASS  active OpenSpec change allowed: chg-w00-s01-repository-governance-and-openspec-foundation
+PASS  no product scaffolding (apps/packages/package.json) present
+fileCount=172 waves=12 slices=42 stories=126
+PASS  package-summary semantics
+PASS no heuristic secrets found
+PASS  secret scan
+PASS  git repository on branch: slice/w00-s01-repository-governance-and-openspec-foundation
+=== summary ===
+PASS
+validate-baseline exit=0
+PASS fixture removed
+PASS wave contract restored

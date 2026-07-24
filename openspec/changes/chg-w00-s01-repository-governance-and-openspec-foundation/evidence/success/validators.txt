@@ -1,0 +1,51 @@
+=== success-path evidence 2026-07-24T07:29:02Z ===
+--- regenerate-package-summary.py ---
+PASS wrote /Users/silveriobernal/Documents/Code/Development/spec-pilot/package-summary.json fileCount=172 (excludes self) adopted=7 waves=12 slices=42 stories=126
+exit=0
+--- validate-delivery-graph.py ---
+PASS waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+exit=0
+--- scan-secrets.py ---
+PASS no heuristic secrets found
+exit=0
+--- validate-baseline.sh ---
+=== SpecPilot baseline validation (phase-aware) ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+PASS  openspec --version => 1.6.0
+Note: Schema commands are experimental and may change.
+PASS  openspec schema validate spec-driven
+- Validating...
+PASS  openspec validate --all
+PASS  openspec doctor
+PASS  cursor commands: 12
+PASS  cursor skills: 12
+PASS  codex skills: 12
+PASS  opencode commands: 12
+PASS  opencode skills: 12
+PASS waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+PASS  delivery graph + machine IDs
+PASS  active OpenSpec change allowed: chg-w00-s01-repository-governance-and-openspec-foundation
+PASS  no product scaffolding (apps/packages/package.json) present
+fileCount=172 waves=12 slices=42 stories=126
+PASS  package-summary semantics
+PASS no heuristic secrets found
+PASS  secret scan
+PASS  git repository on branch: slice/w00-s01-repository-governance-and-openspec-foundation
+=== summary ===
+PASS
+exit=0
+--- openspec validate --all ---
+- Validating...
+✓ change/chg-w00-s01-repository-governance-and-openspec-foundation
+Totals: 1 passed, 0 failed (1 items)
+exit=0
+--- openspec doctor ---
+Doctor
+
+Root
+  Location: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+  OpenSpec root: ok
+
+References
+  (none declared)
+exit=0

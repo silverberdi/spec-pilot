@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-"""Deterministically regenerate package-summary.json for the imported canonical package.
+"""Deterministically regenerate package-summary.json for the SpecPilot package.
 
 Semantics:
 - fileCount counts package files listed in `files`.
 - package-summary.json intentionally excludes itself from `files` / fileCount.
-- Generated OpenSpec integrations (.cursor/.codex/.opencode) are excluded.
-- Candidate baseline artifacts created during reconciliation (AGENTS.md, .gitignore,
-  scripts/, .cursor/rules/, etc.) are tracked under candidateBaselineFiles and remain
-  outside fileCount unless an approved change promotes them into the package inventory.
+- Generated OpenSpec integrations (.cursor/.codex/.opencode command/skill trees) are excluded.
+- Artifacts adopted by w00-s01 are tracked under adoptedBaselineFiles (outside fileCount).
 """
 from __future__ import annotations
 
@@ -18,7 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-CANDIDATE_BASELINE = (
+ADOPTED_BASELINE = (
     ".gitignore",
     "AGENTS.md",
     ".cursor/rules/spec-pilot-governance.mdc",
@@ -69,11 +67,11 @@ def main() -> None:
         slice_count += wc.read_text(encoding="utf-8").count("\n### `")
     user_story_count = len(list((ROOT / "docs/backlog/user-stories").glob("*.md")))
 
-    candidates = []
-    for rel in CANDIDATE_BASELINE:
+    adopted = []
+    for rel in ADOPTED_BASELINE:
         path = ROOT / rel
         if path.is_file():
-            candidates.append(
+            adopted.append(
                 {
                     "path": rel,
                     "bytes": path.stat().st_size,
@@ -89,21 +87,23 @@ def main() -> None:
         "semantics": (
             "fileCount and files list the imported canonical package inventory and "
             "intentionally exclude package-summary.json itself. Generated OpenSpec "
-            "integrations are excluded. candidateBaselineFiles lists reconciliation "
-            "candidates for formal adoption via w00-s01 and are outside fileCount."
+            "integrations are excluded. adoptedBaselineFiles lists artifacts formally "
+            "adopted via w00-s01 / chg-w00-s01-repository-governance-and-openspec-foundation "
+            "and remain outside fileCount. This does not complete w00-s02+."
         ),
         "waveCount": wave_count,
         "sliceCount": slice_count,
         "userStoryCount": user_story_count,
-        "candidateBaselineFiles": candidates,
+        "adoptedBaselineFiles": adopted,
+        "candidateBaselineFiles": [],
         "files": package_files,
     }
 
     out = ROOT / "package-summary.json"
     out.write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     print(
-        f"wrote {out} fileCount={summary['fileCount']} "
-        f"(excludes self) candidates={len(candidates)} "
+        f"PASS wrote {out} fileCount={summary['fileCount']} "
+        f"(excludes self) adopted={len(adopted)} "
         f"waves={wave_count} slices={slice_count} stories={user_story_count}"
     )
 
