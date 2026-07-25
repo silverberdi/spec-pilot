@@ -1,10 +1,14 @@
 # SpecPilot — Canonical Project Package
 
-SpecPilot is a local-first, multi-project delivery assurance console for OpenSpec-governed software projects. Its first release adds a supervised DeepSeek validation layer around `new`, planning readiness, applied implementation review, and verify/sync readiness. It does not edit repositories or execute delivery actions in the initial scope.
+SpecPilot is a local-first, multi-project delivery assurance console for OpenSpec-governed software projects. Its initial release adds a supervised DeepSeek validation layer around next-work guidance, planning readiness, applied implementation review, and Verify/sync readiness. It reads target repositories but does not edit them or execute delivery actions in the initial scope.
 
-## Canonical product statement
+## Current development operating model
 
-SpecPilot reduces context switching, planning defects, scope drift, and premature OpenSpec transitions by reading a registered project's canonical context, evaluating evidence, and producing one structured verdict plus one ready-to-copy instruction for the assigned executor.
+- Cursor is the only implementer of the SpecPilot codebase.
+- Cline with DeepSeek may be used as an optional read-only validation assistant.
+- Codex and OpenCode have no current development, review, validation, or governance role.
+- Generated integrations for other tools may exist, but installed integration files do not assign project roles.
+- OpenSpec remains the workflow authority.
 
 ## First-release technology direction
 
@@ -12,26 +16,26 @@ SpecPilot reduces context switching, planning defects, scope drift, and prematur
 - Nx monorepo.
 - Angular 22 web console with PrimeNG and PrimeIcons.
 - NestJS API using Fastify.
-- PostgreSQL with Prisma as the only operational persistence store.
-- DeepSeek V4 Flash and DeepSeek V4 Pro.
-- OpenSpec as the delivery authority.
-- No authentication initially; Google authentication is the first post-MVP capability.
+- PostgreSQL with Prisma as the only operational persistence path.
+- DeepSeek Flash and Pro under a configurable monthly hard cap, initially USD 10.
+- Spanish-first UI, i18n-ready, light/dark/system appearance.
+- No authentication initially; Google authentication is a later capability.
 - Mandatory `.specpilot/project.yaml` in every registered repository.
 
-## How this package is used
-
-1. Work in the existing `spec-pilot` Git repository on `main` (already initialized; no commits yet until the governed baseline is reviewed).
-2. OpenSpec 1.6.0 is already installed with schema `spec-driven`, profile `custom`, delivery `both`, and all 12 workflows active (including `update`).
-3. Cursor, Codex, and OpenCode integrations already exist. Refresh them only with official `openspec update`; do not edit generated integration files manually.
-4. Give Cursor `bootstrap/cursor-bootstrap-prompt.md` for baseline reconciliation only.
-5. Cursor must reconcile the imported package, validate cross-document consistency, and prepare candidate baseline artifacts. Do not create the first OpenSpec change until the governed baseline is committed and published. Never treat imported documents as completed implementation.
-
-## Delivery hierarchy
+## Canonical delivery hierarchy
 
 `Roadmap → Wave → Slice → User Stories → OpenSpec tasks`
 
-One slice normally maps to one lowercase kebab-case OpenSpec change named `chg-<slice-id>`.
+One slice normally maps to one lowercase kebab-case OpenSpec change. The package does not impose an unapproved branch or Pull Request model; repository governance must explicitly define one before it becomes binding.
 
-## First expected change (after baseline commit)
+## Bootstrap sequence
 
-`chg-w00-s01-repository-governance-and-openspec-foundation`
+1. Create an empty repository named `spec-pilot` on `main`.
+2. Copy this package into the repository root.
+3. Initialize OpenSpec for Cursor using the official CLI. Optional integrations may be installed without assigning them project roles.
+4. Reconcile and validate the imported baseline without creating an OpenSpec change.
+5. Commit and publish the reviewed baseline.
+6. Create `chg-w00-s01-repository-governance-and-openspec-foundation` through OpenSpec.
+7. Stop when its planning artifacts are `APPLY_READY`; do not apply without explicit approval.
+
+Imported documents are planning candidates, not completed implementation.

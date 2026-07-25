@@ -18,7 +18,7 @@
 ## Explicitly out of scope for initial release
 
 - Editing target repositories.
-- Running Cursor, Codex, OpenCode, OPSX, Git, tests, commits, PRs, sync, archive, or merges from SpecPilot.
+- Running Cursor, Cline, Codex, OpenCode, OpenSpec workflows, Git, tests, commits, Pull Requests, sync, archive, or merges from SpecPilot.
 - Authentication and multiuser behavior.
 - Remote repositories without a local checkout.
 - Windows or Linux support.

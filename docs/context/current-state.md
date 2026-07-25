@@ -1,19 +1,17 @@
 # Current State
 
-Lifecycle: `baseline-reconciled-awaiting-first-commit`
+Lifecycle: `baseline-reconciled-awaiting-commit`
 
 - Product name: SpecPilot
-- Repository: `spec-pilot` (Git initialized on `main`; no commits yet)
-- OpenSpec: `1.6.0`, schema `spec-driven`, profile `custom`, delivery `both`
-- Active workflows: propose, explore, new, continue, apply, update, ff, sync, archive, bulk-archive, verify, onboard
-- Integrations present: Cursor, Codex, OpenCode (immutable; refresh via `openspec update` only)
-- Active wave (planned): `w00`
+- Repository: `spec-pilot`
+- Active wave: `w00`
 - Next slice: `w00-s01-repository-governance-and-openspec-foundation`
-- Expected first change (after baseline commit/publish): `chg-w00-s01-repository-governance-and-openspec-foundation`
-- Implementer: `cursor`
-- Reviewer: `codex`
-- Imported package artifacts are canonical planning candidates only.
-- Candidate baseline artifacts created during reconciliation are not completed delivery.
-- No User Story, slice, wave, or OpenSpec change is completed.
-- No OpenSpec change exists yet; do not create one during baseline reconciliation.
-- No product code should be created before the first change is planning-complete and approved.
+- Expected first change: `chg-w00-s01-repository-governance-and-openspec-foundation`
+- Cursor is the only current implementer.
+- Cline with DeepSeek is optional and read-only when used for validation.
+- Codex and OpenCode have no current project role.
+- No active OpenSpec change exists.
+- No User Story, slice, or wave is completed.
+- No product implementation exists yet.
+- The corrected baseline is reconciled and awaiting its reviewed baseline commit.
+- The first OpenSpec change must only be created after that baseline commit.

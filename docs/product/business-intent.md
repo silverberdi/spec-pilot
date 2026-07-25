@@ -2,11 +2,11 @@
 
 ## Problem
 
-OpenSpec-driven delivery across Cursor, Codex, and other executors requires repeated manual work: locating canonical context, determining the next valid change, reviewing proposal/design/specs/tasks, identifying missing coverage or future-scope leakage, checking applied implementation, and drafting corrective prompts. This creates context switching, inconsistent review quality, and premature transitions.
+OpenSpec-driven delivery across AI-assisted development environments requires repeated manual work: locating canonical context, determining the next valid change, reviewing proposal/design/specs/tasks, identifying missing coverage or future-scope leakage, checking applied implementation, and drafting corrective prompts. This creates context switching, inconsistent review quality, and premature transitions.
 
 ## Intent
 
-SpecPilot provides a vendor-neutral assurance layer between OpenSpec and AI executors. It reads evidence, evaluates readiness, and produces deterministic workflow verdicts with a single consolidated prompt or command for the assigned executor.
+SpecPilot provides a assurance layer between OpenSpec and the assigned implementation workflow. It reads evidence, evaluates readiness, and produces deterministic workflow verdicts with a single consolidated prompt or command for the assigned executor.
 
 ## Initial business value
 

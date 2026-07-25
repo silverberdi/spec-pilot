@@ -2,7 +2,7 @@
 
 ## Goal
 
-Deliver the capabilities described in the roadmap while preserving read-only supervised behavior until explicitly expanded.
+Deliver the secure context assembly capabilities defined by the roadmap while preserving the current release boundaries and OpenSpec governance.
 
 ## Slices
 
@@ -32,4 +32,4 @@ Expected change: `chg-w02-s04-context-preview-and-approval`
 
 ## Wave closure
 
-All slices meet Definition of Done, wave evidence is complete, context is synchronized, and the wave PR is ready for the owner’s manual merge to `main`.
+All slices satisfy their acceptance criteria, deterministic checks pass, OpenSpec Verify is exactly `PASS`, documentation/context is synchronized, changes are synced and archived, and any explicitly required human approval is complete.

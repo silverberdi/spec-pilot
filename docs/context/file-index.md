@@ -36,7 +36,7 @@ Candidate baseline index for operator orientation. Formal integrity/generation a
 | OpenCode commands | `.opencode/commands/` | 12 |
 | OpenCode skills | `.opencode/skills/` | 12 |
 
-Refresh only with `openspec update`.
+Refresh only with `openspec update`. Generated Codex and OpenCode inventories are not a current project role; Cursor remains the only implementer.
 
 ## Candidate baseline artifacts (reconciliation)
 

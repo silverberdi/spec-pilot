@@ -1,17 +1,15 @@
 # Baseline Validation Checklist
 
-- [ ] All machine IDs lowercase kebab-case.
-- [ ] Roadmap, waves, slices, stories, and expected changes cross-reference correctly (`chg-<slice-id>`).
-- [ ] Counts: 12 waves, 42 slices, 126 User Stories.
-- [ ] No story, slice, or wave marked completed.
-- [ ] OpenSpec CLI actual version recorded (expected 1.6.0 for this baseline).
-- [ ] Custom expanded workflows active for Cursor, Codex, and OpenCode, including `update`.
-- [ ] Generated integration files untouched except via `openspec update`.
-- [ ] `openspec/config.yaml` parses and contains project-specific rules.
+- [ ] All machine IDs are lowercase kebab-case.
+- [ ] Roadmap, waves, slices, User Stories, and expected changes cross-reference correctly.
+- [ ] Every slice has exactly three declared User Stories in this package.
+- [ ] No User Story, slice, or wave is marked completed.
+- [ ] Cursor is the only declared implementer of the SpecPilot codebase.
+- [ ] No agent-specific review gate exists.
+- [ ] Optional Cline + DeepSeek validation is explicitly read-only.
+- [ ] Generated integrations are untouched except through `openspec update`.
+- [ ] `openspec/config.yaml` contains project-specific rules and parses successfully.
 - [ ] `openspec validate --all` exits successfully.
-- [ ] Repository has no secrets.
-- [ ] `package-summary.json` semantics documented (`fileCount` excludes itself).
-- [ ] Candidate baseline artifacts present but do not mark `w00-s01` complete.
-- [ ] No OpenSpec change exists; no wave/slice branches exist.
-- [ ] Git status captured; no commit created in the reconciliation pass.
-- [ ] First change planning begins only after the governed baseline commit is published.
+- [ ] Repository contains no secrets.
+- [ ] No unrelated project terminology is present.
+- [ ] No OpenSpec change is created before the reviewed baseline commit.

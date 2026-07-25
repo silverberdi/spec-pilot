@@ -9,7 +9,7 @@
 - Average review cost by stage.
 - Cost per change reaching `APPLY_READY`.
 - Cost per change reaching `READY_FOR_VERIFY`.
-- False-positive and escaped-defect rate from sampled human/Codex review.
+- False-positive and escaped-defect rate from sampled human review.
 - Time saved per review.
 
 ## Initial acceptance target

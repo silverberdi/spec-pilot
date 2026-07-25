@@ -1,27 +1,27 @@
-# `us-w00-s02-nx-angular-nest-baseline-003` — Deliver operational experience
+# `us-w00-s02-nx-angular-nest-baseline-003` — Provide operator-visible outcomes
 
 ## Parent
 
 - Wave: `w00`
 - Slice: `w00-s02-nx-angular-nest-baseline`
 - Expected OpenSpec change: `chg-w00-s02-nx-angular-nest-baseline`
+- Implementer: `cursor`
 
 ## Story
 
-As the SpecPilot operator, I need this slice to create Nx monorepo, Angular 22 console, NestJS/Fastify API, shared libraries, and tests. so that the product advances with verifiable, bounded behavior.
+As the SpecPilot operator, I need to use the capability through a clear operational experience so that the product advances with bounded, verifiable behavior.
 
 ## Acceptance criteria
 
-1. The capability is represented by explicit domain/application contracts and no unrelated future scope.
-2. Deterministic validation and automated tests cover success and at least one meaningful failure path.
-3. Errors are explicit, safe, and persisted/auditable where applicable.
-4. Relevant UI behavior is accessible and provides clear loading, empty, success, blocked, and error states when this story has a UI surface.
-5. Documentation, OpenSpec artifacts, and context are synchronized before closure.
+1. Any UI or API surface exposes clear success, blocked, empty, loading, and error behavior where applicable.
+2. Operator-facing commands or prompts are complete, copyable, and use the generated hyphenated OpenSpec command syntax.
+3. Documentation and current context are synchronized before closure.
+4. The slice can close only after deterministic checks and OpenSpec Verify are exactly `PASS`.
 
 ## Evidence
 
-- Automated test output.
-- OpenSpec Verify exactly `PASS`.
-- Relevant API/UI evidence.
-- Cross-review verdict when required.
-- Confirmation of no hidden deferred acceptance criteria.
+- Deterministic automated test or validation output.
+- Traceability to the approved proposal, design, specs, and tasks.
+- OpenSpec Verify exactly `PASS` before closure.
+- Relevant API/UI or operator evidence when the story exposes such a surface.
+- Confirmation that no hidden deferred acceptance criterion remains.

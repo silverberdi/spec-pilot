@@ -38,6 +38,10 @@ pnpm-debug.log*
 .DS_Store
 Thumbs.db
 
+# Python caches
+__pycache__/
+*.py[cod]
+
 # Editors and local tooling
 .idea/
 .vscode/*

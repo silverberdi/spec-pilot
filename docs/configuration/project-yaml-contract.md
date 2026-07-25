@@ -5,8 +5,8 @@ The file is mandatory and version-controlled in every registered repository. It 
 ```yaml
 schemaVersion: 1
 project:
-  id: content-factory
-  name: Content Factory
+  id: spec-pilot
+  name: SpecPilot
 repository:
   mainBranch: main
 openspec:
@@ -16,7 +16,7 @@ delivery:
   wave:
     activeStatePath: docs/context/current-state.md
   mapping:
-    changeIdPattern: "chg-{wave}-{slice}-{slug}"
+    changeIdPattern: "chg-{slice-id}"
 context:
   include:
     - AGENTS.md
@@ -34,23 +34,25 @@ context:
 review:
   provider: deepseek
   models:
-    discovery: deepseek-v4-flash
-    planning: deepseek-v4-pro
-    applied: deepseek-v4-pro
-    verify: deepseek-v4-pro
+    discovery: deepseek-flash
+    planning: deepseek-pro
+    applied: deepseek-pro
+    verify: deepseek-pro
   monthlyBudgetUsd: 10
-executors:
-  cursor:
-    enabled: true
-  codex:
-    enabled: true
+executor:
+  tool: cursor
+validationAssistants:
+  clineDeepSeek:
+    enabled: false
+    mode: read-only
 ```
 
 ## Validation rules
 
-- machine IDs lowercase kebab-case;
-- repository path itself is stored in SpecPilot, not committed in YAML;
-- include/exclude globs must remain inside repository root;
-- at least one OpenSpec path must resolve;
-- model identifiers must be allowlisted;
-- budget must be positive and may not exceed an application-level safety cap without explicit configuration change.
+- machine IDs are lowercase kebab-case;
+- repository paths are stored in SpecPilot, not committed in YAML;
+- include/exclude patterns are normalized and validated;
+- secret-bearing paths are always excluded, even if included elsewhere;
+- executor is Cursor for the current SpecPilot repository;
+- optional validation assistants cannot gain write authority from this file;
+- future product adapters are separate capabilities and do not alter the current development operating model.

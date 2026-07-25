@@ -5,7 +5,7 @@
 3. **Read-only first.** Initial versions do not mutate registered repositories.
 4. **Minimal disclosure.** Send only stage-required content and never send secrets.
 5. **One consolidated next instruction.** A failed review produces one complete corrective prompt.
-6. **No supplementary implementation prompt after approval.** `APPLY_READY` means the executor only needs `/opsx:apply <change>`.
+6. **No supplementary implementation prompt after approval.** `APPLY_READY` means the executor only needs `/opsx-apply <change>`.
 7. **Exact closure semantics.** Verify must be exactly `PASS`; notes do not authorize Sync.
 8. **Configuration over assumptions.** Wave/slice conventions and document locations are project-specific configuration.
 9. **Cost is a gate.** Budget exhaustion blocks analysis.

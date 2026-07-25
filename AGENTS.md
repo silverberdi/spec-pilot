@@ -1,50 +1,43 @@
-# SpecPilot Agent Operating Contract
+# SpecPilot Operating Contract
 
-This file is a **candidate baseline artifact**. Formal adoption, verification, and completion happen through `w00-s01` / `chg-w00-s01-repository-governance-and-openspec-foundation`. Presence here does not complete that slice or its User Stories.
+## Authority and scope
 
-## Product
+OpenSpec is the delivery authority for SpecPilot. Delivery follows:
 
-SpecPilot is a local-first macOS multi-project assurance console for OpenSpec-governed delivery.
+`Roadmap → Wave → Slice → User Stories → OpenSpec tasks`
 
-Canonical stack (future waves; not in `w00-s01`):
+The active wave, slice, expected change, and bound User Stories must be read from the canonical repository sources before work begins. Later-slice and future-wave scope must not be introduced into an active change.
 
-- Nx monorepo
-- Angular 22 + PrimeNG + PrimeIcons
-- NestJS + Fastify
-- PostgreSQL + Prisma
-- DeepSeek V4 Flash and Pro under a USD 10 monthly hard cap
-- Mandatory `.specpilot/project.yaml`
-- Read-only initial product behavior
-- Google authentication only after the initial unauthenticated phase
+## Current development roles
 
-## Delivery authority
+- **Cursor is the only current implementer of the SpecPilot codebase.** Cursor creates and updates OpenSpec planning artifacts, applies approved changes, edits repository files, runs validations, and maintains task evidence.
+- **Cline with DeepSeek is optional and read-only when used for validation.** It may inspect planning or implementation evidence and suggest a ready-to-copy `/opsx-apply` or `/opsx-update` instruction for Cursor. It must not edit files, apply changes, create branches, commit, push, verify, sync, or archive.
+- **Codex and OpenCode have no current development, review, validation, or governance role.** Generated integrations may exist, but their presence does not assign an operational role.
+- Future product capabilities may integrate additional tools or runtimes. Those future integration targets do not participate in developing SpecPilot unless a later approved change explicitly says otherwise.
 
-- Hierarchy: `Roadmap → Wave → Slice → User Stories → OpenSpec tasks`
-- Machine IDs and change names: lowercase kebab-case (`chg-<slice-id>`)
-- Verify must be exactly `PASS` (no PASS WITH NOTES)
-- Imported/package docs are planning candidates until adopted by a change with evidence
+## OpenSpec lifecycle
 
-## OpenSpec environment (already initialized)
+1. Create or select the expected lowercase kebab-case change.
+2. Produce complete proposal, design, specs, and tasks.
+3. Reach `APPLY_READY` before implementation.
+4. Cursor applies the approved change and records deterministic evidence.
+5. OpenSpec Verify must be exactly `PASS`.
+6. Synchronize canonical specs and documentation only after Verify `PASS`.
+7. Archive only after successful synchronization and closure checks.
 
-- OpenSpec 1.6.0, schema `spec-driven`, profile `custom`, delivery `both`
-- Active workflows include `update` plus propose, explore, new, continue, apply, ff, sync, archive, bulk-archive, verify, onboard
-- Generated integrations under `.cursor/`, `.codex/`, and `.opencode/` are immutable; refresh only with `openspec update`
+`PASS WITH NOTES` does not authorize closure.
 
-## Roles
+## Generated integrations
 
-- Implementer (default): Cursor
-- Mandatory reviewer (default): Codex
-- OpenCode is an available integration surface; do not invent ownership without an approved change
+Generated OpenSpec integrations are immutable and may be refreshed only with `openspec update`. Do not manually edit generated commands or skills under tool-specific integration directories.
 
-## Baseline vs delivery
+Installed integration support must not be interpreted as project participation or governance authority.
 
-1. Baseline reconciliation reconciles docs and candidate artifacts only.
-2. Do not create the first OpenSpec change until the governed baseline is committed and published.
-3. First expected change: `chg-w00-s01-repository-governance-and-openspec-foundation`
-4. That change excludes Nx, Angular, PrimeNG, NestJS, PostgreSQL, Prisma, Docker, DeepSeek, authentication, and all `w00-s02+` / future-wave implementation.
+## Safety and repository discipline
 
-## Safety
-
-- Never commit secrets, credentials, or live `.env` files.
-- Prefer deterministic validation scripts under `scripts/`.
-- Do not treat checkbox completion as evidence.
+- Never commit secrets, credentials, tokens, cookies, private keys, or sensitive request/response bodies.
+- Prefer reversible, non-destructive recovery steps.
+- Do not claim a User Story, slice, or wave complete without the required evidence and exact Verify `PASS`.
+- Do not treat imported or pre-existing artifacts as completed delivery merely because they are present.
+- Machine identifiers, paths, branch names, and OpenSpec change names must use lowercase kebab-case where applicable.
+- Use the generated hyphen command syntax in operator-facing instructions, such as `/opsx-apply`, `/opsx-update`, `/opsx-verify`, `/opsx-sync`, and `/opsx-archive`.

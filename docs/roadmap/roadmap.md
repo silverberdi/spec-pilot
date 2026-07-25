@@ -13,4 +13,4 @@
 | w08 | Operational Console Completion | Full multi-project operational UX, history and metrics |
 | w09 | Google Authentication | Google sign-in, user ownership and secure migration |
 | w10 | Supervised Execution | Optional future command runner and human gates |
-| w11 | Multi-agent Runtime | Optional future Cursor/Codex/OpenCode orchestration |
+| w11 | Optional Executor Runtime | Future supervised adapters and controlled orchestration; no current development-role implication |

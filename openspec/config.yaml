@@ -1,10 +1,14 @@
 schema: spec-driven
 context: |
   SpecPilot is a local-first multi-project assurance console for OpenSpec-governed delivery.
+  Cursor is the only implementer of the SpecPilot codebase.
+  Cline with DeepSeek may be used as an optional read-only validation assistant.
+  Codex and OpenCode have no current development, review, validation, or governance role.
+  Installed generated integrations do not assign project roles.
   Initial platform: macOS. Initial user model: single local user without authentication.
   Frontend: Angular 22 with PrimeNG and PrimeIcons, Spanish-first and i18n-ready.
   Backend: NestJS with Fastify. Persistence: PostgreSQL with Prisma. Monorepo: Nx.
-  DeepSeek V4 Flash and Pro provide supervised analysis under a USD 10 monthly hard cap.
+  DeepSeek provides supervised analysis under a configurable USD 10 initial monthly hard cap.
   Every registered repository must contain .specpilot/project.yaml.
   Initial release is read-only: it does not edit target repositories or execute delivery commands.
   Delivery hierarchy is Roadmap -> Wave -> Slice -> User Stories -> OpenSpec tasks.
@@ -13,7 +17,7 @@ context: |
   Imported bootstrap documents are not implementation completion.
 rules:
   proposal:
-    - Bind every change to one wave, one slice, included User Stories, implementer, reviewer, dependencies, and explicit exclusions.
+    - Bind every change to one wave, one slice, included User Stories, Cursor as implementer, dependencies, and explicit exclusions.
     - State business value, security/privacy impact, persistence impact, UI/API impact, tests, migration, rollback, and human validation.
     - Reject later-slice or future-wave scope.
   design:
@@ -26,5 +30,6 @@ rules:
     - Requirements must be independently testable and traceable to User Stories.
   tasks:
     - Organize tasks by User Story/capability and implementation sequence.
-    - Include deterministic tests, evidence, docs/context synchronization, Verify, cross-review, sync, archive, and final integrity gates.
+    - Include deterministic tests, evidence, docs/context synchronization, Verify, sync, archive, and final integrity gates.
+    - Do not introduce agent-specific review gates.
     - Do not mark work complete without evidence.

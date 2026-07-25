@@ -9,6 +9,7 @@ cd "$ROOT"
 fail=0
 pass() { printf 'PASS  %s\n' "$*"; }
 warn() { printf 'WARN  %s\n' "$*"; }
+info() { printf 'INFO  %s\n' "$*"; }
 bad()  { printf 'FAIL  %s\n' "$*"; fail=1; }
 
 echo "=== SpecPilot baseline validation ==="
@@ -16,7 +17,7 @@ echo "root: $ROOT"
 
 # OpenSpec CLI
 if command -v openspec >/dev/null 2>&1; then
-  ver="$(openspec --version 2>/dev/null | head -n1 | tr -d '[:space:]')"
+  ver="$( (openspec --version 2>/dev/null || true) | head -n1 | tr -d '[:space:]')"
   pass "openspec --version => $ver"
   [[ "$ver" == "1.6.0" ]] || warn "expected OpenSpec 1.6.0 for this baseline; found $ver"
 else
@@ -24,13 +25,31 @@ else
 fi
 
 if command -v openspec >/dev/null 2>&1; then
-  openspec schema validate spec-driven >/dev/null && pass "openspec schema validate spec-driven"
-  openspec validate --all >/dev/null && pass "openspec validate --all"
-  openspec doctor >/dev/null && pass "openspec doctor"
+  if openspec schema validate spec-driven >/dev/null 2>&1; then
+    pass "openspec schema validate spec-driven"
+  else
+    bad "openspec schema validate spec-driven failed"
+  fi
+  if openspec validate --all >/dev/null 2>&1; then
+    pass "openspec validate --all"
+  else
+    bad "openspec validate --all failed"
+  fi
+  if openspec doctor >/dev/null 2>&1; then
+    pass "openspec doctor"
+  else
+    bad "openspec doctor failed"
+  fi
 fi
 
 # Integration inventories
-count_files() { find "$1" -type f 2>/dev/null | wc -l | tr -d ' '; }
+count_files() {
+  if [[ -d "$1" ]]; then
+    find "$1" -type f | wc -l | tr -d ' '
+  else
+    echo 0
+  fi
+}
 cc="$(count_files .cursor/commands)"; cs="$(count_files .cursor/skills)"
 oc="$(count_files .codex/skills)"
 opc="$(count_files .opencode/commands)"; ops="$(count_files .opencode/skills)"
@@ -44,8 +63,13 @@ opc="$(count_files .opencode/commands)"; ops="$(count_files .opencode/skills)"
 python3 "$ROOT/scripts/validate-delivery-graph.py" && pass "delivery graph + machine IDs" || bad "delivery graph + machine IDs"
 
 # No OpenSpec changes / no product apps yet
-# openspec/changes/archive is the empty CLI scaffold, not an active change.
-active_changes="$(find openspec/changes -mindepth 1 -maxdepth 1 ! -name archive 2>/dev/null | wc -l | tr -d ' ')"
+# A missing openspec/changes directory and a directory containing only the
+# `archive` CLI scaffold are both valid zero-active-change states.
+if [[ -d openspec/changes ]]; then
+  active_changes="$(find openspec/changes -mindepth 1 -maxdepth 1 ! -name archive | wc -l | tr -d ' ')"
+else
+  active_changes=0
+fi
 if [[ "${active_changes}" != "0" ]]; then
   bad "active OpenSpec change directories present under openspec/changes (baseline must have none)"
 else
@@ -64,9 +88,20 @@ import json
 from pathlib import Path
 s = json.loads(Path("package-summary.json").read_text())
 assert "semantics" in s, "missing semantics field"
-assert s.get("fileCountExcludesSelf") is True
-assert s["fileCount"] == len(s["files"])
-assert "package-summary.json" not in {f["path"] for f in s["files"]}
+sem = s["semantics"]
+# fileCountExcludesSelf lives inside the semantics object in the current
+# baseline; accept a top-level flag as well for older summaries.
+excludes_self = (
+    sem.get("fileCountExcludesSelf") if isinstance(sem, dict)
+    else s.get("fileCountExcludesSelf")
+)
+assert excludes_self is True, "fileCountExcludesSelf must be true"
+assert s["fileCount"] == len(s["files"]), (
+    f"fileCount {s['fileCount']} != len(files) {len(s['files'])}"
+)
+assert "package-summary.json" not in {f["path"] for f in s["files"]}, (
+    "package-summary.json must exclude itself from files"
+)
 print(f"fileCount={s['fileCount']} waves={s['waveCount']} slices={s['sliceCount']} stories={s['userStoryCount']}")
 PY
 
@@ -77,17 +112,34 @@ else
   bad "secret scan"
 fi
 
-# Git hygiene
+# Git hygiene (baseline-replacement state)
+# A dirty working tree is expected here: this script validates the uncommitted
+# corrected-baseline diff before it is committed.
+EXPECTED_HEAD="9a0f519cbd654e5b8614a7c1fbcc8a3a088db30b"
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   branch="$(git branch --show-current 2>/dev/null || true)"
-  [[ "$branch" == "main" ]] && pass "git branch: main" || bad "git branch: ${branch:-unknown} (expected main)"
-  if git rev-parse HEAD >/dev/null 2>&1; then
-    warn "commits already exist; baseline reconciliation expected an uncommitted first commit state"
+  if [[ "$branch" == "main" ]]; then
+    pass "git branch: main"
   else
-    pass "no commits yet (ready for reviewed first baseline commit)"
+    bad "git branch: ${branch:-unknown} (expected main)"
   fi
-  wave_branches="$(git branch --list 'wave/*' 'slice/*' 2>/dev/null | wc -l | tr -d ' ')"
-  [[ "$wave_branches" == "0" ]] && pass "no wave/slice branches" || bad "wave/slice branches exist"
+  head_sha="$(git rev-parse HEAD 2>/dev/null || true)"
+  if [[ "$head_sha" == "$EXPECTED_HEAD" ]]; then
+    pass "HEAD is expected baseline commit $EXPECTED_HEAD"
+  else
+    bad "HEAD is ${head_sha:-unknown} (expected $EXPECTED_HEAD)"
+  fi
+  # Preserved wave/slice branches are intentional rollback references while the
+  # corrected baseline is reviewed. Informational only; never a validation gate.
+  preserved_branches="$(git branch --list 'wave/*' 'slice/*' 2>/dev/null | sed 's/^[* ]*//' || true)"
+  if [[ -n "$preserved_branches" ]]; then
+    info "preserved rollback branches (intentional; not a gate):"
+    while IFS= read -r b; do
+      info "  $b"
+    done <<<"$preserved_branches"
+  else
+    info "no wave/slice rollback branches present"
+  fi
 else
   bad "not a git repository"
 fi

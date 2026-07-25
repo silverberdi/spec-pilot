@@ -1,27 +1,27 @@
-# `us-w10-s01-local-runner-contract-002` — Provide validation and evidence
+# `us-w10-s01-local-runner-contract-002` — Prove safety and correctness
 
 ## Parent
 
 - Wave: `w10`
 - Slice: `w10-s01-local-runner-contract`
 - Expected OpenSpec change: `chg-w10-s01-local-runner-contract`
+- Implementer: `cursor`
 
 ## Story
 
-As the SpecPilot operator, I need this slice to introduce allowlisted local command runner. so that the product advances with verifiable, bounded behavior.
+As the SpecPilot operator, I need to validate the capability with deterministic evidence and safe failure handling so that the product advances with bounded, verifiable behavior.
 
 ## Acceptance criteria
 
-1. The capability is represented by explicit domain/application contracts and no unrelated future scope.
-2. Deterministic validation and automated tests cover success and at least one meaningful failure path.
-3. Errors are explicit, safe, and persisted/auditable where applicable.
-4. Relevant UI behavior is accessible and provides clear loading, empty, success, blocked, and error states when this story has a UI surface.
-5. Documentation, OpenSpec artifacts, and context are synchronized before closure.
+1. Automated tests cover the primary success path and at least one meaningful blocked or failure path.
+2. Security, privacy, persistence, budget, migration, and rollback impacts are addressed where applicable, with explicit no-impact statements otherwise.
+3. Evidence is reproducible and does not rely only on task checkboxes or unsupported claims.
+4. OpenSpec artifacts and implementation remain traceable to this slice and its User Stories.
 
 ## Evidence
 
-- Automated test output.
-- OpenSpec Verify exactly `PASS`.
-- Relevant API/UI evidence.
-- Cross-review verdict when required.
-- Confirmation of no hidden deferred acceptance criteria.
+- Deterministic automated test or validation output.
+- Traceability to the approved proposal, design, specs, and tasks.
+- OpenSpec Verify exactly `PASS` before closure.
+- Relevant API/UI or operator evidence when the story exposes such a surface.
+- Confirmation that no hidden deferred acceptance criterion remains.
