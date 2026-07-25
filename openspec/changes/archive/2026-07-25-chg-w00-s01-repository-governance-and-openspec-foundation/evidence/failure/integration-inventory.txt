@@ -1,0 +1,27 @@
+=== failure: generated integrations inventory ===
+=== SpecPilot baseline validation ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+PASS  openspec --version => 1.6.0
+PASS  openspec schema validate spec-driven
+PASS  openspec validate --all
+PASS  openspec doctor
+FAIL  cursor commands: 13 (expected 12 per docs/context/file-index.md). Refresh generated integrations with `openspec update`; do not hand-edit generated files.
+PASS  cursor skills: 12
+PASS  codex skills: 12
+PASS  opencode commands: 12
+PASS  opencode skills: 12
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+PASS  delivery graph + machine IDs
+INFO  active OpenSpec change directories: 1
+PASS  no product scaffolding (apps/packages/package.json) present
+fileCount=173 waves=12 slices=42 stories=126
+PASS  package-summary semantics
+ERROR: openspec/changes/chg-w00-s01-repository-governance-and-openspec-foundation/evidence/success/validators.txt: possible generic_api_key_assignment: api_key <omitted-from-retained-evidence>"[REDACTED-FIXTURE]...
+ERROR: openspec...
+ERROR: openspec/changes/chg-w00-s01-repository-governance-and-openspec-foundation/evidence/success/validators.txt: possible generic_api_key_assignment: api_key <omitted-from-retained-evidence>"[REDACTED-FIXTURE]...
+ERROR: openspec...
+ERROR: openspec/changes/chg-w00-s01-repository-governance-and-openspec-foundation/evidence/success/validators.txt: possible generic_api_key_assignment: api_key <omitted-from-retained-evidence>"[REDACTED-FIXTURE]...
+ERROR: openspec...
+ERROR: openspec/changes/chg-w00-s01-repository-governance-and-openspec-foundation/evidence/success/validators.txt: possible generic_api_key_assignment: api_key <omitted-from-retained-evidence>"[REDACTED-FIXTURE]...
+ERROR: openspec...
+ERROR: openspec/changes/chg-w00-s01-repository-governance-and-openspec-foundation/evidence/success/validators.txt: possible generic_api_key_assignment: api_key <omitted-from-retained-evidence>

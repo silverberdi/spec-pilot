@@ -1,6 +1,6 @@
 # SpecPilot Canonical File Index
 
-Candidate baseline index for operator orientation. Formal integrity/generation adoption is owned by `w00-s01`.
+Canonical context index for operator orientation. Formal integrity/generation rules are adopted through `w00-s01`.
 
 ## Package inventory (imported)
 
@@ -38,13 +38,14 @@ Candidate baseline index for operator orientation. Formal integrity/generation a
 
 Refresh only with `openspec update`. Generated Codex and OpenCode inventories are not a current project role; Cursor remains the only implementer.
 
-## Candidate baseline artifacts (reconciliation)
+## Repository-owned governance artifacts (adopted via w00-s01)
 
 | Artifact | Path |
 |---|---|
 | Shared operator contract | `AGENTS.md` |
 | Git ignore | `.gitignore` |
-| Cursor project rules | `.cursor/rules/spec-pilot-governance.mdc` |
+| Cursor project rules (manual) | `.cursor/rules/spec-pilot-governance.mdc` |
+| Working policy | `docs/governance/working-policy.md` |
 | Baseline validation | `scripts/validate-baseline.sh` |
 | Delivery graph validation | `scripts/validate-delivery-graph.py` |
 | Secret scan | `scripts/scan-secrets.py` |
@@ -52,7 +53,7 @@ Refresh only with `openspec update`. Generated Codex and OpenCode inventories ar
 | This index | `docs/context/file-index.md` |
 | Summary semantics | `docs/context/package-summary-semantics.md` |
 
-## First change (not created during baseline reconciliation)
+## Active first change
 
 - Slice: `w00-s01-repository-governance-and-openspec-foundation`
 - Change: `chg-w00-s01-repository-governance-and-openspec-foundation`

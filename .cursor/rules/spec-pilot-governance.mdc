@@ -3,11 +3,10 @@ description: SpecPilot repository governance and OpenSpec operating rules
 alwaysApply: true
 ---
 
-# SpecPilot Cursor Rules (candidate baseline)
+# SpecPilot Cursor Rules
 
-These rules are **candidate baseline artifacts**. Formal adoption is owned by
-`chg-w00-s01-repository-governance-and-openspec-foundation`. Do not treat this file as
-completed delivery for `w00-s01`.
+These rules are repository-owned governance for SpecPilot. They are distinct from
+OpenSpec-generated integrations under `.cursor/commands/` and `.cursor/skills/`.
 
 ## Immutable generated integrations
 
@@ -21,20 +20,36 @@ Do not manually edit:
 
 Refresh only via official `openspec update`.
 
+## Working policy (main-only)
+
+- Work only on `main`. Do not create or switch branches for OpenSpec changes.
+- Do not use Pull Requests or a `slice/* → wave/* → main` hierarchy.
+- Do not create commits or push without explicit operator approval.
+- Before every commit or push, run applicable validations and report results.
+- Operator retains final approval for commit, push, Verify, sync, and archive.
+
 ## Identifiers
 
-Use lowercase kebab-case for machine IDs, paths used as IDs, branch names, and OpenSpec
+Use lowercase kebab-case for machine IDs, paths used as IDs, and OpenSpec
 change names. Expected change naming: `chg-<slice-id>`.
 
 ## Scope discipline
 
 - One change binds to one wave, one slice, and its declared User Stories.
 - Reject later-slice or future-wave scope.
-- `w00-s01` excludes Nx, Angular, PrimeNG, NestJS, PostgreSQL, Prisma, Docker, DeepSeek,
-  authentication, and `w00-s02+`.
+- `w00-s01` excludes Nx, Angular, PrimeNG, NestJS, PostgreSQL, Prisma, Docker, DeepSeek
+  product API integration, authentication, later-slice CI/CD, and later-wave scope.
+
+## Roles
+
+- Cursor is the only current implementer.
+- Cline with DeepSeek is optional and read-only when used for validation.
+- Codex and OpenCode have no current development, review, validation, or governance role.
+- Generated integrations do not assign project roles.
+- No agent-specific review gate is required for closure.
 
 ## Evidence
 
-- Verify must be exactly `PASS`.
+- Verify must be exactly `PASS`. `PASS WITH NOTES` does not authorize closure.
 - Do not mark work complete without evidence.
-- Imported docs and candidate baseline files are not completed implementation.
+- Imported docs and candidate baseline files are not completed implementation by presence alone.

@@ -86,12 +86,17 @@ def main() -> None:
         "generated": date.today().isoformat(),
         "fileCount": len(package_files),
         "fileCountExcludesSelf": True,
-        "semantics": (
-            "fileCount and files list the imported canonical package inventory and "
-            "intentionally exclude package-summary.json itself. Generated OpenSpec "
-            "integrations are excluded. candidateBaselineFiles lists reconciliation "
-            "candidates for formal adoption via w00-s01 and are outside fileCount."
-        ),
+        "semantics": {
+            "fileCountExcludesSelf": True,
+            "excludesGeneratedIntegrations": True,
+            "candidateBaselineOutsideFileCount": True,
+            "description": (
+                "fileCount and files list the imported canonical package inventory and "
+                "intentionally exclude package-summary.json itself. Generated OpenSpec "
+                "integrations are excluded. candidateBaselineFiles lists reconciliation "
+                "candidates for formal adoption via w00-s01 and are outside fileCount."
+            ),
+        },
         "waveCount": wave_count,
         "sliceCount": slice_count,
         "userStoryCount": user_story_count,

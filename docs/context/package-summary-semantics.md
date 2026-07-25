@@ -34,9 +34,9 @@ Expected live counts for this baseline:
 - 42 slices
 - 126 User Stories
 
-## Candidate baseline artifacts
+## Governance artifacts and candidateBaselineFiles
 
-Files such as `.gitignore`, `AGENTS.md`, `.cursor/rules/**`, and `scripts/**` created during baseline reconciliation are candidates for formal adoption through `w00-s01`. Their presence does not complete that slice or its User Stories.
+Files such as `.gitignore`, `AGENTS.md`, repository-owned Cursor rules, and `scripts/**` are tracked under `candidateBaselineFiles` (outside `fileCount`) for inventory clarity. Formal behavioral adoption of these artifacts is owned by `w00-s01`; presence alone does not complete User Stories without evidence and Verify exactly `PASS`.
 
 ## Roles reminder
 

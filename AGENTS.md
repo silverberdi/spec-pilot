@@ -21,9 +21,9 @@ The active wave, slice, expected change, and bound User Stories must be read fro
 2. Produce complete proposal, design, specs, and tasks.
 3. Reach `APPLY_READY` before implementation.
 4. Cursor applies the approved change and records deterministic evidence.
-5. OpenSpec Verify must be exactly `PASS`.
-6. Synchronize canonical specs and documentation only after Verify `PASS`.
-7. Archive only after successful synchronization and closure checks.
+5. OpenSpec Verify must be exactly `PASS` (operator-approved).
+6. Synchronize canonical specs and documentation only after Verify `PASS` (operator-approved).
+7. Archive only after successful synchronization and closure checks (operator-approved).
 
 `PASS WITH NOTES` does not authorize closure.
 
@@ -33,11 +33,23 @@ Generated OpenSpec integrations are immutable and may be refreshed only with `op
 
 Installed integration support must not be interpreted as project participation or governance authority.
 
+## Working policy (binding)
+
+- All SpecPilot work is performed directly on `main`.
+- Do not create branches per OpenSpec change.
+- Do not use Pull Requests.
+- Do not adopt a `slice/* → wave/* → main` branch hierarchy.
+- Cursor must not switch branches.
+- Cursor must not create commits or push without explicit operator approval.
+- Before every commit or push, run applicable validations and report their results to the operator.
+- The operator retains final approval over commit, push, Verify, sync, and archive.
+- Canonical details: `docs/governance/working-policy.md`.
+
 ## Safety and repository discipline
 
 - Never commit secrets, credentials, tokens, cookies, private keys, or sensitive request/response bodies.
 - Prefer reversible, non-destructive recovery steps.
 - Do not claim a User Story, slice, or wave complete without the required evidence and exact Verify `PASS`.
 - Do not treat imported or pre-existing artifacts as completed delivery merely because they are present.
-- Machine identifiers, paths, branch names, and OpenSpec change names must use lowercase kebab-case where applicable.
+- Machine identifiers, paths used as IDs, and OpenSpec change names must use lowercase kebab-case where applicable.
 - Use the generated hyphen command syntax in operator-facing instructions, such as `/opsx-apply`, `/opsx-update`, `/opsx-verify`, `/opsx-sync`, and `/opsx-archive`.

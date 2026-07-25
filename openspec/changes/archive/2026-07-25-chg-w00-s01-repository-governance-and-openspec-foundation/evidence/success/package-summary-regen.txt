@@ -1,0 +1,7 @@
+=== package-summary regeneration (success) ===
+wrote /Users/silveriobernal/Documents/Code/Development/spec-pilot/package-summary.json fileCount=173 (excludes self) candidates=7 waves=12 slices=42 stories=126
+exit=0
+fileCount 173 files 173 excludesSelf True
+waves 12 slices 42 stories 126
+candidates 7
+integrity OK

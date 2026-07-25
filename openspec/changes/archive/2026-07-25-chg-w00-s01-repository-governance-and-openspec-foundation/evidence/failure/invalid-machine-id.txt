@@ -1,0 +1,6 @@
+=== failure: delivery-graph / invalid machine ID ===
+ERROR: bad user-story filename: us-W00-Bad_ID.md
+ERROR: backlog-index mismatch: missing=['us-W00-Bad_ID'] extra=[]
+ERROR: expected 126 stories, found 127
+waves=12 slices=42 stories=127 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+exit=1

@@ -1,0 +1,121 @@
+=== Final validations (task 8.6, pre-commit) ===
+timestamp_utc: 2026-07-25T18:45:46Z
+operator_note: validations and status/diff only; commit/push not authorized
+
+--- openspec validate --all ---
+- Validating...
+✓ spec/agent-operating-contracts
+✓ spec/baseline-validation-and-secret-scanning
+✓ spec/closure-evidence-and-process-gates
+✓ spec/context-and-package-integrity
+✓ spec/delivery-graph-and-id-validation
+✓ spec/immutable-openspec-integrations
+✓ spec/openspec-verified-lifecycle
+✓ spec/repository-governance
+Totals: 8 passed, 0 failed (8 items)
+validate_all_exit=0
+
+--- openspec list (active changes) ---
+No active changes found.
+
+--- openspec list --specs ---
+Specs:
+  agent-operating-contracts                   requirements 4
+  baseline-validation-and-secret-scanning     requirements 4
+  closure-evidence-and-process-gates          requirements 5
+  context-and-package-integrity               requirements 3
+  delivery-graph-and-id-validation            requirements 4
+  immutable-openspec-integrations             requirements 3
+  openspec-verified-lifecycle                 requirements 4
+  repository-governance                       requirements 5
+
+--- regenerate package-summary ---
+wrote /Users/silveriobernal/Documents/Code/Development/spec-pilot/package-summary.json fileCount=173 (excludes self) candidates=7 waves=12 slices=42 stories=126
+regen_exit=0
+
+--- delivery graph ---
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+delivery_graph_exit=0
+
+--- secret scan ---
+no heuristic secrets found
+secret_scan_exit=0
+
+--- baseline orchestrator ---
+=== SpecPilot baseline validation ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+PASS  openspec --version => 1.6.0
+PASS  openspec schema validate spec-driven
+PASS  openspec validate --all
+PASS  openspec doctor
+PASS  cursor commands: 12
+PASS  cursor skills: 12
+PASS  codex skills: 12
+PASS  opencode commands: 12
+PASS  opencode skills: 12
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+PASS  delivery graph + machine IDs
+INFO  active OpenSpec change directories: 0
+PASS  no product scaffolding (apps/packages/package.json) present
+fileCount=173 waves=12 slices=42 stories=126
+PASS  package-summary semantics
+no heuristic secrets found
+PASS  secret scan
+PASS  git branch: main
+=== summary ===
+BASELINE_OK
+baseline_exit=0
+
+--- git branch ---
+main
+
+=== git status ===
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   .cursor/rules/spec-pilot-governance.mdc
+	modified:   AGENTS.md
+	modified:   docs/context/current-state.md
+	modified:   docs/context/file-index.md
+	modified:   docs/context/package-summary-semantics.md
+	modified:   docs/governance/definition-of-done.md
+	modified:   docs/governance/delivery-methodology.md
+	modified:   package-summary.json
+	modified:   scripts/regenerate-package-summary.py
+	modified:   scripts/scan-secrets.py
+	modified:   scripts/validate-baseline.sh
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+	docs/governance/working-policy.md
+	openspec/changes/
+	openspec/specs/
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+=== git diff --stat ===
+ .cursor/rules/spec-pilot-governance.mdc   |  33 ++++++---
+ AGENTS.md                                 |  20 ++++--
+ docs/context/current-state.md             |  19 +++---
+ docs/context/file-index.md                |   9 +--
+ docs/context/package-summary-semantics.md |   4 +-
+ docs/governance/definition-of-done.md     |   9 +--
+ docs/governance/delivery-methodology.md   |  24 +++++--
+ package-summary.json                      |  54 +++++++++------
+ scripts/regenerate-package-summary.py     |  17 +++--
+ scripts/scan-secrets.py                   |   8 +++
+ scripts/validate-baseline.sh              | 108 ++++++++++++++----------------
+ 11 files changed, 184 insertions(+), 121 deletions(-)
+
+=== untracked openspec archive + specs ===
+?? docs/governance/working-policy.md
+?? openspec/changes/
+?? openspec/specs/
+
+=== RESULT ===
+final_validations: PASS (validate-all, baseline, delivery-graph, secret-scan)
+commit: NOT CREATED (awaiting explicit operator approval)
+push: NOT PERFORMED

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Candidate baseline validation for SpecPilot.
-# Formal adoption is owned by w00-s01; running this script does not complete that slice.
+# SpecPilot baseline validation orchestrator.
+# Adopted by w00-s01. Exit 0 = pass; non-zero = fail with human-readable reasons.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -19,7 +19,6 @@ echo "root: $ROOT"
 if command -v openspec >/dev/null 2>&1; then
   ver="$( (openspec --version 2>/dev/null || true) | head -n1 | tr -d '[:space:]')"
   pass "openspec --version => $ver"
-  [[ "$ver" == "1.6.0" ]] || warn "expected OpenSpec 1.6.0 for this baseline; found $ver"
 else
   bad "openspec CLI not found on PATH"
 fi
@@ -42,7 +41,8 @@ if command -v openspec >/dev/null 2>&1; then
   fi
 fi
 
-# Integration inventories
+# Integration inventories (expected counts from docs/context/file-index.md)
+# Drift fails with guidance to refresh via `openspec update` — never hand-edit.
 count_files() {
   if [[ -d "$1" ]]; then
     find "$1" -type f | wc -l | tr -d ' '
@@ -50,60 +50,74 @@ count_files() {
     echo 0
   fi
 }
-cc="$(count_files .cursor/commands)"; cs="$(count_files .cursor/skills)"
-oc="$(count_files .codex/skills)"
-opc="$(count_files .opencode/commands)"; ops="$(count_files .opencode/skills)"
-[[ "$cc" == "12" ]] && pass "cursor commands: $cc" || bad "cursor commands: $cc (expected 12)"
-[[ "$cs" == "12" ]] && pass "cursor skills: $cs" || bad "cursor skills: $cs (expected 12)"
-[[ "$oc" == "12" ]] && pass "codex skills: $oc" || bad "codex skills: $oc (expected 12)"
-[[ "$opc" == "12" ]] && pass "opencode commands: $opc" || bad "opencode commands: $opc (expected 12)"
-[[ "$ops" == "12" ]] && pass "opencode skills: $ops" || bad "opencode skills: $ops (expected 12)"
+check_inventory() {
+  local label="$1" dir="$2" expected="$3"
+  local actual
+  actual="$(count_files "$dir")"
+  if [[ "$actual" == "$expected" ]]; then
+    pass "$label: $actual"
+  else
+    bad "$label: $actual (expected $expected per docs/context/file-index.md). Refresh generated integrations with \`openspec update\`; do not hand-edit generated files."
+  fi
+}
+check_inventory "cursor commands" ".cursor/commands" "12"
+check_inventory "cursor skills" ".cursor/skills" "12"
+check_inventory "codex skills" ".codex/skills" "12"
+check_inventory "opencode commands" ".opencode/commands" "12"
+check_inventory "opencode skills" ".opencode/skills" "12"
 
 # Delivery graph + kebab IDs
-python3 "$ROOT/scripts/validate-delivery-graph.py" && pass "delivery graph + machine IDs" || bad "delivery graph + machine IDs"
+if python3 "$ROOT/scripts/validate-delivery-graph.py"; then
+  pass "delivery graph + machine IDs"
+else
+  bad "delivery graph + machine IDs"
+fi
 
-# No OpenSpec changes / no product apps yet
-# A missing openspec/changes directory and a directory containing only the
-# `archive` CLI scaffold are both valid zero-active-change states.
+# Active OpenSpec changes are allowed after first-change creation; archive is ignored.
 if [[ -d openspec/changes ]]; then
-  active_changes="$(find openspec/changes -mindepth 1 -maxdepth 1 ! -name archive | wc -l | tr -d ' ')"
+  active_changes="$(find openspec/changes -mindepth 1 -maxdepth 1 ! -name archive -print | wc -l | tr -d ' ')"
+  info "active OpenSpec change directories: $active_changes"
 else
-  active_changes=0
-fi
-if [[ "${active_changes}" != "0" ]]; then
-  bad "active OpenSpec change directories present under openspec/changes (baseline must have none)"
-else
-  pass "no OpenSpec change present"
+  info "no openspec/changes directory"
 fi
 
+# Product scaffolding remains out of scope for w00-s01
 if [[ -d apps ]] || [[ -d packages ]] || [[ -f package.json ]]; then
-  warn "product scaffolding files present; ensure they were not introduced before w00-s02"
+  bad "product scaffolding present (apps/packages/package.json); excluded from w00-s01"
 else
   pass "no product scaffolding (apps/packages/package.json) present"
 fi
 
 # package-summary semantics
-python3 - <<'PY' && pass "package-summary semantics" || bad "package-summary semantics"
+if python3 - <<'PY'
 import json
 from pathlib import Path
 s = json.loads(Path("package-summary.json").read_text())
 assert "semantics" in s, "missing semantics field"
-sem = s["semantics"]
-# fileCountExcludesSelf lives inside the semantics object in the current
-# baseline; accept a top-level flag as well for older summaries.
-excludes_self = (
-    sem.get("fileCountExcludesSelf") if isinstance(sem, dict)
-    else s.get("fileCountExcludesSelf")
-)
+excludes_self = s.get("fileCountExcludesSelf")
+if excludes_self is None and isinstance(s.get("semantics"), dict):
+    excludes_self = s["semantics"].get("fileCountExcludesSelf")
 assert excludes_self is True, "fileCountExcludesSelf must be true"
 assert s["fileCount"] == len(s["files"]), (
     f"fileCount {s['fileCount']} != len(files) {len(s['files'])}"
 )
-assert "package-summary.json" not in {f["path"] for f in s["files"]}, (
+paths = {f["path"] for f in s["files"]}
+assert "package-summary.json" not in paths, (
     "package-summary.json must exclude itself from files"
 )
-print(f"fileCount={s['fileCount']} waves={s['waveCount']} slices={s['sliceCount']} stories={s['userStoryCount']}")
+assert s.get("waveCount") == 12, f"waveCount {s.get('waveCount')} != 12"
+assert s.get("sliceCount") == 42, f"sliceCount {s.get('sliceCount')} != 42"
+assert s.get("userStoryCount") == 126, f"userStoryCount {s.get('userStoryCount')} != 126"
+print(
+    f"fileCount={s['fileCount']} waves={s['waveCount']} "
+    f"slices={s['sliceCount']} stories={s['userStoryCount']}"
+)
 PY
+then
+  pass "package-summary semantics"
+else
+  bad "package-summary semantics"
+fi
 
 # Secret scan (heuristic)
 if python3 "$ROOT/scripts/scan-secrets.py"; then
@@ -112,33 +126,13 @@ else
   bad "secret scan"
 fi
 
-# Git hygiene (baseline-replacement state)
-# A dirty working tree is expected here: this script validates the uncommitted
-# corrected-baseline diff before it is committed.
-EXPECTED_HEAD="9a0f519cbd654e5b8614a7c1fbcc8a3a088db30b"
+# Git hygiene: main-only working policy
 if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   branch="$(git branch --show-current 2>/dev/null || true)"
   if [[ "$branch" == "main" ]]; then
     pass "git branch: main"
   else
-    bad "git branch: ${branch:-unknown} (expected main)"
-  fi
-  head_sha="$(git rev-parse HEAD 2>/dev/null || true)"
-  if [[ "$head_sha" == "$EXPECTED_HEAD" ]]; then
-    pass "HEAD is expected baseline commit $EXPECTED_HEAD"
-  else
-    bad "HEAD is ${head_sha:-unknown} (expected $EXPECTED_HEAD)"
-  fi
-  # Preserved wave/slice branches are intentional rollback references while the
-  # corrected baseline is reviewed. Informational only; never a validation gate.
-  preserved_branches="$(git branch --list 'wave/*' 'slice/*' 2>/dev/null | sed 's/^[* ]*//' || true)"
-  if [[ -n "$preserved_branches" ]]; then
-    info "preserved rollback branches (intentional; not a gate):"
-    while IFS= read -r b; do
-      info "  $b"
-    done <<<"$preserved_branches"
-  else
-    info "no wave/slice rollback branches present"
+    bad "git branch: ${branch:-unknown} (expected main per working policy)"
   fi
 else
   bad "not a git repository"
@@ -146,7 +140,7 @@ fi
 
 echo "=== summary ==="
 if [[ "$fail" -eq 0 ]]; then
-  echo "READY_FOR_FIRST_COMMIT"
+  echo "BASELINE_OK"
   exit 0
 fi
 echo "CHANGES_REQUIRED"

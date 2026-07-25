@@ -1,0 +1,24 @@
+=== exclusions check (w00-s01 scope) ===
+date: 2026-07-25T17:54:45Z
+
+-- product scaffolding --
+absent: apps
+absent: packages
+absent: package.json
+absent: nx.json
+absent: angular.json
+absent: nest-cli.json
+absent: docker-compose.yml
+absent: docker-compose.yaml
+absent: prisma
+
+-- later-slice CI/CD product config --
+absent: .github/workflows
+absent: .gitlab-ci.yml
+absent: Jenkinsfile
+absent: azure-pipelines.yml
+
+-- change tree must not introduce later-wave product code --
+absent: JS/TS product files in change
+
+RESULT: exclusions check complete; no w00-s02+ scaffolding, later-slice CI/CD, or later-wave product code introduced by this change.

@@ -1,0 +1,56 @@
+=== post-sync integrity gates ===
+timestamp_utc: 2026-07-25T18:43:00Z
+
+--- regenerate package-summary ---
+wrote /Users/silveriobernal/Documents/Code/Development/spec-pilot/package-summary.json fileCount=173 (excludes self) candidates=7 waves=12 slices=42 stories=126
+regen_exit=0
+
+--- delivery graph ---
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+delivery_graph_exit=0
+
+--- secret scan ---
+no heuristic secrets found
+secret_scan_exit=0
+
+--- baseline orchestrator ---
+=== SpecPilot baseline validation ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+PASS  openspec --version => 1.6.0
+PASS  openspec schema validate spec-driven
+PASS  openspec validate --all
+PASS  openspec doctor
+PASS  cursor commands: 12
+PASS  cursor skills: 12
+PASS  codex skills: 12
+PASS  opencode commands: 12
+PASS  opencode skills: 12
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+PASS  delivery graph + machine IDs
+INFO  active OpenSpec change directories: 1
+PASS  no product scaffolding (apps/packages/package.json) present
+fileCount=173 waves=12 slices=42 stories=126
+PASS  package-summary semantics
+no heuristic secrets found
+PASS  secret scan
+PASS  git branch: main
+=== summary ===
+BASELINE_OK
+baseline_exit=0
+
+--- openspec validate --all ---
+- Validating...
+✓ spec/agent-operating-contracts
+✓ spec/baseline-validation-and-secret-scanning
+✓ change/chg-w00-s01-repository-governance-and-openspec-foundation
+✓ spec/closure-evidence-and-process-gates
+✓ spec/context-and-package-integrity
+✓ spec/delivery-graph-and-id-validation
+✓ spec/immutable-openspec-integrations
+✓ spec/openspec-verified-lifecycle
+✓ spec/repository-governance
+Totals: 9 passed, 0 failed (9 items)
+validate_all_exit=0
+
+--- git branch ---
+main

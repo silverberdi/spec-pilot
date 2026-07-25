@@ -1,0 +1,28 @@
+=== standalone validators ===
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+validate-delivery-graph.py exit=0
+no heuristic secrets found
+scan-secrets.py exit=0
+=== SpecPilot baseline validation ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+PASS  openspec --version => 1.6.0
+PASS  openspec schema validate spec-driven
+PASS  openspec validate --all
+PASS  openspec doctor
+PASS  cursor commands: 12
+PASS  cursor skills: 12
+PASS  codex skills: 12
+PASS  opencode commands: 12
+PASS  opencode skills: 12
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+PASS  delivery graph + machine IDs
+INFO  active OpenSpec change directories: 1
+PASS  no product scaffolding (apps/packages/package.json) present
+fileCount=173 waves=12 slices=42 stories=126
+PASS  package-summary semantics
+no heuristic secrets found
+PASS  secret scan
+PASS  git branch: main
+=== summary ===
+BASELINE_OK
+validate-baseline.sh exit=0

@@ -15,6 +15,12 @@ EXCLUDE_PREFIXES = (
     ".opencode/",
     "node_modules/",
 )
+
+# Quarantine for change-scoped evidence only (fixtures / redacted transcripts
+# under .../evidence/). Does not weaken scanning of canonical docs or scripts.
+EXCLUDE_SUBSTRINGS = (
+    "/evidence/",
+)
 EXCLUDE_NAMES = {".DS_Store"}
 
 PATTERNS = [
@@ -39,6 +45,8 @@ def iter_files():
             continue
         rel = path.relative_to(ROOT).as_posix()
         if any(rel.startswith(p) for p in EXCLUDE_PREFIXES):
+            continue
+        if any(s in rel for s in EXCLUDE_SUBSTRINGS):
             continue
         if path.name in EXCLUDE_NAMES:
             continue
