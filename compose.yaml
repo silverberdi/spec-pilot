@@ -1,0 +1,59 @@
+name: specpilot
+
+networks:
+  specpilot-net:
+    name: specpilot-net
+    driver: bridge
+
+volumes:
+  specpilot-postgres-data:
+    name: specpilot-postgres-data
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: specpilot-postgres
+    networks:
+      - specpilot-net
+    ports:
+      - '5441:5432'
+    environment:
+      POSTGRES_USER: specpilot
+      POSTGRES_PASSWORD: specpilot
+      POSTGRES_DB: specpilot
+    volumes:
+      - specpilot-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U specpilot -d specpilot']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: specpilot-api
+    networks:
+      - specpilot-net
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgresql://specpilot:specpilot@postgres:5432/specpilot?schema=public
+      PORT: '3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: specpilot-web
+    networks:
+      - specpilot-net
+    ports:
+      - '8081:80'
+    depends_on:
+      - api

@@ -1,0 +1,65 @@
+=== post-sync integrity — chg-w00-s03-postgresql-prisma-and-local-runtime ===
+timestamp_utc: 2026-07-26T04:23:55Z
+branch: main
+
+--- openspec validate --all --strict ---
+- Validating...
+✓ spec/agent-operating-contracts
+✓ spec/angular-web-console-baseline
+✓ spec/application-test-baseline
+✓ spec/baseline-validation-and-secret-scanning
+✓ change/chg-w00-s03-postgresql-prisma-and-local-runtime
+✓ spec/closure-evidence-and-process-gates
+✓ spec/context-and-package-integrity
+✓ spec/delivery-graph-and-id-validation
+✓ spec/docker-compose-local-runtime
+✓ spec/immutable-openspec-integrations
+✓ spec/nestjs-fastify-api-baseline
+✓ spec/nx-monorepo-baseline
+✓ spec/openspec-verified-lifecycle
+✓ spec/postgresql-prisma-persistence-baseline
+✓ spec/repository-governance
+✓ spec/shared-libraries-baseline
+Totals: 16 passed, 0 failed (16 items)
+openspec_validate_exit=0
+
+--- package-summary regenerate + check ---
+wrote /Users/silveriobernal/Documents/Code/Development/spec-pilot/package-summary.json fileCount=242 (excludes self) candidates=7 waves=12 slices=42 stories=126
+package_summary_regen_exit=0
+fileCount=242 waves=None slices=None stories=None
+package_summary_ok
+
+--- delivery-graph ---
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+delivery_graph_exit=0
+
+--- secret scan ---
+no heuristic secrets found
+secret_scan_exit=0
+
+--- baseline ---
+=== SpecPilot baseline validation ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+PASS  openspec --version => 1.6.0
+PASS  openspec schema validate spec-driven
+PASS  openspec validate --all
+PASS  openspec doctor
+PASS  cursor commands: 12
+PASS  cursor skills: 12
+PASS  codex skills: 12
+PASS  opencode commands: 12
+PASS  opencode skills: 12
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+PASS  delivery graph + machine IDs
+INFO  active OpenSpec change directories: 1
+PASS  product scaffolding present (apps/packages/package.json)
+fileCount=242 waves=12 slices=42 stories=126
+PASS  package-summary semantics
+no heuristic secrets found
+PASS  secret scan
+PASS  git branch: main
+=== summary ===
+BASELINE_OK
+baseline_exit=0
+
+=== summary ===

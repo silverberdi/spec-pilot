@@ -1,0 +1,15 @@
+exclusions-check
+timestamp_utc=2026-07-26T04:05:00Z
+change=chg-w00-s03-postgresql-prisma-and-local-runtime
+
+checked:
+- no CI workflow ownership introduced for w00-s04: PASS (no .github/workflows added by this slice intent)
+- no apps/worker: PASS (directory absent; compose excludes worker)
+- no Redis/SQLite stores: PASS (PostgreSQL-only per ADR-003)
+- no DeepSeek product integration: PASS
+- no authentication/multiuser: PASS
+- no product domain tables/modules: PASS (only app_metadata probe model)
+- no reuse/modification of axioma-db-dev: PASS (isolated SpecPilot Compose on host 5441)
+- no later-wave scope: PASS
+
+result=PASS

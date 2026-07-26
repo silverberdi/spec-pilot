@@ -1,0 +1,10 @@
+docker-coexistence-post
+timestamp_utc=2026-07-26T04:16:57Z
+axioma_id_before=fbdabca10675efab7137dc95fbb31bfa89d4070508d07aaf9b6cd8795438c48f
+axioma_started_before=2026-07-24T06:02:19.896124Z
+axioma_id_after=fbdabca10675efab7137dc95fbb31bfa89d4070508d07aaf9b6cd8795438c48f axioma_started_after=2026-07-24T06:02:19.896124Z axioma_status=running
+axioma_unchanged_id=yes
+axioma_not_restarted=yes
+5432/tcp -> 0.0.0.0:5440
+host_5440_reserved=yes
+result=PASS

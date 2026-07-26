@@ -1,0 +1,5 @@
+compose-runtime-blocked
+timestamp_utc=2026-07-26T04:16:49Z
+ready_status=503
+ready_body={"status":"error","service":"api","database":"unavailable"}
+liveness={"status":"ok","service":"api"}

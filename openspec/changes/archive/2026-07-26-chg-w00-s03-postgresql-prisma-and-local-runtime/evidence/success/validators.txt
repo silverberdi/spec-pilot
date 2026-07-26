@@ -1,0 +1,16 @@
+- Validating...
+✓ spec/agent-operating-contracts
+✓ spec/angular-web-console-baseline
+✓ spec/application-test-baseline
+✓ spec/baseline-validation-and-secret-scanning
+✓ change/chg-w00-s03-postgresql-prisma-and-local-runtime
+✓ spec/closure-evidence-and-process-gates
+✓ spec/context-and-package-integrity
+✓ spec/delivery-graph-and-id-validation
+✓ spec/immutable-openspec-integrations
+✓ spec/nestjs-fastify-api-baseline
+✓ spec/nx-monorepo-baseline
+✓ spec/openspec-verified-lifecycle
+✓ spec/repository-governance
+✓ spec/shared-libraries-baseline
+Totals: 14 passed, 0 failed (14 items)

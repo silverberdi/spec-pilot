@@ -1,0 +1,111 @@
+## Verification Report: chg-w00-s03-postgresql-prisma-and-local-runtime
+
+timestamp_utc: 2026-07-26T04:23:10Z
+branch: main
+operator_approval: continuous closure authorizing Verify through push
+
+### Summary
+
+| Dimension | Status |
+|---|---|
+| Completeness | Tasks 1.1–8.1 complete; 8.2 is this Verify; 8.3–8.6 are post-Verify closure gates authorized in the same continuous pass |
+| Correctness | Four capability deltas covered by Prisma schema/migrations, Nest readiness, Compose runtime, Testcontainers/unit tests, and evidence |
+| Coherence | SpecPilot-only Postgres on `5441`, Prisma lifecycle in Nest, byte-stable liveness, readiness 503 on failure, coexistence with `axioma-db-dev` on `5440` |
+| Deterministic checks | `openspec validate --strict` valid; evidence baseline `BASELINE_OK`; delivery-graph and secret scan captured as PASS |
+
+### Completeness
+
+- Planning artifacts: proposal, design, specs, tasks — complete (4/4)
+- Tasks 1.1–8.1: complete with evidence under `evidence/`
+- Task 7.1: operator human validation recorded in `evidence/human-validation.md`
+- Task 8.1: operator authorized continuous closure (Verify → sync → archive → commit → push)
+- Task 8.2: Verify execution (this report)
+- Tasks 8.3–8.6: authorized next gates in the same continuous stop-on-failure operation
+
+### Correctness (requirement coverage)
+
+| Capability | Evidence / surfaces |
+|---|---|
+| postgresql-prisma-persistence-baseline | `apps/api/prisma/schema.prisma` with `AppMetadata` only; migration under `apps/api/prisma/migrations/`; `PrismaModule`/`PrismaService`; `.env.example`; Testcontainers migrate+round-trip evidence |
+| docker-compose-local-runtime | Root `compose.yaml` with `postgres`/`api`/`web`; pinned `postgres:16-alpine`; host `5441:5432`; Dockerfiles + `.dockerignore`; operator runbooks; coexistence pre/post evidence |
+| nestjs-fastify-api-baseline (delta) | Byte-stable `GET /health`; `GET /health/ready` 200/503; startup reject on missing/malformed `DATABASE_URL`; shared readiness contracts |
+| application-test-baseline (delta) | Unit tests without Docker; Testcontainers persistence tests; Compose success + blocked readiness evidence; web/api/shared-contracts suites green |
+
+### Coherence
+
+- Design isolation from `axioma-db-dev` preserved (host `5440` untouched; identity unchanged per operator human validation)
+- Liveness remains independent of database connectivity; readiness never fabricates success
+- Main-only working policy: branch is `main`
+- Exclusions (CI/`w00-s04`, worker, Redis/SQLite, DeepSeek product API, auth, domain tables) remain absent
+
+### Issues
+
+- CRITICAL: none
+- WARNING: none
+- SUGGESTION: none for Verify scope
+
+### Final Assessment
+
+PASS
+
+Exact Verify result: **PASS**
+
+### Raw check transcript
+
+```
+=== OpenSpec Verify — chg-w00-s03-postgresql-prisma-and-local-runtime ===
+timestamp_utc: 2026-07-26T04:23:10Z
+operator_approval: continuous closure (Verify through push)
+branch: main
+
+--- openspec validate --strict ---
+Change 'chg-w00-s03-postgresql-prisma-and-local-runtime' is valid
+validate_exit=0
+
+--- openspec status ---
+Progress: 4/4 artifacts complete
+[x] proposal
+[x] design
+[x] specs
+[x] tasks
+
+--- incomplete tasks (post-Verify gates expected) ---
+8.2 Verify (this report)
+8.3 sync
+8.4 integrity after sync
+8.5 archive
+8.6 final validation + commit/push
+
+--- requirement inventory ---
+application-test-baseline: 4
+docker-compose-local-runtime: 6
+nestjs-fastify-api-baseline: 4
+postgresql-prisma-persistence-baseline: 5
+
+--- evidence presence ---
+PRESENT binding.md
+PRESENT exclusions-check.txt
+PRESENT toolchain.md
+PRESENT secret-safety-check.txt
+PRESENT docker-coexistence-pre.txt
+PRESENT docker-coexistence-post.txt
+PRESENT operator-commands.md
+PRESENT impact-statements.md
+PRESENT human-validation.md
+PRESENT no-deferred-ac.md
+PRESENT success/validators.txt
+PRESENT success/baseline.txt
+PRESENT success/secret-scan.txt
+PRESENT success/compose-runtime.txt
+PRESENT failure/compose-ready-blocked.txt
+
+--- key implementation surfaces ---
+PRESENT apps/api/prisma/schema.prisma
+PRESENT apps/api/src/app/prisma.service.ts
+PRESENT apps/api/src/app/prisma.module.ts
+PRESENT compose.yaml
+PRESENT apps/api/Dockerfile
+PRESENT apps/web/Dockerfile
+PRESENT .env.example
+PRESENT .dockerignore
+```

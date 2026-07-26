@@ -1,0 +1,19 @@
+# Spec sync evidence — chg-w00-s03-postgresql-prisma-and-local-runtime
+
+timestamp_utc: 2026-07-26T04:24:00Z
+operator_approval: continuous closure pass authorizing sync through push
+
+## Result
+
+SYNCED
+
+Four capability specs were synchronized to canonical `openspec/specs/<capability>/spec.md` (two new + two deltas).
+
+| Capability | Canonical path | Action |
+|---|---|---|
+| postgresql-prisma-persistence-baseline | `openspec/specs/postgresql-prisma-persistence-baseline/spec.md` | Created (5 ADDED requirements) |
+| docker-compose-local-runtime | `openspec/specs/docker-compose-local-runtime/spec.md` | Created (6 ADDED requirements) |
+| nestjs-fastify-api-baseline | `openspec/specs/nestjs-fastify-api-baseline/spec.md` | Updated (2 MODIFIED + 2 ADDED requirements) |
+| application-test-baseline | `openspec/specs/application-test-baseline/spec.md` | Updated (1 MODIFIED + 3 ADDED requirements) |
+
+No REMOVED / RENAMED delta operations were present.

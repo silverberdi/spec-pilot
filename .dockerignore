@@ -1,0 +1,25 @@
+# SpecPilot Docker build context — keep secrets and local artifacts out of images.
+.git
+.github
+.cursor
+.codex
+.opencode
+**/node_modules
+**/dist
+**/.angular
+**/.nx
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+apps/web/src/environments/environment.local.ts
+**/coverage
+**/*.log
+openspec/changes/**/evidence
+docs/context/generated
+.docker-data
+postgres-data
+*.pem
+*.p12
+*.key
+credentials.json

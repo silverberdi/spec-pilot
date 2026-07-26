@@ -1,6 +1,8 @@
 import {
   createHealthResponse,
+  createReadyResponse,
   isHealthResponse,
+  isReadyResponse,
 } from './shared-contracts';
 
 describe('shared-contracts health validator', () => {
@@ -18,5 +20,15 @@ describe('shared-contracts health validator', () => {
     expect(isHealthResponse({ service: 'api' })).toBe(false);
     expect(isHealthResponse({ status: 'down', service: 'api' })).toBe(false);
     expect(isHealthResponse({ status: 'ok', service: 'web' })).toBe(false);
+  });
+
+  it('accepts the readiness success contract', () => {
+    const payload = createReadyResponse();
+    expect(isReadyResponse(payload)).toBe(true);
+    expect(payload).toEqual({
+      status: 'ok',
+      service: 'api',
+      database: 'ok',
+    });
   });
 });

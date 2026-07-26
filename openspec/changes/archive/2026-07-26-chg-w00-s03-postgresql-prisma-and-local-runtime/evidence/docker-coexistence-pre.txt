@@ -1,0 +1,23 @@
+docker-coexistence-pre
+timestamp_utc=2026-07-26T04:10:43Z
+
+=== axioma-db-dev inspect (must remain intact) ===
+name=/axioma-db-dev image=postgres:16-alpine status=running startedAt=2026-07-24T06:02:19.896124Z id=fbdabca10675efab7137dc95fbb31bfa89d4070508d07aaf9b6cd8795438c48f
+
+=== host port 5440 (Axioma reserved) ===
+5432/tcp -> 0.0.0.0:5440
+COMMAND     PID           USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+com.docke 27390 silveriobernal  162u  IPv6 0xfb96611a459a15a5      0t0  TCP *:5440 (LISTEN)
+
+=== host port 5441 availability (SpecPilot) ===
+PORT_5441_OCCUPIED=no
+PORT_5441_AVAILABLE=yes
+
+=== SpecPilot name collision checks ===
+FREE_CONTAINER=specpilot-postgres
+FREE_CONTAINER=specpilot-api
+FREE_CONTAINER=specpilot-web
+FREE_NETWORK=specpilot-net
+FREE_VOLUME=specpilot-postgres-data
+
+result=PASS

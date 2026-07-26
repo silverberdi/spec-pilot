@@ -1,0 +1,9 @@
+compose-runtime-success
+timestamp_utc=2026-07-26T04:16:45Z
+health={"status":"ok","service":"api"}
+ready={"status":"ok","service":"api","database":"ok"}
+web_http=200
+NAME                 IMAGE                COMMAND                  SERVICE    CREATED              STATUS                        PORTS
+specpilot-api        specpilot-api        "docker-entrypoint.s…"   api        About a minute ago   Up About a minute             0.0.0.0:3000->3000/tcp
+specpilot-postgres   postgres:16-alpine   "docker-entrypoint.s…"   postgres   About a minute ago   Up About a minute (healthy)   0.0.0.0:5441->5432/tcp
+specpilot-web        specpilot-web        "/docker-entrypoint.…"   web        52 seconds ago       Up 51 seconds                 0.0.0.0:8081->80/tcp

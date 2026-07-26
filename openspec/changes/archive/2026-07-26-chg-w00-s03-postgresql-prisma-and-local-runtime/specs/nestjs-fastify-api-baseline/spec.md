@@ -1,17 +1,4 @@
-# nestjs-fastify-api-baseline
-
-## Purpose
-
-NestJS 11 HTTP API baseline using Fastify 5 with an exact public health contract, readiness probing through Prisma, and safe startup failure behavior.
-
-## Requirements
-
-### Requirement: NestJS 11 Fastify API exists
-The repository SHALL provide `apps/api` as a NestJS major 11 HTTP API using Fastify major 5 through `@nestjs/platform-fastify`. Nest framework packages under `@nestjs/*` MUST remain on major 11 and mutually compatible.
-
-#### Scenario: NestJS Fastify API app is present
-- **WHEN** the API baseline is verified
-- **THEN** `apps/api` exists as NestJS 11 with Fastify 5 via `@nestjs/platform-fastify`
+## MODIFIED Requirements
 
 ### Requirement: Exact public GET /health contract
 `apps/api` MUST expose a public liveness route at `GET /health`. On success the route MUST return the stable JSON contract `{ "status": "ok", "service": "api" }`. The liveness route MUST NOT perform a PostgreSQL, Prisma, or other database readiness check and MUST NOT depend on database connectivity. Database readiness MUST be exposed only through the separate readiness route defined by this change.
@@ -34,6 +21,8 @@ If `DATABASE_URL` is missing or malformed, or the API otherwise cannot initializ
 #### Scenario: Health success requires a serving baseline
 - **WHEN** `GET /health` returns the success contract
 - **THEN** the HTTP server is serving the baseline API module correctly and startup configuration validation has passed
+
+## ADDED Requirements
 
 ### Requirement: Exact public GET /health/ready contract
 `apps/api` MUST expose a public readiness route at `GET /health/ready`. When a Prisma connectivity probe succeeds, the route MUST return HTTP 200 with the JSON body `{ "status": "ok", "service": "api", "database": "ok" }`. When the probe fails, the route MUST return HTTP 503 with an explicit non-ok database status in the JSON body. The API MUST NOT fabricate readiness success while the database is unreachable.

@@ -29,6 +29,8 @@ Canonical context index for operator orientation. Formal integrity/generation ru
 | Web console | `apps/web/**` |
 | API service | `apps/api/**` |
 | Shared contracts | `packages/shared-contracts/**` |
+| Prisma schema/migrations | `apps/api/prisma/**`, `apps/api/prisma.config.ts` |
+| Local Compose runtime | `compose.yaml`, `apps/api/Dockerfile`, `apps/web/Dockerfile`, `.dockerignore`, `.env.example` |
 
 ## Generated integrations (immutable)
 

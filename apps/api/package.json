@@ -6,8 +6,17 @@
     "@nestjs/common": "11.1.28",
     "@nestjs/core": "11.1.28",
     "@nestjs/platform-fastify": "11.1.28",
+    "@prisma/adapter-pg": "7.9.0",
+    "@prisma/client": "7.9.0",
     "@specpilot/shared-contracts": "0.0.1",
+    "pg": "8.22.0",
+    "prisma": "7.9.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.0"
+  },
+  "devDependencies": {
+    "@testcontainers/postgresql": "12.0.4",
+    "@types/pg": "8.20.0",
+    "testcontainers": "12.0.4"
   }
 }

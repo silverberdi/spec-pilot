@@ -5,8 +5,11 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { AppModule } from './app/app.module';
+import { assertDatabaseUrl } from './app/database-url';
 
 async function bootstrap() {
+  assertDatabaseUrl(process.env['DATABASE_URL']);
+
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
