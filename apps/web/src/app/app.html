@@ -1,0 +1,19 @@
+<main class="shell" [attr.data-state]="shellState()">
+  @if (shellState() === 'loading') {
+    <section class="shell__panel shell__panel--loading" aria-busy="true">
+      <p-progress-spinner ariaLabel="Cargando" />
+      <p>{{ copy().loading }}</p>
+    </section>
+  } @else if (shellState() === 'error') {
+    <section class="shell__panel shell__panel--error">
+      <p-message severity="error">{{ copy().errorTitle }}</p-message>
+      <p>{{ copy().errorDetail }}</p>
+    </section>
+  } @else {
+    <section class="shell__panel shell__panel--success">
+      <p-card [header]="copy().brand">
+        <p class="shell__tagline">{{ copy().tagline }}</p>
+      </p-card>
+    </section>
+  }
+</main>

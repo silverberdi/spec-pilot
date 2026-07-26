@@ -1,0 +1,152 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ NX   Running target serve for project api and 2 tasks it depends on:
+
+
+
+> nx run shared-contracts:build
+
+(node:56250) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Compiling TypeScript files for project "shared-contracts"...
+Done compiling TypeScript files for project "shared-contracts".
+
+> nx run api:build
+
+> webpack-cli build --node-env=production
+
+(node:56278) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:56309) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:56310) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+webpack compiled [1m[32msuccessfully[39m[22m (922ee6458e5acfae)
+
+> nx run api:serve:development
+
+(node:56347) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:56432) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ NX   Running target build for project api and 1 task it depends on:
+ NX  File change detected. Restarting...
+(node:56443) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+> nx run shared-contracts:build
+(node:56440) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Compiling TypeScript files for project "shared-contracts"...
+Done compiling TypeScript files for project "shared-contracts".
+> nx run api:build:development
+> webpack-cli build --node-env=development
+ NX   Running target build for project api and 1 task it depends on:
+ NX  File change detected. Restarting...
+> nx run shared-contracts:build
+(node:56476) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ NX   Running target build for project api and 1 task it depends on failed
+Failed tasks:
+- shared-contracts:build
+Hint: run the command with --verbose for more details.
+ NX   Nx detected a flaky task
+  shared-contracts:build
+Flaky tasks can disrupt your CI pipeline. Automatically retry them with Nx Cloud. Learn more at https://nx.dev/ci/features/flaky-tasks
+Your AI agent configuration is outdated. Run "nx configure-ai-agents" to update.
+  Run duration:      1.1s
+  Cache:             Skipped (--skip-nx-cache)
+  Critical path:     1.1s (1 task)
+  Recoverable time:  <1ms
+  Recommendations:
+    - Cache: drop --skip-nx-cache to restore unchanged tasks instantly.
+    - Speed up or split the longest tasks on the critical path:
+        shared-contracts:build    1.1s
+(node:56501) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ NX   Running target build for project api and 1 task it depends on:
+(node:56474) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:56545) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:56546) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+> nx run shared-contracts:build
+(node:56544) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Compiling TypeScript files for project "shared-contracts"...
+Done compiling TypeScript files for project "shared-contracts".
+> nx run api:build:development
+> webpack-cli build --node-env=development
+webpack compiled [1m[32msuccessfully[39m[22m (922ee6458e5acfae)
+ NX   Successfully ran target build for project api and 1 task it depends on
+ NX   Nx detected a flaky task
+  shared-contracts:build
+Flaky tasks can disrupt your CI pipeline. Automatically retry them with Nx Cloud. Learn more at https://nx.dev/ci/features/flaky-tasks
+Your AI agent configuration is outdated. Run "nx configure-ai-agents" to update.
+  Run duration:      6.5s
+  Cache:             Skipped (--skip-nx-cache)
+  Critical path:     6.5s (2 tasks)
+  Recoverable time:  <1ms
+  Recommendations:
+    - Cache: drop --skip-nx-cache to restore unchanged tasks instantly.
+    - Speed up or split the longest tasks on the critical path:
+        api:build:development     4.7s
+        shared-contracts:build    1.8s
+(node:56558) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:56589) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:56590) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+webpack compiled [1m[32msuccessfully[39m[22m (922ee6458e5acfae)
+ NX   Successfully ran target build for project api and 1 task it depends on
+ NX   Nx detected a flaky task
+  shared-contracts:build
+Flaky tasks can disrupt your CI pipeline. Automatically retry them with Nx Cloud. Learn more at https://nx.dev/ci/features/flaky-tasks
+Your AI agent configuration is outdated. Run "nx configure-ai-agents" to update.
+  Run duration:      4.3s
+  Cache:             Skipped (--skip-nx-cache)
+  Critical path:     4.3s (2 tasks)
+  Recoverable time:  <1ms
+  Recommendations:
+    - Cache: drop --skip-nx-cache to restore unchanged tasks instantly.
+    - Speed up or split the longest tasks on the critical path:
+        api:build:development     3.0s
+        shared-contracts:build    1.2s
+Debugger listening on ws://localhost:9229/2a0d689c-8a94-4d49-afe5-e6aeacc5dd6c
+Debugger listening on ws://localhost:9229/2a0d689c-8a94-4d49-afe5-e6aeacc5dd6c
+For help, see: https://nodejs.org/learn/getting-started/debugging
+(node:56643) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[Nest] 56643  - 07/25/2026, 6:20:55 PM     LOG [NestFactory] Starting Nest application...
+[Nest] 56643  - 07/25/2026, 6:20:55 PM     LOG [InstanceLoader] AppModule dependencies initialized +7ms
+[Nest] 56643  - 07/25/2026, 6:20:55 PM     LOG [RoutesResolver] AppController {/}: +1ms
+[Nest] 56643  - 07/25/2026, 6:20:55 PM     LOG [RouterExplorer] Mapped {/health, GET} route +2ms
+[Nest] 56643  - 07/25/2026, 6:20:55 PM     LOG [NestApplication] Nest application successfully started +0ms
+[Nest] 56643  - 07/25/2026, 6:20:55 PM     LOG API listening on http://localhost:3000/health
+ NX  Process exited with code null, waiting for changes to restart...
+
+
+
+ NX   Successfully ran target serve for project api and 2 tasks it depends on
+
+
+
+ NX   Nx detected a flaky task
+
+  shared-contracts:build
+
+Flaky tasks can disrupt your CI pipeline. Automatically retry them with Nx Cloud. Learn more at https://nx.dev/ci/features/flaky-tasks
+
+Your AI agent configuration is outdated. Run "nx configure-ai-agents" to update.
+
+  Run duration:      3.7s
+  Cache:             Skipped (--skip-nx-cache)
+  Critical path:     3.7s (2 tasks)
+  Recoverable time:  <1ms
+
+  Recommendations:
+    - Cache: drop --skip-nx-cache to restore unchanged tasks instantly.
+    - Speed up or split the longest tasks on the critical path:
+        api:build                 2.6s
+        shared-contracts:build    1.1s

@@ -23,8 +23,8 @@ python3 scripts/regenerate-package-summary.py
 
 The regenerator:
 
-- inventories `README.md`, `bootstrap/**`, `docs/**`, and `openspec/config.yaml`
-- excludes generated integrations and `package-summary.json` from `files` / `fileCount`
+- inventories `README.md`, `bootstrap/**`, `docs/**`, `openspec/config.yaml`, root workspace manifests (`package.json`, `package-lock.json`, `nx.json`, TypeScript/Jest/Prettier configs), `apps/**`, and `packages/**`
+- excludes `node_modules/`, build outputs (`dist/`, `coverage/`, `.nx/`, `.angular/`), generated integrations, and `package-summary.json` from `files` / `fileCount`
 - records reconciliation candidate artifacts under `candidateBaselineFiles` (outside `fileCount`)
 - refreshes `waveCount`, `sliceCount`, and `userStoryCount` from live docs
 

@@ -32,9 +32,26 @@ CANDIDATE_BASELINE = (
 def is_package_path(rel: str) -> bool:
     if rel == "package-summary.json":
         return False
-    if rel in {"README.md", "openspec/config.yaml"}:
+    if "node_modules/" in rel or rel.startswith("node_modules/"):
+        return False
+    if rel.startswith(("dist/", "coverage/", ".nx/", ".angular/", "tmp/", "out/")):
+        return False
+    root_workspace = {
+        "README.md",
+        "openspec/config.yaml",
+        "package.json",
+        "package-lock.json",
+        "nx.json",
+        "tsconfig.json",
+        "tsconfig.base.json",
+        "jest.config.ts",
+        "jest.preset.js",
+        ".prettierrc",
+        ".prettierignore",
+    }
+    if rel in root_workspace:
         return True
-    return rel.startswith(("bootstrap/", "docs/"))
+    return rel.startswith(("bootstrap/", "docs/", "apps/", "packages/"))
 
 
 def sha256_file(path: Path) -> str:
@@ -91,10 +108,10 @@ def main() -> None:
             "excludesGeneratedIntegrations": True,
             "candidateBaselineOutsideFileCount": True,
             "description": (
-                "fileCount and files list the imported canonical package inventory and "
-                "intentionally exclude package-summary.json itself. Generated OpenSpec "
-                "integrations are excluded. candidateBaselineFiles lists reconciliation "
-                "candidates for formal adoption via w00-s01 and are outside fileCount."
+                "fileCount and files list the canonical package inventory (docs, bootstrap, "
+                "apps/, packages/, and root workspace manifests) and intentionally exclude "
+                "package-summary.json itself. Generated OpenSpec integrations are excluded. "
+                "candidateBaselineFiles lists reconciliation candidates outside fileCount."
             ),
         },
         "waveCount": wave_count,

@@ -1,0 +1,20 @@
+# Spec sync evidence — chg-w00-s02-nx-angular-nest-baseline
+
+timestamp_utc: 2026-07-26T00:27:00Z
+operator_approval: continuous closure pass authorizing sync through push
+
+## Result
+
+SYNCED
+
+Five delta capabilities were promoted to canonical `openspec/specs/<capability>/spec.md` as new capability specs (ADDED Requirements → Purpose + Requirements).
+
+| Capability | Canonical path | Action |
+|---|---|---|
+| nx-monorepo-baseline | `openspec/specs/nx-monorepo-baseline/spec.md` | Created (6 requirements) |
+| angular-web-console-baseline | `openspec/specs/angular-web-console-baseline/spec.md` | Created (4 requirements) |
+| nestjs-fastify-api-baseline | `openspec/specs/nestjs-fastify-api-baseline/spec.md` | Created (3 requirements) |
+| shared-libraries-baseline | `openspec/specs/shared-libraries-baseline/spec.md` | Created (3 requirements) |
+| application-test-baseline | `openspec/specs/application-test-baseline/spec.md` | Created (5 requirements) |
+
+No MODIFIED / REMOVED / RENAMED delta operations were present.

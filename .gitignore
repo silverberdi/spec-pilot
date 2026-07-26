@@ -7,6 +7,7 @@ node_modules/
 dist/
 build/
 out/
+packages/*/dist/
 tmp/
 temp/
 coverage/
@@ -27,6 +28,7 @@ coverage/
 credentials.json
 **/secrets/**
 !.gitkeep
+apps/web/src/environments/environment.local.ts
 
 # Logs and local runtime
 logs/
@@ -62,3 +64,5 @@ openspec/changes/**/.openspec-scratch/
 # Generated context packs that contain ephemeral machine state
 # (committed manifests/indexes are allowed; regenerate via scripts)
 docs/context/generated/*.tmp
+
+.angular

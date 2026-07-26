@@ -1,0 +1,10 @@
+# Package manager / Nx Cloud / CI check
+date: 2026-07-25T23:11:17Z
+pnpm-lock.yaml: absent
+yarn.lock: absent
+bun.lockb: absent
+nested package-lock.json count: 1
+./package-lock.json
+nx.json analytics: false
+github workflows: none
+NX_CLOUD env: unset

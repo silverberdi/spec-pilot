@@ -1,0 +1,23 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> nx run shared-contracts:build
+
+(node:54786) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Compiling TypeScript files for project "shared-contracts"...
+Done compiling TypeScript files for project "shared-contracts".
+
+
+
+ NX   Successfully ran target build for project shared-contracts
+
+
+  Run duration:      1.3s
+  Cache:             Skipped (--skip-nx-cache)
+  Critical path:     1.3s (1 task)
+  Recoverable time:  <1ms
+
+  Recommendations:
+    - Cache: drop --skip-nx-cache to restore unchanged tasks instantly.
+    - Speed up or split the longest tasks on the critical path:
+        shared-contracts:build    1.3s

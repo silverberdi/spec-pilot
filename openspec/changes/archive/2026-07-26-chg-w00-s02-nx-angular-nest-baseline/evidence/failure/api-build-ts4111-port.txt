@@ -1,0 +1,33 @@
+# API build failure — TS4111 process.env.PORT
+
+Observed during operator validation (serve/build) on 2026-07-25.
+
+Error:
+  apps/api/src/main.ts — TS4111
+  Property 'PORT' comes from an index signature, so it must be accessed with ['PORT'].
+
+Cause:
+  TypeScript strict / noPropertyAccessFromIndexSignature rejects process.env.PORT.
+
+Remediation (applied):
+  Replace process.env.PORT with process.env['PORT'].
+  Preserve default port 3000.
+  Do not weaken TypeScript strictness.
+  Do not change the GET /health contract.
+
+## Follow-on serve blocker found while verifying remediation
+
+After TS4111 fix, `npx nx serve api` built successfully but the Node process exited:
+
+  Cannot find module '.../node_modules/@specpilot/shared-contracts/src/index.js'
+  (package.json "main": "./src/index.js" while compiled output lives under dist/packages/shared-contracts/)
+
+Additional minimal remediation for live serve:
+  Point @specpilot/shared-contracts package.json "main" at
+  ../../dist/packages/shared-contracts/src/index.js
+  (types remain source .ts for IDE/build path mapping).
+
+Updated shared-contracts packaging for Node resolution through npm workspace symlink:
+  - build outputPath -> packages/shared-contracts/dist
+  - package.json main -> ./dist/src/index.js
+  - ignore packages/*/dist/ in .gitignore

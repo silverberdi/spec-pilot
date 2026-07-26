@@ -1,0 +1,157 @@
+## Verification Report: chg-w00-s02-nx-angular-nest-baseline
+
+timestamp_utc: 2026-07-26T00:06:28Z
+branch: main
+operator_approval: Verify only (sync, archive, commit, and push not authorized)
+
+### Summary
+
+| Dimension | Status |
+|---|---|
+| Completeness | Implementation tasks through 9.1 complete; 9.2 is this Verify; 9.3–9.6 deferred by operator until post-Verify approvals |
+| Correctness | All five capability delta specs have corresponding apps/packages, tests, and evidence |
+| Coherence | Nx 23.1.0 + Angular 22 + NestJS/Fastify 5, npm workspaces, main-only policy, and exclusions match proposal/design/specs |
+| Deterministic checks | `openspec validate --strict` valid; baseline `BASELINE_OK`; delivery-graph exit 0; secret scan exit 0 |
+
+### Completeness
+
+- Planning artifacts: proposal, design, specs, tasks — complete (4/4)
+- Tasks 1.1–9.1: complete with evidence under `evidence/`
+- Task 8.2: operator human validation recorded in `evidence/human-validation.md` (no license key stored)
+- Task 9.2: Verify execution (this report)
+- Tasks 9.3–9.6: intentionally incomplete; operator forbade sync/archive/commit/push in this authorization
+
+### Correctness (requirement coverage)
+
+| Capability | Evidence / surfaces |
+|---|---|
+| nx-monorepo-baseline | Root npm workspaces; Nx `23.1.0` identical `@nx/*`; projects `web`, `api`, `shared-contracts`; no Nx Cloud/CI; clean peer install policy in evidence |
+| angular-web-console-baseline | `apps/web` Angular 22 standalone + PrimeNG 22 Aura via `providePrimeNG`; Spanish SpecPilot shell states; operator-confirmed at `:4200` |
+| nestjs-fastify-api-baseline | `apps/api` Fastify adapter; `GET /health` exact contract; live HTTP 200 evidence; Express absent |
+| shared-libraries-baseline | `@specpilot/shared-contracts` health contract + `isHealthResponse`; no Angular/Nest imports; consumed as workspace dependency |
+| application-test-baseline | Jest for web/api/shared-contracts; success/failure evidence under `evidence/success/` |
+
+### Coherence
+
+- Design D2 Nx 23 ≥ 23.1.0 with Angular 22 retained after Nx 22 discard is reflected in lockfile and `evidence/toolchain.md`
+- PrimeUI license configured only via gitignored `environment.local.ts` (`license` on `PrimeNGConfigType`); example template committed-intended; key never in evidence
+- Main-only working policy: branch is `main`
+- Later-slice exclusions (Postgres/Prisma/Docker/CI/worker/DeepSeek/auth) remain absent from delivered baseline
+
+### Issues
+
+- CRITICAL: none
+- WARNING: none
+- SUGGESTION: none for Verify scope
+
+### Final Assessment
+
+PASS
+
+Exact Verify result: **PASS**
+
+Post-Verify gates (sync, archive, final commit/push) remain blocked pending separate explicit operator approvals.
+
+### Raw check transcript
+
+```
+=== OpenSpec Verify — chg-w00-s02-nx-angular-nest-baseline ===
+timestamp_utc: 2026-07-26T00:06:28Z
+operator_approval: explicit for Verify only (no sync/archive/commit/push)
+branch: main
+
+--- openspec validate --strict ---
+Change 'chg-w00-s02-nx-angular-nest-baseline' is valid
+validate_exit=0
+
+--- openspec status ---
+Change: chg-w00-s02-nx-angular-nest-baseline
+Schema: spec-driven
+Progress: 4/4 artifacts complete
+[x] proposal
+[x] design
+[x] specs
+[x] tasks
+All artifacts complete!
+
+--- baseline validation ---
+PASS  openspec --version => 1.6.0
+PASS  openspec schema validate spec-driven
+PASS  openspec validate --all
+PASS  openspec doctor
+PASS  cursor commands: 12
+PASS  cursor skills: 12
+PASS  codex skills: 12
+PASS  opencode commands: 12
+PASS  opencode skills: 12
+PASS  delivery graph + machine IDs
+INFO  active OpenSpec change directories: 1
+PASS  product scaffolding present (apps/packages/package.json)
+fileCount=220 waves=12 slices=42 stories=126
+PASS  package-summary semantics
+PASS  secret scan
+PASS  git branch: main
+=== summary ===
+BASELINE_OK
+baseline_exit=0
+
+--- delivery graph ---
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+delivery_graph_exit=0
+
+--- secret scan ---
+no heuristic secrets found
+secret_scan_exit=0
+
+--- nx versions (no secrets) ---
+nx 23.1.0
+@nx/angular 23.1.0
+@angular/core 22.0.8
+primeng 22.0.0
+@nestjs/platform-fastify 11.1.28
+typescript 6.0.3
+
+--- projects / workspaces ---
+shared-contracts
+api
+web
+@specpilot/api
+@specpilot/web
+@specpilot/shared-contracts
+
+--- evidence presence ---
+PRESENT binding.md
+PRESENT exclusions-check.txt
+PRESENT toolchain.md
+PRESENT package-manager-check.txt
+PRESENT test-runner.md
+PRESENT impact-statements.md
+PRESENT operator-commands.md
+PRESENT human-validation.md
+PRESENT no-deferred-ac.md
+PRESENT primeui-license-config.md
+PRESENT success/validators.txt
+PRESENT success/api-health-live-after-ts4111-fix.txt
+PRESENT success/npm-nx-workspaces.txt
+
+--- incomplete tasks (post-Verify gates expected) ---
+9.2 Verify (this report)
+9.3 sync
+9.4 integrity after sync
+9.5 archive
+9.6 final commit/push
+
+--- requirement inventory ---
+nx-monorepo-baseline: 6
+angular-web-console-baseline: 4
+nestjs-fastify-api-baseline: 3
+shared-libraries-baseline: 3
+application-test-baseline: 5
+
+--- gitignore local license file ---
+.gitignore ignores apps/web/src/environments/environment.local.ts
+PRESENT environment.local.example.ts
+
+--- express / angular21 / nx22 residue ---
+none
+```

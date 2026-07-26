@@ -1,0 +1,11 @@
+# Archive evidence — chg-w00-s02-nx-angular-nest-baseline
+
+timestamp_utc: 2026-07-26T00:28:59Z
+operator_approval: continuous closure pass authorizing sync through push
+schema: spec-driven
+specs_synced_before_archive: yes (agent-driven; archive --skip-specs)
+archive_path: openspec/changes/archive/2026-07-26-chg-w00-s02-nx-angular-nest-baseline
+archivedAs: 2026-07-26-chg-w00-s02-nx-angular-nest-baseline
+specsUpdated_by_cli: false
+active_changes_after_archive: 0
+ARCHIVE_CONFIRMED

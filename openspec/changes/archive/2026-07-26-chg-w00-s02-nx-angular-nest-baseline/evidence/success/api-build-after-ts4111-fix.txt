@@ -1,0 +1,40 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ NX   Running target build for project api and 1 task it depends on:
+
+
+
+> nx run shared-contracts:build
+
+(node:54940) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Compiling TypeScript files for project "shared-contracts"...
+Done compiling TypeScript files for project "shared-contracts".
+
+> nx run api:build
+
+> webpack-cli build --node-env=production
+
+(node:54958) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:54999) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:55000) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+webpack compiled [1m[32msuccessfully[39m[22m (922ee6458e5acfae)
+
+
+
+ NX   Successfully ran target build for project api and 1 task it depends on
+
+
+  Run duration:      4.3s
+  Cache:             Skipped (--skip-nx-cache)
+  Critical path:     4.2s (2 tasks)
+  Recoverable time:  <1ms
+
+  Recommendations:
+    - Cache: drop --skip-nx-cache to restore unchanged tasks instantly.
+    - Speed up or split the longest tasks on the critical path:
+        api:build                 3.0s
+        shared-contracts:build    1.2s

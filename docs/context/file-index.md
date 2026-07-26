@@ -25,6 +25,10 @@ Canonical context index for operator orientation. Formal integrity/generation ru
 | Research | `docs/research/**` |
 | OpenSpec config | `openspec/config.yaml` |
 | Package manifest | `package-summary.json` (counts other package files; excludes itself) |
+| Nx workspace root | `package.json`, `package-lock.json`, `nx.json`, `tsconfig*.json`, Jest/Prettier configs |
+| Web console | `apps/web/**` |
+| API service | `apps/api/**` |
+| Shared contracts | `packages/shared-contracts/**` |
 
 ## Generated integrations (immutable)
 
@@ -53,8 +57,8 @@ Refresh only with `openspec update`. Generated Codex and OpenCode inventories ar
 | This index | `docs/context/file-index.md` |
 | Summary semantics | `docs/context/package-summary-semantics.md` |
 
-## Active first change
+## Active change
 
-- Slice: `w00-s01-repository-governance-and-openspec-foundation`
-- Change: `chg-w00-s01-repository-governance-and-openspec-foundation`
-- Stories: `...-001`, `...-002`, `...-003`
+- None (active OpenSpec change directory empty after archive of `chg-w00-s02-nx-angular-nest-baseline`)
+- Latest archived: `openspec/changes/archive/2026-07-26-chg-w00-s02-nx-angular-nest-baseline`
+- Prior archived: `openspec/changes/archive/2026-07-25-chg-w00-s01-repository-governance-and-openspec-foundation`

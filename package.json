@@ -1,0 +1,69 @@
+{
+  "name": "spec-pilot",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "node": "^24.15.0"
+  },
+  "scripts": {
+    "nx": "nx",
+    "build": "nx run-many -t build",
+    "test": "nx run-many -t test",
+    "serve:api": "nx serve api",
+    "serve:web": "nx serve web"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@angular-devkit/core": "~22.0.4",
+    "@angular-devkit/schematics": "~22.0.4",
+    "@angular/build": "~22.0.4",
+    "@angular/cli": "~22.0.4",
+    "@angular/compiler-cli": "~22.0.4",
+    "@angular/language-service": "~22.0.4",
+    "@nestjs/schematics": "^11.0.0",
+    "@nestjs/testing": "^11.0.0",
+    "@nx/angular": "23.1.0",
+    "@nx/jest": "23.1.0",
+    "@nx/js": "23.1.0",
+    "@nx/nest": "23.1.0",
+    "@nx/node": "23.1.0",
+    "@nx/web": "23.1.0",
+    "@nx/webpack": "23.1.0",
+    "@schematics/angular": "~22.0.4",
+    "@swc-node/register": "~1.11.1",
+    "@swc/core": "~1.15.5",
+    "@swc/helpers": "~0.5.18",
+    "@types/jest": "~30.0.0",
+    "@types/node": "^24.0.0",
+    "jest": "~30.3.0",
+    "jest-environment-jsdom": "~30.3.0",
+    "jest-environment-node": "~30.3.0",
+    "jest-preset-angular": "~17.0.0",
+    "jest-util": "~30.3.0",
+    "nx": "23.1.0",
+    "prettier": "~3.6.2",
+    "ts-jest": "^29.4.0",
+    "ts-node": "10.9.1",
+    "tslib": "^2.3.0",
+    "typescript": "6.0.3",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@angular/common": "~22.0.4",
+    "@angular/compiler": "~22.0.4",
+    "@angular/core": "~22.0.4",
+    "@angular/forms": "~22.0.4",
+    "@angular/platform-browser": "~22.0.4",
+    "@angular/platform-browser-dynamic": "~22.0.4",
+    "@angular/router": "~22.0.4",
+    "@nestjs/common": "11.1.28",
+    "@nestjs/core": "11.1.28",
+    "@nestjs/platform-fastify": "11.1.28",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.0"
+  }
+}

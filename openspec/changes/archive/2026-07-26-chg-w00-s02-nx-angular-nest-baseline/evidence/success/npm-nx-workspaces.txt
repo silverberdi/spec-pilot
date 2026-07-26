@@ -1,0 +1,72 @@
+# npm + Nx workspace proof
+## npm workspaces
+@specpilot/api
+@specpilot/web
+@specpilot/shared-contracts
+## nx projects
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+shared-contracts
+api
+web
+## local resolve @specpilot/shared-contracts
+api /Users/silveriobernal/Documents/Code/Development/spec-pilot/packages/shared-contracts/package.json
+web /Users/silveriobernal/Documents/Code/Development/spec-pilot/packages/shared-contracts/package.json
+## npm ci dry-run check (lockfile present)
+root package-lock.json present
+## npm ci verification
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+up to date in 2s
+
+293 packages are looking for funding
+  run `npm fund` for details
+npm warn allow-scripts 9 packages have install scripts not yet covered by allowScripts:
+npm warn allow-scripts   @parcel/watcher@2.6.0 (install: node-gyp rebuild)
+npm warn allow-scripts   @swc/core@1.15.46 (install: (install scripts present))
+npm warn allow-scripts   esbuild@0.28.1 (install: (install scripts present))
+npm warn allow-scripts   fsevents@2.3.3 (install: (install scripts present))
+npm warn allow-scripts   less@4.5.1 (install: (install scripts present))
+npm warn allow-scripts   lmdb@3.5.4 (install: node-gyp rebuild)
+npm warn allow-scripts   msgpackr-extract@3.0.4 (install: node-gyp rebuild)
+npm warn allow-scripts   nx@23.1.0 (install: (install scripts present))
+npm warn allow-scripts   unrs-resolver@1.12.2 (install: (install scripts present))
+npm warn allow-scripts
+npm warn allow-scripts Run `npm approve-scripts --allow-scripts-pending` to review, or `npm approve-scripts <pkg>` to allow.
+
+## npm ci (from clean node_modules)
+Running npm ci with Node v24.18.0...
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+npm warn deprecated whatwg-encoding@2.0.0: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+npm warn deprecated @angular/platform-browser-dynamic@22.0.8: @angular/platform-browser-dynamic is deprecated. Use `@angular/platform-browser` instead.
+npm warn deprecated @angular/animations@22.0.8: @angular/animations is deprecated. Use `animate.enter` and `animate.leave` instead. For more information see: https://v22.angular.dev/guide/animations.
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+added 1658 packages, and audited 1662 packages in 1m
+
+293 packages are looking for funding
+  run `npm fund` for details
+
+40 vulnerabilities (10 moderate, 30 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+npm warn allow-scripts 9 packages have install scripts not yet covered by allowScripts:
+npm warn allow-scripts   @parcel/watcher@2.6.0 (install: node scripts/build-from-source.js)
+npm warn allow-scripts   @swc/core@1.15.46 (postinstall: node postinstall.js)
+npm warn allow-scripts   esbuild@0.28.1 (postinstall: node install.js)
+npm warn allow-scripts   fsevents@2.3.3 (install: (install scripts present))
+npm warn allow-scripts   less@4.5.1 (postinstall: node scripts/postinstall.js)
+npm warn allow-scripts   lmdb@3.5.4 (install: node-gyp-build-optional-packages)
+npm warn allow-scripts   msgpackr-extract@3.0.4 (install: node-gyp-build-optional-packages)
+npm warn allow-scripts   nx@23.1.0 (postinstall: node -e "try{require('./dist/bin/post-install')}catch(e){}")
+npm warn allow-scripts   unrs-resolver@1.12.2 (postinstall: node postinstall.js)
+npm warn allow-scripts
+npm warn allow-scripts Run `npm approve-scripts --allow-scripts-pending` to review, or `npm approve-scripts <pkg>` to allow.

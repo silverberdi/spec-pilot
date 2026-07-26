@@ -1,0 +1,23 @@
+# Exclusions check — chg-w00-s02-nx-angular-nest-baseline
+
+Date: 2026-07-25
+Command intent: verify this slice does not introduce later-slice / later-wave scope.
+
+## Checks
+
+| Exclusion | Result | Notes |
+|---|---|---|
+| PostgreSQL / Prisma / Docker Compose (`w00-s03`) | PASS (pre-scaffold) | No prisma schema, docker-compose, or postgres service present at apply start |
+| CI ownership (`w00-s04`) | PASS (pre-scaffold) | No `.github/workflows` or other CI workflows introduced by this change yet; scaffolding must keep Nx Cloud/CI disabled |
+| `apps/worker` | PASS (pre-scaffold) | `apps/` absent at apply start; worker must not be generated |
+| DeepSeek product API integration | PASS | No DeepSeek gateway/product modules in scope |
+| Authentication / multiuser | PASS | No auth modules in scope |
+| Later-wave domain modules | PASS | No project registry, reviews, budget, secrets product path, etc. |
+
+## Pre-scaffold inventory (repo root)
+
+Present at apply start: `AGENTS.md`, `README.md`, `CORRECTION-REPORT.md`, `.gitignore`, `bootstrap/`, `docs/`, `openspec/`, `scripts/`, `package-summary.json`, tool integration dirs.
+
+Absent at apply start: `apps/`, `packages/`, root `package.json`, `package-lock.json`, `nx.json`.
+
+This check will be re-confirmed after scaffolding in later evidence.

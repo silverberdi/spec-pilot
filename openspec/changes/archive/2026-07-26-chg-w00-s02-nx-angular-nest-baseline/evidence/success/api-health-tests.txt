@@ -1,0 +1,41 @@
+# api tests
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ NX   Running target test for project api and 1 task it depends on:
+
+
+
+> nx run shared-contracts:build
+
+(node:34415) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Compiling TypeScript files for project "shared-contracts"...
+Done compiling TypeScript files for project "shared-contracts".
+
+> nx run api:test
+
+> jest --passWithNoTests=true
+
+(node:34417) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m2 passed[39m[22m, 2 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        1.229 s, estimated 3 s
+[2mRan all test suites[22m[2m.[22m
+
+
+
+ NX   Successfully ran target test for project api and 1 task it depends on
+
+
+  Run duration:      2.4s
+  Cache:             Skipped (--skip-nx-cache)
+  Critical path:     2.4s (2 tasks)
+  Recoverable time:  <1ms
+
+  Recommendations:
+    - Cache: drop --skip-nx-cache to restore unchanged tasks instantly.
+    - Speed up or split the longest tasks on the critical path:
+        api:test                   1.6s
+        shared-contracts:build    768ms

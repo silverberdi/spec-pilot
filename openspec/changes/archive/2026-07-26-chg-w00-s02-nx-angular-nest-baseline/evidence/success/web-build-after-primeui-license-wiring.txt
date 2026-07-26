@@ -1,0 +1,46 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ NX   Running target build for project web and 1 task it depends on:
+
+
+
+> nx run shared-contracts:build
+
+(node:76092) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Compiling TypeScript files for project "shared-contracts"...
+Done compiling TypeScript files for project "shared-contracts".
+
+> nx run web:build:development
+
+(node:76106) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[33m❯[39m Building...
+(node:76106) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[32m✔[39m Building...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m        [2m | [22m [1mRaw size[22m
+[32mchunk-SBKLUNND.js[39m  [2m | [22m[2m-[22m            [2m | [22m[36m863.40 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m         [2m | [22m[36m630.05 kB[39m[2m | [22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m       [2m | [22m [36m18.22 kB[39m[2m | [22m
+[1m [22m                  [2m | [22m[1mInitial total[22m[2m | [22m  [1m1.51 MB[22m
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m        [2m | [22m [1mRaw size[22m
+[32mchunk-ZNJC2RWO.js[39m  [2m | [22m[2mbrowser[22m      [2m | [22m[36m153.75 kB[39m[2m | [22m
+Application bundle generation complete. [2.371 seconds] - 2026-07-26T00:00:24.843Z
+Output location: /Users/silveriobernal/Documents/Code/Development/spec-pilot/dist/apps/web
+
+
+
+ NX   Successfully ran target build for project web and 1 task it depends on
+
+
+  Run duration:      4.1s
+  Cache:             Skipped (--skip-nx-cache)
+  Critical path:     4.1s (2 tasks)
+  Recoverable time:  <1ms
+
+  Recommendations:
+    - Cache: drop --skip-nx-cache to restore unchanged tasks instantly.
+    - Speed up or split the longest tasks on the critical path:
+        web:build:development      3.2s
+        shared-contracts:build    871ms

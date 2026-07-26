@@ -81,11 +81,11 @@ else
   info "no openspec/changes directory"
 fi
 
-# Product scaffolding remains out of scope for w00-s01
-if [[ -d apps ]] || [[ -d packages ]] || [[ -f package.json ]]; then
-  bad "product scaffolding present (apps/packages/package.json); excluded from w00-s01"
+# Product scaffolding required from w00-s02 onward (Nx monorepo baseline)
+if [[ -d apps ]] && [[ -d packages ]] && [[ -f package.json ]]; then
+  pass "product scaffolding present (apps/packages/package.json)"
 else
-  pass "no product scaffolding (apps/packages/package.json) present"
+  bad "product scaffolding missing (require apps/, packages/, and root package.json from w00-s02)"
 fi
 
 # package-summary semantics
