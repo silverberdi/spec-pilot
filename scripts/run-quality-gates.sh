@@ -51,31 +51,42 @@ else
 fi
 [[ "$fail" -eq 0 ]] || { echo "QUALITY_GATES_FAILED"; exit 1; }
 
-# 2. Typecheck (explicit app/lib configs; avoids broken emitDeclarationOnly nx typecheck on web specs)
+# 2. Prisma client generate (required after clean npm ci; client is not committed)
+# Placeholder DATABASE_URL is enough for generate; migrate/runtime still need a real URL.
+if ! run_step "prisma generate" env \
+  DATABASE_URL="${DATABASE_URL:-postgresql://specpilot:specpilot@localhost:5441/specpilot?schema=public}" \
+  npx prisma generate \
+  --schema=apps/api/prisma/schema.prisma \
+  --config=apps/api/prisma.config.ts; then
+  echo "QUALITY_GATES_FAILED"
+  exit 1
+fi
+
+# 3. Typecheck (explicit app/lib configs; avoids broken emitDeclarationOnly nx typecheck on web specs)
 if ! run_step "typecheck" npm run typecheck; then
   echo "QUALITY_GATES_FAILED"
   exit 1
 fi
 
-# 3. Dependency boundaries (Nx lint loads project graph for @nx/enforce-module-boundaries)
+# 4. Dependency boundaries (Nx lint loads project graph for @nx/enforce-module-boundaries)
 if ! run_step "dependency-boundary lint" npx nx run-many -t lint --parallel=false; then
   echo "QUALITY_GATES_FAILED"
   exit 1
 fi
 
-# 4. Automated tests (includes Testcontainers persistence suites; not Compose-as-CI)
+# 5. Automated tests (includes Testcontainers persistence suites; not Compose-as-CI)
 if ! run_step "automated tests" npx nx run-many -t test --parallel=false; then
   echo "QUALITY_GATES_FAILED"
   exit 1
 fi
 
-# 5. Baseline validation (includes nested secret scan; still fail-closed)
+# 6. Baseline validation (includes nested secret scan; still fail-closed)
 if ! run_step "baseline validation" bash scripts/validate-baseline.sh; then
   echo "QUALITY_GATES_FAILED"
   exit 1
 fi
 
-# 6. Secret scanning (authoritative explicit step; must not be weakened for fixtures)
+# 7. Secret scanning (authoritative explicit step; must not be weakened for fixtures)
 if ! run_step "secret scanning" python3 scripts/scan-secrets.py; then
   echo "QUALITY_GATES_FAILED"
   exit 1
