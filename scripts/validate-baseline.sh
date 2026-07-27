@@ -15,26 +15,43 @@ bad()  { printf 'FAIL  %s\n' "$*"; fail=1; }
 echo "=== SpecPilot baseline validation ==="
 echo "root: $ROOT"
 
-# OpenSpec CLI
-if command -v openspec >/dev/null 2>&1; then
-  ver="$( (openspec --version 2>/dev/null || true) | head -n1 | tr -d '[:space:]')"
+# OpenSpec CLI — prefer PATH, then local shim, then npm-installed bin (CI after npm ci).
+resolve_openspec() {
+  if command -v openspec >/dev/null 2>&1; then
+    command -v openspec
+    return 0
+  fi
+  if [[ -x "$ROOT/.tools/bin/openspec" ]]; then
+    printf '%s\n' "$ROOT/.tools/bin/openspec"
+    return 0
+  fi
+  if [[ -x "$ROOT/node_modules/.bin/openspec" ]]; then
+    printf '%s\n' "$ROOT/node_modules/.bin/openspec"
+    return 0
+  fi
+  return 1
+}
+
+OPENSPEC_BIN=""
+if OPENSPEC_BIN="$(resolve_openspec)"; then
+  ver="$( ("$OPENSPEC_BIN" --version 2>/dev/null || true) | head -n1 | tr -d '[:space:]')"
   pass "openspec --version => $ver"
 else
-  bad "openspec CLI not found on PATH"
+  bad "openspec CLI not found (PATH, .tools/bin, or node_modules/.bin)"
 fi
 
-if command -v openspec >/dev/null 2>&1; then
-  if openspec schema validate spec-driven >/dev/null 2>&1; then
+if [[ -n "$OPENSPEC_BIN" ]]; then
+  if "$OPENSPEC_BIN" schema validate spec-driven >/dev/null 2>&1; then
     pass "openspec schema validate spec-driven"
   else
     bad "openspec schema validate spec-driven failed"
   fi
-  if openspec validate --all >/dev/null 2>&1; then
+  if "$OPENSPEC_BIN" validate --all >/dev/null 2>&1; then
     pass "openspec validate --all"
   else
     bad "openspec validate --all failed"
   fi
-  if openspec doctor >/dev/null 2>&1; then
+  if "$OPENSPEC_BIN" doctor >/dev/null 2>&1; then
     pass "openspec doctor"
   else
     bad "openspec doctor failed"
