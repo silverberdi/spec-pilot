@@ -1,0 +1,19 @@
+# Exclusions check — chg-w00-s04-ci-quality-and-security-baseline
+
+Date: 2026-07-26
+
+Checked absent / not introduced by this change:
+
+- [x] No product domain modules (project registry, reviews, findings, budget, prompts)
+- [x] No DeepSeek product API integration
+- [x] No authentication / multiuser
+- [x] No apps/worker
+- [x] No Playwright product E2E ownership
+- [x] No Nx Cloud (nx.json analytics: false; no nx-cloud token)
+- [x] No Compose-as-CI (workflow invokes scripts/run-quality-gates.sh only)
+- [x] No automatically managed local Git hooks / husky / lefthook (only stock .git/hooks/*.sample)
+- [x] No Pull Requests or feature-branch delivery model
+- [x] Main-only working policy unchanged
+- [x] No later-wave product scope
+
+Result: PASS

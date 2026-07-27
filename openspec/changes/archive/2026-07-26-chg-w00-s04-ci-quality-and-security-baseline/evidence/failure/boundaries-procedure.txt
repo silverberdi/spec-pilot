@@ -1,0 +1,11 @@
+# Failure evidence — dependency boundary gate
+
+Procedure:
+
+1. Temporarily added `apps/web/src/app/forbidden-boundary-probe.ts` importing `@specpilot/api` (forbidden app→app / web→api edge) plus a temporary `tsconfig.base.json` path mapping.
+2. Ran `npx nx run web:lint --skip-nx-cache`.
+3. Observed non-zero exit with human-readable reason: `Imports of apps are forbidden` (`@nx/enforce-module-boundaries`).
+4. Removed the probe file and restored `tsconfig.base.json`.
+5. Re-ran `npx nx run web:lint --skip-nx-cache` → success.
+
+Captured command output follows (fixture since removed from the working tree):

@@ -1,0 +1,73 @@
+## Verification Report: chg-w00-s04-ci-quality-and-security-baseline
+
+timestamp_utc: 2026-07-27T02:14:14Z
+branch: main
+operator_approval: continuous closure authorizing Verify through push (tasks 9.1 + 10.2)
+
+### Summary
+
+| Dimension | Status |
+|---|---|
+| Completeness | Tasks 1.1–10.2 complete; 10.3 is this Verify; 10.4–10.9 are post-Verify closure gates authorized in the same continuous pass |
+| Correctness | Six capability deltas covered by GitHub Actions workflow, quality-gate orchestrator, Nx tags/ESLint boundaries, validator wiring, evidence |
+| Coherence | Local gate = pre-commit/push prevention; Actions = post-push remote verification only; no Compose-as-CI; no Nx Cloud; no auto Git hooks; main-only |
+| Deterministic checks | `openspec validate --strict` valid; local `QUALITY_GATES_OK`; baseline `BASELINE_OK`; boundary failure path evidenced |
+
+### Completeness
+
+- Planning artifacts: proposal, design, specs, tasks — complete (4/4)
+- Tasks 1.1–10.2: complete with evidence under `evidence/`
+- Task 9.1: operator human validation recorded in `evidence/human-validation.md`
+- Task 10.2: operator authorized continuous closure (Verify → sync → archive → final validation → commit → push)
+- Task 10.3: Verify execution (this report)
+- Tasks 10.4–10.9: authorized next gates in the same continuous stop-on-failure operation
+
+### Correctness (requirement coverage)
+
+| Capability | Evidence / surfaces |
+|---|---|
+| deterministic-ci-pipeline | `.github/workflows/ci-quality-gates.yml` (`push`/`main` + `workflow_dispatch`); invokes `scripts/run-quality-gates.sh`; no Compose; Nx Cloud off |
+| nx-dependency-boundaries | Project tags; `eslint.config.mjs` `@nx/enforce-module-boundaries`; `nx run-many -t lint`; failure evidence web→api |
+| required-quality-gates | `scripts/run-quality-gates.sh` + `npm run quality-gates`; local PASS evidence; no auto hooks |
+| baseline-validation-and-secret-scanning (delta) | Gates invoke `validate-baseline.sh` and `scan-secrets.py` |
+| nx-monorepo-baseline (delta) | CI ownership allowed for s04; Nx Cloud still disabled |
+| application-test-baseline (delta) | Gates run `nx run-many -t test` including Testcontainers; evidence under this change |
+
+### Coherence
+
+- Main-only working policy: branch is `main`
+- Remote CI is not described as a pre-entry block onto `main`
+- Exclusions (domain modules, DeepSeek product API, auth, worker, Playwright E2E, Nx Cloud, Compose-as-CI, auto hooks, PRs) remain absent
+
+### Issues
+
+- CRITICAL: none
+- WARNING: none
+- SUGGESTION: none for Verify scope
+
+### Final Assessment
+
+PASS
+
+Exact Verify result: **PASS**
+
+### Raw check transcript
+
+```
+=== OpenSpec Verify — chg-w00-s04-ci-quality-and-security-baseline ===
+timestamp_utc: 2026-07-27T02:14:14Z
+operator_approval: continuous closure (Verify through push)
+branch: main
+
+--- openspec validate --strict ---
+Change 'chg-w00-s04-ci-quality-and-security-baseline' is valid
+validate_exit=0
+
+--- key surfaces ---
+PRESENT .github/workflows/ci-quality-gates.yml
+PRESENT scripts/run-quality-gates.sh
+PRESENT eslint.config.mjs
+PRESENT evidence/success/quality-gates-pass.txt (QUALITY_GATES_OK)
+PRESENT evidence/failure/boundaries.txt
+PRESENT evidence/human-validation.md (PASS)
+```

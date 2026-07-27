@@ -1,0 +1,17 @@
+# Spec sync evidence — chg-w00-s04-ci-quality-and-security-baseline
+
+timestamp_utc: 2026-07-27T02:14:14Z
+operator_authorization: continuous closure after Verify PASS
+
+## Synced capabilities
+
+| Capability | Action | Canonical path |
+|---|---|---|
+| deterministic-ci-pipeline | NEW | openspec/specs/deterministic-ci-pipeline/spec.md |
+| nx-dependency-boundaries | NEW | openspec/specs/nx-dependency-boundaries/spec.md |
+| required-quality-gates | NEW | openspec/specs/required-quality-gates/spec.md |
+| baseline-validation-and-secret-scanning | ADDED requirement | openspec/specs/baseline-validation-and-secret-scanning/spec.md |
+| nx-monorepo-baseline | MODIFIED CI/Nx Cloud requirement | openspec/specs/nx-monorepo-baseline/spec.md |
+| application-test-baseline | MODIFIED evidence + ADDED gate tests | openspec/specs/application-test-baseline/spec.md |
+
+Result: SYNC_OK

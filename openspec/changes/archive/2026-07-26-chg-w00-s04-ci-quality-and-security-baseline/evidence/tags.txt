@@ -1,0 +1,10 @@
+# Project tags (w00-s04)
+
+| Project | Tags |
+|---|---|
+| apps/web | type:app, scope:web |
+| apps/api | type:app, scope:api |
+| packages/shared-contracts | type:lib, scope:shared |
+
+Verified via `npx nx show project <name> --json` (also includes npm:private from package metadata).
+Empty `tags: []` arrays replaced in project.json files.

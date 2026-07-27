@@ -1,0 +1,10 @@
+# No automatically managed local Git hooks
+
+Checked 2026-07-26 during chg-w00-s04 apply:
+
+- No `.husky/` directory
+- No `lefthook.yml` / `.lefthook*`
+- No `simple-git-hooks` / `pre-commit` framework config introduced by this change
+- `.git/hooks/` contains only stock Git `*.sample` hooks
+
+Result: PASS — this slice did not introduce automatically managed local Git hooks.

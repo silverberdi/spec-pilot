@@ -1,0 +1,8 @@
+# Nx Cloud check — chg-w00-s04
+
+- `nx.json` has `"analytics": false`
+- No `nxCloudId` / `nxCloudAccessToken` in nx.json
+- No `NX_CLOUD_ACCESS_TOKEN` committed
+- No Nx Cloud enablement in CI workflow
+
+Result: PASS — Nx Cloud remains disabled.

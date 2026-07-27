@@ -1,0 +1,7 @@
+# Archive evidence
+change: chg-w00-s04-ci-quality-and-security-baseline
+archived_as: openspec/changes/archive/2026-07-26-chg-w00-s04-ci-quality-and-security-baseline
+timestamp_utc: 2026-07-27T02:17:12Z
+verify: PASS
+sync: SYNC_OK
+post_sync: POST_SYNC_OK

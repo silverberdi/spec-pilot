@@ -1,0 +1,114 @@
+=== final validation set ===
+timestamp_utc: 2026-07-27T02:17:28Z
+--- openspec validate --all --strict ---
+- Validating...
+✓ spec/agent-operating-contracts
+✓ spec/angular-web-console-baseline
+✓ spec/application-test-baseline
+✓ spec/baseline-validation-and-secret-scanning
+✓ spec/closure-evidence-and-process-gates
+✓ spec/context-and-package-integrity
+✓ spec/delivery-graph-and-id-validation
+✓ spec/deterministic-ci-pipeline
+✓ spec/docker-compose-local-runtime
+✓ spec/immutable-openspec-integrations
+✓ spec/nestjs-fastify-api-baseline
+✓ spec/nx-dependency-boundaries
+✓ spec/nx-monorepo-baseline
+✓ spec/openspec-verified-lifecycle
+✓ spec/postgresql-prisma-persistence-baseline
+✓ spec/repository-governance
+✓ spec/required-quality-gates
+✓ spec/shared-libraries-baseline
+Totals: 18 passed, 0 failed (18 items)
+--- openspec list ---
+{
+  "changes": [],
+  "root": {
+    "path": "/Users/silveriobernal/Documents/Code/Development/spec-pilot",
+    "source": "nearest"
+  }
+}
+--- package-summary ---
+wrote /Users/silveriobernal/Documents/Code/Development/spec-pilot/package-summary.json fileCount=242 (excludes self) candidates=7 waves=12 slices=42 stories=126
+package-summary PASS 242
+--- delivery-graph ---
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+--- secret scan ---
+no heuristic secrets found
+--- baseline ---
+=== SpecPilot baseline validation ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+PASS  openspec --version => 1.6.0
+PASS  openspec schema validate spec-driven
+PASS  openspec validate --all
+PASS  openspec doctor
+PASS  cursor commands: 12
+PASS  cursor skills: 12
+PASS  codex skills: 12
+PASS  opencode commands: 12
+PASS  opencode skills: 12
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+PASS  delivery graph + machine IDs
+INFO  active OpenSpec change directories: 0
+PASS  product scaffolding present (apps/packages/package.json)
+fileCount=242 waves=12 slices=42 stories=126
+PASS  package-summary semantics
+no heuristic secrets found
+PASS  secret scan
+PASS  git branch: main
+=== summary ===
+BASELINE_OK
+--- branch ---
+main
+--- sensitive content checks ---
+333:openspec/changes/archive/2026-07-26-chg-w00-s02-nx-angular-nest-baseline/evidence/primeui-license-config.md
+347:openspec/changes/archive/2026-07-26-chg-w00-s02-nx-angular-nest-baseline/evidence/success/web-build-after-primeui-license-wiring.txt
+349:openspec/changes/archive/2026-07-26-chg-w00-s02-nx-angular-nest-baseline/evidence/success/web-tests-after-primeui-license-wiring.txt
+no .env file present (ok)
+.gitignore:21:.env	.env
+no husky
+--- git status ---
+ M apps/api/project.json
+ M apps/api/tsconfig.app.json
+ M apps/api/tsconfig.spec.json
+ M apps/web/project.json
+ M apps/web/tsconfig.app.json
+ M apps/web/tsconfig.spec.json
+ M docs/context/current-state.md
+ M docs/context/file-index.md
+ M nx.json
+ M openspec/specs/application-test-baseline/spec.md
+ M openspec/specs/baseline-validation-and-secret-scanning/spec.md
+ M openspec/specs/nx-monorepo-baseline/spec.md
+ M package-lock.json
+ M package-summary.json
+ M package.json
+ M packages/shared-contracts/project.json
+ M packages/shared-contracts/tsconfig.spec.json
+?? .github/
+?? eslint.config.mjs
+?? openspec/changes/archive/2026-07-26-chg-w00-s04-ci-quality-and-security-baseline/
+?? openspec/specs/deterministic-ci-pipeline/
+?? openspec/specs/nx-dependency-boundaries/
+?? openspec/specs/required-quality-gates/
+?? scripts/run-quality-gates.sh
+--- git diff stat ---
+ apps/api/project.json                              |   2 +-
+ apps/api/tsconfig.app.json                         |   1 +
+ apps/api/tsconfig.spec.json                        |   1 +
+ apps/web/project.json                              |   2 +-
+ apps/web/tsconfig.app.json                         |   1 +
+ apps/web/tsconfig.spec.json                        |   1 +
+ docs/context/current-state.md                      |  16 +-
+ docs/context/file-index.md                         |  10 +-
+ nx.json                                            |  11 +
+ openspec/specs/application-test-baseline/spec.md   |  29 +-
+ .../spec.md                                        |  11 +
+ openspec/specs/nx-monorepo-baseline/spec.md        |  16 +-
+ package-lock.json                                  | 589 +++++++++++++++++----
+ package-summary.json                               |  54 +-
+ package.json                                       |   8 +
+ packages/shared-contracts/project.json             |   2 +-
+ packages/shared-contracts/tsconfig.spec.json       |   1 +
+ 17 files changed, 595 insertions(+), 160 deletions(-)

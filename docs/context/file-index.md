@@ -31,6 +31,9 @@ Canonical context index for operator orientation. Formal integrity/generation ru
 | Shared contracts | `packages/shared-contracts/**` |
 | Prisma schema/migrations | `apps/api/prisma/**`, `apps/api/prisma.config.ts` |
 | Local Compose runtime | `compose.yaml`, `apps/api/Dockerfile`, `apps/web/Dockerfile`, `.dockerignore`, `.env.example` |
+| Quality-gate orchestrator | `scripts/run-quality-gates.sh` (`npm run quality-gates`) |
+| CI workflow (post-push) | `.github/workflows/ci-quality-gates.yml` |
+| ESLint / Nx boundaries | `eslint.config.mjs`, project tags in `apps/*/project.json` and `packages/*/project.json` |
 
 ## Generated integrations (immutable)
 
@@ -53,6 +56,7 @@ Refresh only with `openspec update`. Generated Codex and OpenCode inventories ar
 | Cursor project rules (manual) | `.cursor/rules/spec-pilot-governance.mdc` |
 | Working policy | `docs/governance/working-policy.md` |
 | Baseline validation | `scripts/validate-baseline.sh` |
+| Quality gates | `scripts/run-quality-gates.sh` |
 | Delivery graph validation | `scripts/validate-delivery-graph.py` |
 | Secret scan | `scripts/scan-secrets.py` |
 | Package summary regenerator | `scripts/regenerate-package-summary.py` |
@@ -61,6 +65,6 @@ Refresh only with `openspec update`. Generated Codex and OpenCode inventories ar
 
 ## Active change
 
-- None (active OpenSpec change directory empty after archive of `chg-w00-s02-nx-angular-nest-baseline`)
-- Latest archived: `openspec/changes/archive/2026-07-26-chg-w00-s02-nx-angular-nest-baseline`
-- Prior archived: `openspec/changes/archive/2026-07-25-chg-w00-s01-repository-governance-and-openspec-foundation`
+- None (active OpenSpec change directory empty after archive of `chg-w00-s04-ci-quality-and-security-baseline`)
+- Latest archived: `openspec/changes/archive/2026-07-26-chg-w00-s04-ci-quality-and-security-baseline`
+- Prior archived: `openspec/changes/archive/2026-07-26-chg-w00-s03-postgresql-prisma-and-local-runtime`, `openspec/changes/archive/2026-07-26-chg-w00-s02-nx-angular-nest-baseline`, `openspec/changes/archive/2026-07-25-chg-w00-s01-repository-governance-and-openspec-foundation`

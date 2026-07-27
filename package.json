@@ -10,6 +10,9 @@
     "nx": "nx",
     "build": "nx run-many -t build",
     "test": "nx run-many -t test",
+    "typecheck": "tsc -p packages/shared-contracts/tsconfig.lib.json --noEmit && tsc -p apps/api/tsconfig.app.json --noEmit && tsc -p apps/web/tsconfig.app.json --noEmit",
+    "boundaries": "nx run-many -t lint",
+    "quality-gates": "bash scripts/run-quality-gates.sh",
     "serve:api": "nx serve api",
     "serve:web": "nx serve web"
   },
@@ -24,9 +27,12 @@
     "@angular/cli": "~22.0.4",
     "@angular/compiler-cli": "~22.0.4",
     "@angular/language-service": "~22.0.4",
+    "@eslint/js": "^9.39.5",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.0",
     "@nx/angular": "23.1.0",
+    "@nx/eslint": "^23.1.0",
+    "@nx/eslint-plugin": "^23.1.0",
     "@nx/jest": "23.1.0",
     "@nx/js": "23.1.0",
     "@nx/nest": "23.1.0",
@@ -39,6 +45,7 @@
     "@swc/helpers": "~0.5.18",
     "@types/jest": "~30.0.0",
     "@types/node": "^24.0.0",
+    "eslint": "^9.39.5",
     "jest": "~30.3.0",
     "jest-environment-jsdom": "~30.3.0",
     "jest-environment-node": "~30.3.0",
@@ -51,6 +58,7 @@
     "ts-node": "10.9.1",
     "tslib": "^2.3.0",
     "typescript": "6.0.3",
+    "typescript-eslint": "^8.65.0",
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
