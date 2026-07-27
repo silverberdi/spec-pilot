@@ -62,31 +62,39 @@ if ! run_step "prisma generate" env \
   exit 1
 fi
 
-# 3. Typecheck (explicit app/lib configs; avoids broken emitDeclarationOnly nx typecheck on web specs)
+# 3. Local web environment stub (gitignored; CI/Docker copy from example when absent)
+WEB_ENV="apps/web/src/environments/environment.local.ts"
+WEB_ENV_EXAMPLE="apps/web/src/environments/environment.local.example.ts"
+if [[ ! -f "$WEB_ENV" ]]; then
+  step_info "seeding $WEB_ENV from example (empty license; no secrets)"
+  cp "$WEB_ENV_EXAMPLE" "$WEB_ENV"
+fi
+
+# 4. Typecheck (explicit app/lib configs; avoids broken emitDeclarationOnly nx typecheck on web specs)
 if ! run_step "typecheck" npm run typecheck; then
   echo "QUALITY_GATES_FAILED"
   exit 1
 fi
 
-# 4. Dependency boundaries (Nx lint loads project graph for @nx/enforce-module-boundaries)
+# 5. Dependency boundaries (Nx lint loads project graph for @nx/enforce-module-boundaries)
 if ! run_step "dependency-boundary lint" npx nx run-many -t lint --parallel=false; then
   echo "QUALITY_GATES_FAILED"
   exit 1
 fi
 
-# 5. Automated tests (includes Testcontainers persistence suites; not Compose-as-CI)
+# 6. Automated tests (includes Testcontainers persistence suites; not Compose-as-CI)
 if ! run_step "automated tests" npx nx run-many -t test --parallel=false; then
   echo "QUALITY_GATES_FAILED"
   exit 1
 fi
 
-# 6. Baseline validation (includes nested secret scan; still fail-closed)
+# 7. Baseline validation (includes nested secret scan; still fail-closed)
 if ! run_step "baseline validation" bash scripts/validate-baseline.sh; then
   echo "QUALITY_GATES_FAILED"
   exit 1
 fi
 
-# 7. Secret scanning (authoritative explicit step; must not be weakened for fixtures)
+# 8. Secret scanning (authoritative explicit step; must not be weakened for fixtures)
 if ! run_step "secret scanning" python3 scripts/scan-secrets.py; then
   echo "QUALITY_GATES_FAILED"
   exit 1
