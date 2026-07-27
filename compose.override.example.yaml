@@ -1,0 +1,23 @@
+# Local Compose override template for SpecPilot API host repository access.
+#
+# Purpose: allow the Compose `api` service to inspect operator-authorized local
+# repositories at the SAME absolute path as on the macOS host (read-only).
+#
+# Setup:
+# 1. Copy this file to `compose.override.yaml` (gitignored; auto-merged by Compose).
+# 2. Set SPECPILOT_HOST_REPOS_ROOT in a local `.env` (gitignored) to an absolute
+#    authorized host directory — NOT `/` and NOT your entire home directory.
+#    Example placeholder value: /ABSOLUTE/PATH/TO/AUTHORIZED/REPOS/ROOT
+# 3. Recreate only SpecPilot API: `docker compose up -d --build api`
+#
+# Rules:
+# - Mount is read-only (`:ro`).
+# - Host and container paths MUST be identical (no path rewriting).
+# - Do not mount the entire host filesystem.
+# - Do not commit `compose.override.yaml` or real `.env` values.
+# - Never target axioma-db-dev or foreign Docker resources.
+
+services:
+  api:
+    volumes:
+      - ${SPECPILOT_HOST_REPOS_ROOT:?Set SPECPILOT_HOST_REPOS_ROOT in .env to an authorized absolute host directory}:${SPECPILOT_HOST_REPOS_ROOT}:ro

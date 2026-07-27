@@ -14,6 +14,71 @@
       <p-card [header]="copy().brand">
         <p class="shell__tagline">{{ copy().tagline }}</p>
       </p-card>
+
+      <p-card [header]="copy().registerTitle" styleClass="shell__register">
+        <p class="shell__tagline">{{ copy().registerHint }}</p>
+
+        @if (projects().length === 0 && registrationState() !== 'success') {
+          <p class="shell__empty" data-testid="empty-registry">
+            {{ copy().emptyRegistry }}
+          </p>
+        }
+
+        <label class="shell__field">
+          <span>{{ copy().pathLabel }}</span>
+          <input
+            pInputText
+            type="text"
+            [ngModel]="repositoryPath()"
+            (ngModelChange)="repositoryPath.set($event)"
+            [disabled]="registrationState() === 'loading'"
+            autocomplete="off"
+          />
+        </label>
+
+        <label class="shell__field">
+          <span>{{ copy().displayNameLabel }}</span>
+          <input
+            pInputText
+            type="text"
+            [ngModel]="displayName()"
+            (ngModelChange)="displayName.set($event)"
+            [disabled]="registrationState() === 'loading'"
+            autocomplete="off"
+          />
+        </label>
+
+        <p-button
+          [label]="copy().submit"
+          (onClick)="submitRegistration()"
+          [loading]="registrationState() === 'loading'"
+          [disabled]="registrationState() === 'loading'"
+        />
+
+        @if (registrationState() === 'loading') {
+          <p data-testid="registration-loading">{{ copy().loading }}</p>
+        }
+
+        @if (registrationState() === 'success' && lastRegistered(); as project) {
+          <section data-testid="registration-success">
+            <p-message severity="success">{{ copy().successTitle }}</p-message>
+            <p>
+              <strong>{{ project.displayName }}</strong> ({{ project.slug }})
+            </p>
+            <p class="shell__path">{{ project.repositoryPath }}</p>
+          </section>
+        }
+
+        @if (
+          (registrationState() === 'blocked' || registrationState() === 'error') &&
+          registrationMessage()
+        ) {
+          <section data-testid="registration-blocked">
+            <p-message severity="warn">{{ copy().blockedTitle }}</p-message>
+            <p>{{ registrationMessage() }}</p>
+          </section>
+        }
+      </p-card>
     </section>
   }
 </main>

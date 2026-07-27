@@ -1,0 +1,9 @@
+HTTP/1.1 422 Unprocessable Entity
+vary: Origin
+content-type: application/json; charset=utf-8
+content-length: 115
+Date: Mon, 27 Jul 2026 22:18:09 GMT
+Connection: keep-alive
+Keep-Alive: timeout=72
+
+{"code":"project_yaml_missing","message":"Falta el archivo obligatorio .specpilot/project.yaml en el repositorio."}

@@ -29,6 +29,8 @@ credentials.json
 **/secrets/**
 !.gitkeep
 apps/web/src/environments/environment.local.ts
+.tools/
+compose.override.yaml
 
 # Logs and local runtime
 logs/

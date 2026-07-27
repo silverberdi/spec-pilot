@@ -1,0 +1,28 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> nx run shared-contracts:test
+
+> jest
+
+(node:44916) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m7 passed[39m[22m, 7 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        1.01 s
+[2mRan all test suites[22m[2m.[22m
+
+
+
+ NX   Successfully ran target test for project shared-contracts
+
+
+  Run duration:      1.5s
+  Cache:             0/1 hit (0%)
+  Critical path:     1.5s (1 task)
+  Recoverable time:  <1ms
+
+  Recommendations:
+    - Drastically reduce your run duration by sharing a cache across your team and CI → https://nx.dev/ci/features/remote-cache?utm_source=nx-cli&utm_medium=cli&utm_campaign=performance-report&utm_content=remote-cache.
+    - Speed up or split the longest tasks on the critical path:
+        shared-contracts:test    1.5s

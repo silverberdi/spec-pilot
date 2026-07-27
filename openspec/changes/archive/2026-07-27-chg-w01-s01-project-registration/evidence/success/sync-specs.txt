@@ -1,0 +1,14 @@
+# Spec sync evidence
+
+timestamp_utc: 2026-07-27T22:50:00Z
+change: chg-w01-s01-project-registration
+
+Synced capabilities to canonical openspec/specs/:
+
+1. local-project-registration (NEW) — openspec/specs/local-project-registration/spec.md
+2. postgresql-prisma-persistence-baseline (MODIFIED)
+3. angular-web-console-baseline (MODIFIED)
+4. shared-libraries-baseline (MODIFIED + ADDED registration contracts)
+5. application-test-baseline (MODIFIED evidence path + ADDED registration tests)
+
+RESULT: SYNC_OK

@@ -25,15 +25,15 @@ The repository SHALL provide `apps/web` as an Angular major 22 standalone applic
 - **THEN** PrimeNG 22, PrimeIcons, and the required official themes package are present and PrimeNG is configured via official standalone providers
 
 ### Requirement: Spanish-first i18n-ready baseline shell
-The web console MUST present SpecPilot-branded baseline shell content with Spanish as the default operator-facing locale and MUST remain i18n-ready through a minimal translation or locale boundary. This slice MUST NOT implement complete product internationalization, accessibility polish, light/dark/system theme switching, or product domain screens.
+The web console MUST present SpecPilot-branded content with Spanish as the default operator-facing locale and MUST remain i18n-ready through a minimal translation or locale boundary. This change MAY implement a minimal project-registration operator surface in `apps/web` as required by `local-project-registration`. This change MUST NOT implement complete product internationalization, accessibility polish, light/dark/system theme switching, or a project dashboard / discovery-health listing UI (those remain later-slice scope).
 
-#### Scenario: Spanish baseline shell renders
-- **WHEN** the web console shell loads successfully
-- **THEN** a SpecPilot-branded baseline shell is shown with Spanish default operator-facing copy and without product domain dashboards or theme-switcher product features
+#### Scenario: Spanish registration surface is allowed
+- **WHEN** the web console loads the project-registration operator surface delivered by this change
+- **THEN** SpecPilot-branded Spanish default operator-facing copy is shown for that registration flow
 
-#### Scenario: Complete i18n and accessibility are deferred
-- **WHEN** the web console baseline scope is inspected
-- **THEN** full product i18n coverage and accessibility polish belonging to later slices are not required or claimed as delivered by this baseline
+#### Scenario: Dashboard and theme product features remain deferred
+- **WHEN** the web console scope for this change is inspected
+- **THEN** full product i18n coverage, accessibility polish, light/dark/system theme switching, and project dashboard / discovery-health UI are not required or claimed as delivered by this change
 
 ### Requirement: Shell exposes success, loading, and error behavior
 The baseline shell MUST expose clear success, loading, and error behavior for shell bootstrap. If a shell region has no content yet, the UI MUST show an explicit empty placeholder rather than a blank failure state.

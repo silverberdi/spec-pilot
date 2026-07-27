@@ -1,0 +1,46 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ NX   Running target test for project api and 1 task it depends on:
+
+
+
+> nx run shared-contracts:build  [existing outputs match the cache, left as is]
+
+
+> nx run api:test
+
+> jest --passWithNoTests=true
+
+(node:46148) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:46218) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:46219) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:46215) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:46217) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:46216) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[1mTest Suites: [22m[1m[32m5 passed[39m[22m, 5 total
+[1mTests:       [22m[1m[32m24 passed[39m[22m, 24 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5.973 s, estimated 6 s
+[2mRan all test suites[22m[2m.[22m
+
+
+
+ NX   Successfully ran target test for project api and 1 task it depends on
+
+Nx read the output from the cache instead of running the command for 1 out of 2 tasks.
+
+  Run duration:      6.3s
+  Cache:             1/2 hit (50%)
+  Critical path:     6.3s (2 tasks)
+  Recoverable time:  <1ms
+
+  Recommendations:
+    - Speed up or split the longest tasks on the critical path:
+        api:test    6.3s

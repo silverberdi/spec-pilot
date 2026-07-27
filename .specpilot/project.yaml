@@ -1,0 +1,44 @@
+# SpecPilot portable project contract (presence required for registration).
+# Full schema validation / versioning belongs to w01-s02.
+schemaVersion: 1
+project:
+  id: spec-pilot
+  name: SpecPilot
+repository:
+  mainBranch: main
+openspec:
+  path: openspec
+delivery:
+  methodology: wave-slice
+  wave:
+    activeStatePath: docs/context/current-state.md
+  mapping:
+    changeIdPattern: "chg-{slice-id}"
+context:
+  include:
+    - AGENTS.md
+    - docs/context/**
+    - docs/roadmap/**
+    - docs/backlog/**
+    - docs/waves/**
+    - openspec/**
+  exclude:
+    - "**/.env"
+    - "**/.env.*"
+    - "**/*.pem"
+    - "**/*.key"
+    - "**/secrets/**"
+review:
+  provider: deepseek
+  models:
+    discovery: deepseek-flash
+    planning: deepseek-pro
+    applied: deepseek-pro
+    verify: deepseek-pro
+  monthlyBudgetUsd: 10
+executor:
+  tool: cursor
+validationAssistants:
+  clineDeepSeek:
+    enabled: false
+    mode: read-only

@@ -1,0 +1,18 @@
+=== mount inspect ===
+[
+    {
+        "Type": "bind",
+        "Source": "/Users/silveriobernal/Documents/Code/Development",
+        "Destination": "/Users/silveriobernal/Documents/Code/Development",
+        "Mode": "ro",
+        "RW": false,
+        "Propagation": "rprivate"
+    }
+]
+=== path exists in container ===
+project.yaml visible at host-identical absolute path under authorized root
+=== read-only write attempt ===
+command: touch .../spec-pilot/.specpilot/write-probe-should-fail
+result: EXIT:1
+stderr: touch: cannot touch '.../write-probe-should-fail': Read-only file system
+RESULT: WRITE_BLOCKED_OK (mount Mode=ro, RW=false)

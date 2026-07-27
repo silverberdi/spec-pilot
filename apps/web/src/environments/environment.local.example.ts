@@ -5,4 +5,6 @@
  */
 export const environment = {
   primeUiLicense: '',
+  /** Nest/Fastify API base URL for local development (no trailing slash). */
+  apiBaseUrl: 'http://localhost:3000',
 };

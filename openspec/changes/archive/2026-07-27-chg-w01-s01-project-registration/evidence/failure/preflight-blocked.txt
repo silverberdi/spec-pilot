@@ -1,0 +1,43 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ NX   Running target test for project api and 1 task it depends on:
+
+
+
+> nx run shared-contracts:build  [local cache]
+
+
+> nx run api:test --testPathPattern=filesystem.spec
+
+> jest --passWithNoTests=true --testPathPattern=filesystem.spec
+
+(node:49323) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[31m[31m[1mtestPathPattern[22m:[39m[31m[39m
+[31m[31m[39m[31m[39m
+[31m[31m  Option [1m"testPathPattern"[22m was replaced by [1m"--testPathPatterns"[22m. [1m"--testPathPatterns"[22m is only available as a command-line option.[39m[31m[39m
+[31m[31m  [39m[31m[39m
+[31m[31m  Please update your configuration.[39m[31m[39m
+[31m[31m[39m[31m[39m
+[31m[31m  [1mCLI Options Documentation:[22m[39m[31m[39m
+[31m[31m  https://jestjs.io/docs/cli[39m[31m[39m
+[31m[31m[39m[31m[39m
+Warning: command "jest --passWithNoTests=true --testPathPattern=filesystem.spec" exited with non-zero status code
+
+
+ NX   Running target test for project api and 1 task it depends on failed
+
+Failed tasks:
+
+- api:test
+
+Hint: run the command with --verbose for more details.
+
+  Run duration:      124ms
+  Cache:             1/1 hit (100%)
+  Critical path:     107ms (2 tasks)
+  Recoverable time:  <1ms
+
+  Recommendations:
+    - Speed up or split the longest tasks on the critical path:
+        api:test    102ms

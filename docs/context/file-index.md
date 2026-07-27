@@ -30,7 +30,10 @@ Canonical context index for operator orientation. Formal integrity/generation ru
 | API service | `apps/api/**` |
 | Shared contracts | `packages/shared-contracts/**` |
 | Prisma schema/migrations | `apps/api/prisma/**`, `apps/api/prisma.config.ts` |
-| Local Compose runtime | `compose.yaml`, `apps/api/Dockerfile`, `apps/web/Dockerfile`, `.dockerignore`, `.env.example` |
+| Project registration (API) | `apps/api/src/app/projects/**` |
+| Project registration (web) | `apps/web` registration surface in `apps/web/src/app/*` |
+| Local Compose runtime | `compose.yaml`, `compose.override.example.yaml` (local `compose.override.yaml` gitignored), `apps/api/Dockerfile`, `apps/web/Dockerfile`, `.dockerignore`, `.env.example` |
+| Portable project contract (this repo) | `.specpilot/project.yaml` |
 | Quality-gate orchestrator | `scripts/run-quality-gates.sh` (`npm run quality-gates`) |
 | CI workflow (post-push) | `.github/workflows/ci-quality-gates.yml` |
 | ESLint / Nx boundaries | `eslint.config.mjs`, project tags in `apps/*/project.json` and `packages/*/project.json` |

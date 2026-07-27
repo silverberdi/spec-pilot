@@ -1,0 +1,4 @@
+=== coexistence pre (api recreate) ===
+timestamp_utc: 2026-07-27T22:17:33Z
+axioma=/axioma-db-dev status=running id=fbdabca10675efab7137dc95fbb31bfa89d4070508d07aaf9b6cd8795438c48f
+0.0.0.0:5440->5432/tcp

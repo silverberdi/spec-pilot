@@ -1,0 +1,9 @@
+HTTP/1.1 409 Conflict
+vary: Origin
+content-type: application/json; charset=utf-8
+content-length: 120
+Date: Mon, 27 Jul 2026 22:18:09 GMT
+Connection: keep-alive
+Keep-Alive: timeout=72
+
+{"code":"duplicate_repository_path","message":"Ya existe un proyecto registrado para este directorio (ruta canónica)."}

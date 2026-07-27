@@ -1,0 +1,253 @@
+=== post-sync validation ===
+timestamp_utc: 2026-07-27T22:45:55Z
+--- openspec validate --all --strict ---
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+- Validating...
+✓ spec/agent-operating-contracts
+✓ spec/angular-web-console-baseline
+✓ spec/application-test-baseline
+✓ spec/baseline-validation-and-secret-scanning
+✓ change/chg-w01-s01-project-registration
+✓ spec/closure-evidence-and-process-gates
+✓ spec/context-and-package-integrity
+✓ spec/delivery-graph-and-id-validation
+✓ spec/deterministic-ci-pipeline
+✓ spec/docker-compose-local-runtime
+✓ spec/immutable-openspec-integrations
+✓ spec/local-project-registration
+✓ spec/nestjs-fastify-api-baseline
+✓ spec/nx-dependency-boundaries
+✓ spec/nx-monorepo-baseline
+✓ spec/openspec-verified-lifecycle
+✓ spec/postgresql-prisma-persistence-baseline
+✓ spec/repository-governance
+✓ spec/required-quality-gates
+✓ spec/shared-libraries-baseline
+Totals: 20 passed, 0 failed (20 items)
+--- package-summary ---
+wrote /Users/silveriobernal/Documents/Code/Development/spec-pilot/package-summary.json fileCount=252 (excludes self) candidates=7 waves=12 slices=42 stories=126
+package-summary PASS 252
+--- delivery-graph ---
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+--- secret scan ---
+no heuristic secrets found
+--- baseline ---
+=== SpecPilot baseline validation ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+PASS  openspec --version => 1.6.0
+PASS  openspec schema validate spec-driven
+PASS  openspec validate --all
+PASS  openspec doctor
+PASS  cursor commands: 12
+PASS  cursor skills: 12
+PASS  codex skills: 12
+PASS  opencode commands: 12
+PASS  opencode skills: 12
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+PASS  delivery graph + machine IDs
+INFO  active OpenSpec change directories: 1
+PASS  product scaffolding present (apps/packages/package.json)
+fileCount=252 waves=12 slices=42 stories=126
+PASS  package-summary semantics
+no heuristic secrets found
+PASS  secret scan
+PASS  git branch: main
+=== summary ===
+BASELINE_OK
+--- quality gates ---
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> spec-pilot@0.0.0 quality-gates
+> bash scripts/run-quality-gates.sh
+
+=== SpecPilot quality gates ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+note: local full-gate PASS is mandatory before commit/push (main-only policy).
+note: GitHub Actions re-runs this orchestrator as post-push remote verification only.
+INFO  gate: install integrity
+PASS  install integrity (npm ci --dry-run)
+INFO  gate: typecheck
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> spec-pilot@0.0.0 typecheck
+> tsc -p packages/shared-contracts/tsconfig.lib.json --noEmit && tsc -p apps/api/tsconfig.app.json --noEmit && tsc -p apps/web/tsconfig.app.json --noEmit
+
+PASS  typecheck
+INFO  gate: dependency-boundary lint
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ NX   Running target lint for 3 projects:
+
+- shared-contracts
+- api
+- web
+
+
+
+> nx run shared-contracts:lint  [existing outputs match the cache, left as is]
+
+> eslint .
+
+(node:6362) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> nx run api:lint  [existing outputs match the cache, left as is]
+
+> eslint .
+
+(node:6380) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> nx run web:lint  [existing outputs match the cache, left as is]
+
+> eslint .
+
+(node:6404) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+
+ NX   Successfully ran target lint for 3 projects
+
+Nx read the output from the cache instead of running the command for 3 out of 3 tasks.
+
+Your AI agent configuration is outdated. Run "nx configure-ai-agents" to update.
+
+  Run duration:      30ms
+  Cache:             3/3 hit (100%)
+  Critical path:     1ms (1 task)
+  Recoverable time:  <1ms
+PASS  dependency-boundary lint
+INFO  gate: automated tests
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ NX   Running target test for 3 projects and 1 task they depend on:
+
+- shared-contracts
+- api
+- web
+
+
+
+> nx run shared-contracts:build  [existing outputs match the cache, left as is]
+
+(node:6446) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Compiling TypeScript files for project "shared-contracts"...
+Done compiling TypeScript files for project "shared-contracts".
+
+> nx run shared-contracts:test  [existing outputs match the cache, left as is]
+
+> jest
+
+(node:6457) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m7 passed[39m[22m, 7 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        0.804 s, estimated 1 s
+[2mRan all test suites[22m[2m.[22m
+
+> nx run api:test  [existing outputs match the cache, left as is]
+
+> jest --passWithNoTests=true
+
+(node:6698) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:6797) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:6795) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:6799) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:6796) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:6798) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /Users/silveriobernal/Documents/Code/Development/spec-pilot/packages/shared-contracts/dist/src/index.js). To fix this:
+  - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+  - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+
+[1mTest Suites: [22m[1m[32m5 passed[39m[22m, 5 total
+[1mTests:       [22m[1m[32m24 passed[39m[22m, 24 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        5.974 s, estimated 6 s
+[2mRan all test suites[22m[2m.[22m
+
+> nx run web:test
+
+(node:16562) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+The `@nx/jest:jest` executor is deprecated and will be removed in Nx v24. Run `nx g @nx/jest:convert-to-inferred` to migrate to the `@nx/jest/plugin` inferred targets. See https://nx.dev/docs/guides/tasks--caching/convert-to-inferred for details.
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m4 passed[39m[22m, 4 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        1.516 s
+[2mRan all test suites[22m[2m.[22m
+
+
+
+ NX   Successfully ran target test for 3 projects and 1 task they depend on
+
+Nx read the output from the cache instead of running the command for 3 out of 4 tasks.
+
+Your AI agent configuration is outdated. Run "nx configure-ai-agents" to update.
+
+  Run duration:      1.9s
+  Cache:             3/4 hit (75%)
+  Critical path:     1.9s (2 tasks)
+  Recoverable time:  <1ms
+
+  Recommendations:
+    - Speed up or split the longest tasks on the critical path:
+        web:test    1.9s
+PASS  automated tests
+INFO  gate: baseline validation
+=== SpecPilot baseline validation ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+PASS  openspec --version => 1.6.0
+PASS  openspec schema validate spec-driven
+PASS  openspec validate --all
+PASS  openspec doctor
+PASS  cursor commands: 12
+PASS  cursor skills: 12
+PASS  codex skills: 12
+PASS  opencode commands: 12
+PASS  opencode skills: 12
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+PASS  delivery graph + machine IDs
+INFO  active OpenSpec change directories: 1
+PASS  product scaffolding present (apps/packages/package.json)
+fileCount=252 waves=12 slices=42 stories=126
+PASS  package-summary semantics
+no heuristic secrets found
+PASS  secret scan
+PASS  git branch: main
+=== summary ===
+BASELINE_OK
+PASS  baseline validation
+INFO  gate: secret scanning
+no heuristic secrets found
+PASS  secret scanning
+=== summary ===
+QUALITY_GATES_OK

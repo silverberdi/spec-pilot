@@ -14,6 +14,7 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
+  app.enableCors({ origin: true });
   const port = Number(process.env['PORT']) || 3000;
   await app.listen({ port, host: '0.0.0.0' });
   Logger.log(`API listening on http://localhost:${port}/health`);

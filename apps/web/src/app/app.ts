@@ -1,9 +1,25 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 import { Card } from 'primeng/card';
 import { Message } from 'primeng/message';
 import { ProgressSpinner } from 'primeng/progressspinner';
+import { Button } from 'primeng/button';
+import { InputText } from 'primeng/inputtext';
+import type {
+  ProjectDto,
+  ProjectErrorResponse,
+} from '@specpilot/shared-contracts';
+import { isProjectErrorResponse } from '@specpilot/shared-contracts';
+import { environment } from '../environments/environment.local';
 
 export type ShellState = 'loading' | 'success' | 'error';
+export type RegistrationUiState =
+  | 'idle'
+  | 'loading'
+  | 'success'
+  | 'blocked'
+  | 'error';
 
 /** Minimal i18n-ready copy boundary (Spanish default). */
 export const shellCopy = {
@@ -14,28 +30,52 @@ export const shellCopy = {
     errorTitle: 'No se pudo iniciar la consola',
     errorDetail: 'Revise la configuración de arranque e intente de nuevo.',
     emptyRegion: 'Sin contenido en esta región.',
+    registerTitle: 'Registrar repositorio local',
+    registerHint:
+      'Indique la ruta absoluta de un repositorio que contenga .specpilot/project.yaml.',
+    pathLabel: 'Ruta del repositorio',
+    displayNameLabel: 'Nombre para mostrar (opcional)',
+    submit: 'Registrar',
+    emptyRegistry: 'Aún no hay proyectos registrados.',
+    successTitle: 'Proyecto registrado',
+    blockedTitle: 'Registro bloqueado',
   },
 } as const;
 
 export type ShellLocale = keyof typeof shellCopy;
 
 @Component({
-  imports: [Card, Message, ProgressSpinner],
+  imports: [
+    Card,
+    Message,
+    ProgressSpinner,
+    Button,
+    InputText,
+    FormsModule,
+  ],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App {
+export class App implements OnInit {
   /** Optional bootstrap override for tests (invalid forces error). */
   readonly bootstrapMode = input<'ok' | 'invalid'>('ok');
 
+  private readonly http = inject(HttpClient);
   private readonly locale = signal<ShellLocale>('es');
   private readonly state = signal<ShellState>('loading');
 
   readonly copy = computed(() => shellCopy[this.locale()]);
   readonly shellState = computed(() => this.state());
 
-  constructor() {
+  readonly repositoryPath = signal('');
+  readonly displayName = signal('');
+  readonly registrationState = signal<RegistrationUiState>('idle');
+  readonly projects = signal<ProjectDto[]>([]);
+  readonly lastRegistered = signal<ProjectDto | null>(null);
+  readonly registrationMessage = signal<string | null>(null);
+
+  ngOnInit(): void {
     queueMicrotask(() => this.completeBootstrap());
   }
 
@@ -45,5 +85,63 @@ export class App {
       return;
     }
     this.state.set('success');
+    queueMicrotask(() => this.refreshProjects());
+  }
+
+  refreshProjects(): void {
+    this.http.get<ProjectDto[]>(`${environment.apiBaseUrl}/projects`).subscribe({
+      next: (list) => this.projects.set(list),
+      error: () => {
+        // Empty-state still usable if list fails; keep prior list.
+      },
+    });
+  }
+
+  submitRegistration(): void {
+    this.registrationState.set('loading');
+    this.registrationMessage.set(null);
+    this.lastRegistered.set(null);
+
+    const body: { repositoryPath: string; displayName?: string } = {
+      repositoryPath: this.repositoryPath(),
+    };
+    const name = this.displayName().trim();
+    if (name.length > 0) {
+      body.displayName = name;
+    }
+
+    this.http
+      .post<ProjectDto>(`${environment.apiBaseUrl}/projects`, body)
+      .subscribe({
+        next: (project) => {
+          this.lastRegistered.set(project);
+          this.registrationState.set('success');
+          this.refreshProjects();
+        },
+        error: (err: unknown) => {
+          const payload = this.extractError(err);
+          this.registrationMessage.set(
+            payload?.message ?? 'No se pudo completar el registro.',
+          );
+          const status =
+            typeof err === 'object' &&
+            err !== null &&
+            'status' in err &&
+            typeof (err as { status: unknown }).status === 'number'
+              ? (err as { status: number }).status
+              : 0;
+          this.registrationState.set(
+            status === 422 || status === 409 ? 'blocked' : 'error',
+          );
+        },
+      });
+  }
+
+  private extractError(err: unknown): ProjectErrorResponse | null {
+    if (typeof err !== 'object' || err === null || !('error' in err)) {
+      return null;
+    }
+    const body = (err as { error: unknown }).error;
+    return isProjectErrorResponse(body) ? body : null;
   }
 }

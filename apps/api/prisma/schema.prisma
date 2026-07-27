@@ -1,5 +1,5 @@
-// SpecPilot persistence-plane probe model only.
-// Not a product domain model — later waves add domain tables via their own migrations.
+// SpecPilot persistence: AppMetadata probe + bounded Project registration (w01-s01).
+// ProjectConfigurationVersion and other product aggregates remain later-slice scope.
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,4 +15,16 @@ model AppMetadata {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("app_metadata")
+}
+
+model Project {
+  id              String    @id @default(uuid())
+  slug            String    @unique
+  displayName     String    @map("display_name") @db.VarChar(120)
+  repositoryPath  String    @unique @map("repository_path")
+  status          String
+  registeredAt    DateTime  @default(now()) @map("registered_at")
+  lastInspectedAt DateTime? @map("last_inspected_at")
+
+  @@map("projects")
 }

@@ -1,0 +1,15 @@
+# Product blocked-path evidence (registration preflight / HTTP 422)
+# Captured from automated suite apps/api/src/app/projects/filesystem.spec.ts
+# and projects.integration.spec.ts (PASS by demonstrating blocked outcomes).
+
+Cases covered:
+- empty_repository_path / relative_repository_path
+- repository_not_found
+- repository_not_directory
+- project_yaml_missing
+- project_yaml_not_regular_file
+- invalid_display_name (HTTP 422)
+- duplicate_repository_path (HTTP 409)
+
+RESULT: BLOCKED_PATHS_DEMONSTRATED_IN_AUTOMATED_TESTS
+See also: evidence/success/api-tests.txt

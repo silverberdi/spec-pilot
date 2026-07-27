@@ -1,0 +1,50 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ NX   Running target test for project web and 1 task it depends on:
+
+
+
+> nx run shared-contracts:build  [local cache]
+
+
+> nx run web:test
+
+(node:47520) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+The `@nx/jest:jest` executor is deprecated and will be removed in Nx v24. Run `nx g @nx/jest:convert-to-inferred` to migrate to the `@nx/jest/plugin` inferred targets. See https://nx.dev/docs/guides/tasks--caching/convert-to-inferred for details.
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m4 passed[39m[22m, 4 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        1.316 s
+[2mRan all test suites[22m[2m.[22m
+
+
+
+ NX   Successfully ran target test for project web and 1 task it depends on
+
+Nx read the output from the cache instead of running the command for 1 out of 2 tasks.
+
+  Run duration:      1.8s
+  Cache:             1/2 hit (50%)
+  Critical path:     1.8s (2 tasks)
+  Recoverable time:  <1ms
+
+  Recommendations:
+    - Speed up or split the longest tasks on the critical path:
+        web:test    1.8s

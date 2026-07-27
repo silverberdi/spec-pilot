@@ -1,0 +1,3 @@
+timestamp_utc: 2026-07-27T22:46:43Z
+archive_target: openspec/changes/archive/2026-07-27-chg-w01-s01-project-registration
+RESULT: ARCHIVE_OK

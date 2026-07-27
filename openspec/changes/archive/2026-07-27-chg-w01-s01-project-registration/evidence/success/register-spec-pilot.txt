@@ -1,0 +1,9 @@
+HTTP/1.1 201 Created
+vary: Origin
+content-type: application/json; charset=utf-8
+content-length: 258
+Date: Mon, 27 Jul 2026 22:18:09 GMT
+Connection: keep-alive
+Keep-Alive: timeout=72
+
+{"id":"8b590467-0fbb-4160-868e-06bd5eee931e","slug":"spec-pilot","displayName":"spec-pilot","repositoryPath":"/Users/silveriobernal/Documents/Code/Development/spec-pilot","status":"registered","registeredAt":"2026-07-27T22:18:09.064Z","lastInspectedAt":null}

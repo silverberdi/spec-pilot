@@ -1,0 +1,18 @@
+# Exclusions check
+
+timestamp_utc: recorded at apply
+
+Checked against proposal Binding.Exclusions and design Non-Goals:
+
+- [PASS] No project.yaml parse/schema validation/versioning
+- [PASS] No ProjectConfigurationVersion model or migration
+- [PASS] No Git status / OpenSpec discovery inspection
+- [PASS] No project dashboard / discovery-health listing UI
+- [PASS] Registration filesystem adapter is read-only (no target-repo writes)
+- [PASS] No authentication / multiuser
+- [PASS] No DeepSeek product API integration
+- [PASS] No reviews, findings, budget, prompts, or context bundles
+- [PASS] No Windows/Linux support claims
+- [PASS] No later-wave scope introduced
+
+RESULT: EXCLUSIONS_OK
