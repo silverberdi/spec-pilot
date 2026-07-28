@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma.module';
+import { ConfigurationService } from './configuration.service';
 import { FILESYSTEM_PORT } from './filesystem.port';
 import { NodeFilesystemAdapter } from './node-filesystem.adapter';
+import { ProjectYamlReader } from './project-yaml-reader';
 import { ProjectsController } from './projects.controller';
 import { ProjectsService } from './projects.service';
 
@@ -10,6 +12,8 @@ import { ProjectsService } from './projects.service';
   controllers: [ProjectsController],
   providers: [
     ProjectsService,
+    ConfigurationService,
+    ProjectYamlReader,
     NodeFilesystemAdapter,
     { provide: FILESYSTEM_PORT, useExisting: NodeFilesystemAdapter },
   ],

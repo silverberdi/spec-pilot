@@ -60,6 +60,9 @@ export function isReadyResponse(value: unknown): value is ReadyResponse {
 /** Binding max length for Project.displayName (contract, model, tests). */
 export const DISPLAY_NAME_MAX_LENGTH = 120;
 
+/** Binding max size for `.specpilot/project.yaml` before parse (bytes). */
+export const PROJECT_YAML_MAX_BYTES = 262144;
+
 export type ProjectStatus = 'registered';
 
 export interface RegisterProjectRequest {
@@ -75,12 +78,37 @@ export interface ProjectDto {
   status: ProjectStatus;
   registeredAt: string;
   lastInspectedAt: string | null;
+  configurationVersionId: string | null;
+}
+
+export interface ProjectConfigurationVersionDto {
+  id: string;
+  projectId: string;
+  schemaVersion: number;
+  sourceHash: string;
+  normalizedConfig: Record<string, unknown>;
+  validatedAt: string;
+  createdAt: string;
 }
 
 export interface ProjectErrorResponse {
   code: string;
   message: string;
 }
+
+export type ConfigurationAttached = {
+  status: 'attached';
+  version: ProjectConfigurationVersionDto;
+};
+
+export type ConfigurationBlocked = {
+  status: 'blocked';
+  error: ProjectErrorResponse;
+};
+
+export type RegisterProjectResponse = ProjectDto & {
+  configuration: ConfigurationAttached | ConfigurationBlocked;
+};
 
 export const PROJECT_ERROR_CODES = [
   'empty_repository_path',
@@ -95,6 +123,18 @@ export const PROJECT_ERROR_CODES = [
   'duplicate_repository_path',
   'duplicate_project_slug',
   'project_not_found',
+  'configuration_not_found',
+  'project_yaml_too_large',
+  'project_yaml_parse_error',
+  'unsupported_schema_version',
+  'invalid_machine_id',
+  'invalid_repository_contract',
+  'invalid_executor',
+  'invalid_validation_assistant',
+  'invalid_budget_declaration',
+  'invalid_context_patterns',
+  'configuration_attach_failed',
+  'configuration_refresh_failed',
   'internal_error',
 ] as const;
 
@@ -110,6 +150,26 @@ export function isProjectErrorResponse(
   return typeof record['code'] === 'string' && typeof record['message'] === 'string';
 }
 
+export function isProjectConfigurationVersionDto(
+  value: unknown,
+): value is ProjectConfigurationVersionDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record['id'] === 'string' &&
+    typeof record['projectId'] === 'string' &&
+    typeof record['schemaVersion'] === 'number' &&
+    typeof record['sourceHash'] === 'string' &&
+    typeof record['normalizedConfig'] === 'object' &&
+    record['normalizedConfig'] !== null &&
+    !Array.isArray(record['normalizedConfig']) &&
+    typeof record['validatedAt'] === 'string' &&
+    typeof record['createdAt'] === 'string'
+  );
+}
+
 export function isProjectDto(value: unknown): value is ProjectDto {
   if (typeof value !== 'object' || value === null) {
     return false;
@@ -123,8 +183,46 @@ export function isProjectDto(value: unknown): value is ProjectDto {
     record['status'] === 'registered' &&
     typeof record['registeredAt'] === 'string' &&
     (record['lastInspectedAt'] === null ||
-      typeof record['lastInspectedAt'] === 'string')
+      typeof record['lastInspectedAt'] === 'string') &&
+    (record['configurationVersionId'] === null ||
+      typeof record['configurationVersionId'] === 'string')
   );
+}
+
+export function isRegisterProjectResponse(
+  value: unknown,
+): value is RegisterProjectResponse {
+  if (!isProjectDto(value)) {
+    return false;
+  }
+  const record = value as unknown as Record<string, unknown>;
+  const configuration = record['configuration'];
+  if (typeof configuration !== 'object' || configuration === null) {
+    return false;
+  }
+  const cfg = configuration as Record<string, unknown>;
+  if (cfg['status'] === 'attached') {
+    if ('error' in cfg) {
+      return false;
+    }
+    if (!isProjectConfigurationVersionDto(cfg['version'])) {
+      return false;
+    }
+    return (
+      record['configurationVersionId'] ===
+      (cfg['version'] as ProjectConfigurationVersionDto).id
+    );
+  }
+  if (cfg['status'] === 'blocked') {
+    if ('version' in cfg) {
+      return false;
+    }
+    if (!isProjectErrorResponse(cfg['error'])) {
+      return false;
+    }
+    return record['configurationVersionId'] === null;
+  }
+  return false;
 }
 
 /**

@@ -21,6 +21,21 @@ export class ProjectsController {
     return this.projects.list();
   }
 
+  @Post(':id/configuration/refresh')
+  async refreshConfiguration(
+    @Param('id') id: string,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
+    const version = await this.projects.refreshConfiguration(id);
+    reply.code(200);
+    return version;
+  }
+
+  @Get(':id/configuration')
+  getConfiguration(@Param('id') id: string) {
+    return this.projects.getConfiguration(id);
+  }
+
   @Get(':id')
   getById(@Param('id') id: string) {
     return this.projects.getById(id);

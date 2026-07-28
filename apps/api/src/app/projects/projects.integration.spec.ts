@@ -1,5 +1,5 @@
 /**
- * Testcontainers PostgreSQL integration for project registration.
+ * Testcontainers PostgreSQL integration for project registration + configuration.
  * MUST NOT target axioma-db-dev or SpecPilot Compose volumes.
  */
 import { execFileSync } from 'node:child_process';
@@ -17,19 +17,23 @@ import {
 } from '@nestjs/platform-fastify';
 import { AppModule } from '../app.module';
 import { DISPLAY_NAME_MAX_LENGTH } from '@specpilot/shared-contracts';
+import { validProjectYaml } from './valid-project-yaml.fixture';
 
 const apiRoot = join(__dirname, '../../..');
 
-async function makeEligibleRepo(name: string): Promise<string> {
+async function makeEligibleRepo(
+  name: string,
+  yamlContent: string = validProjectYaml({ projectId: name }),
+): Promise<string> {
   const root = await mkdtemp(join(tmpdir(), 'sp-api-'));
   const repo = join(root, name);
   await mkdir(join(repo, '.specpilot'), { recursive: true });
   const yamlPath = join(repo, '.specpilot', 'project.yaml');
-  await writeFile(yamlPath, 'schemaVersion: 1\n');
+  await writeFile(yamlPath, yamlContent);
   return repo;
 }
 
-describe('Project registration (Testcontainers)', () => {
+describe('Project registration and configuration (Testcontainers)', () => {
   jest.setTimeout(180_000);
 
   let container: StartedPostgreSqlContainer;
@@ -72,7 +76,7 @@ describe('Project registration (Testcontainers)', () => {
     }
   });
 
-  it('registers an eligible repository with canonical realpath (201)', async () => {
+  it('registers with attached configuration for valid YAML (201)', async () => {
     const repo = await makeEligibleRepo('alpha-repo');
     const expectedCanonical = await realpath(repo);
     const yamlBefore = await readFile(
@@ -92,12 +96,85 @@ describe('Project registration (Testcontainers)', () => {
     expect(body.repositoryPath).toBe(expectedCanonical);
     expect(body.status).toBe('registered');
     expect(body.lastInspectedAt).toBeNull();
+    expect(body.configuration.status).toBe('attached');
+    expect(body.configurationVersionId).toBe(body.configuration.version.id);
+    expect(body.configuration.version.sourceHash).toMatch(/^[a-f0-9]{64}$/);
 
     const yamlAfter = await readFile(
       join(repo, '.specpilot', 'project.yaml'),
       'utf8',
     );
     expect(yamlAfter).toBe(yamlBefore);
+
+    const getConfig = await app.inject({
+      method: 'GET',
+      url: `/projects/${body.id}/configuration`,
+    });
+    expect(getConfig.statusCode).toBe(200);
+    expect(JSON.parse(getConfig.body).id).toBe(body.configuration.version.id);
+  });
+
+  it('registers with blocked configuration for invalid YAML (201)', async () => {
+    const repo = await makeEligibleRepo('invalid-yaml-repo', 'schemaVersion: 1\n');
+    const response = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: repo },
+    });
+    expect(response.statusCode).toBe(201);
+    const body = JSON.parse(response.body);
+    expect(body.configuration.status).toBe('blocked');
+    expect(body.configurationVersionId).toBeNull();
+    expect(body.configuration.error.code).toBeTruthy();
+
+    const getConfig = await app.inject({
+      method: 'GET',
+      url: `/projects/${body.id}/configuration`,
+    });
+    expect(getConfig.statusCode).toBe(404);
+    expect(JSON.parse(getConfig.body).code).toBe('configuration_not_found');
+  });
+
+  it('blocks oversized YAML on refresh with 422', async () => {
+    const repo = await makeEligibleRepo('oversize-base');
+    const created = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: repo },
+    });
+    expect(created.statusCode).toBe(201);
+    const project = JSON.parse(created.body);
+
+    await writeFile(
+      join(repo, '.specpilot', 'project.yaml'),
+      'a'.repeat(262145),
+    );
+
+    const refresh = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/configuration/refresh`,
+    });
+    expect(refresh.statusCode).toBe(422);
+    expect(JSON.parse(refresh.body).code).toBe('project_yaml_too_large');
+  });
+
+  it('refresh same bytes is idempotent', async () => {
+    const repo = await makeEligibleRepo('idempotent-repo');
+    const created = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: repo },
+    });
+    const project = JSON.parse(created.body);
+    expect(project.configuration.status).toBe('attached');
+    const firstVersionId = project.configuration.version.id;
+
+    const refresh = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/configuration/refresh`,
+    });
+    expect(refresh.statusCode).toBe(200);
+    expect(JSON.parse(refresh.body).id).toBe(firstVersionId);
   });
 
   it('blocks missing project.yaml with 422 and creates no row', async () => {

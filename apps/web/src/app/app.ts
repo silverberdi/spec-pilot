@@ -7,14 +7,22 @@ import { ProgressSpinner } from 'primeng/progressspinner';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import type {
+  ProjectConfigurationVersionDto,
   ProjectDto,
   ProjectErrorResponse,
+  RegisterProjectResponse,
 } from '@specpilot/shared-contracts';
 import { isProjectErrorResponse } from '@specpilot/shared-contracts';
 import { environment } from '../environments/environment.local';
 
 export type ShellState = 'loading' | 'success' | 'error';
 export type RegistrationUiState =
+  | 'idle'
+  | 'loading'
+  | 'success'
+  | 'blocked'
+  | 'error';
+export type ConfigurationUiState =
   | 'idle'
   | 'loading'
   | 'success'
@@ -39,6 +47,12 @@ export const shellCopy = {
     emptyRegistry: 'Aún no hay proyectos registrados.',
     successTitle: 'Proyecto registrado',
     blockedTitle: 'Registro bloqueado',
+    configAttachedTitle: 'Configuración adjunta',
+    configBlockedTitle: 'Configuración bloqueada',
+    refreshLabel: 'Actualizar configuración',
+    refreshSuccessTitle: 'Configuración actualizada',
+    refreshBlockedTitle: 'Actualización de configuración bloqueada',
+    selectProjectHint: 'Seleccione un proyecto registrado para actualizar su configuración.',
   },
 } as const;
 
@@ -72,8 +86,14 @@ export class App implements OnInit {
   readonly displayName = signal('');
   readonly registrationState = signal<RegistrationUiState>('idle');
   readonly projects = signal<ProjectDto[]>([]);
-  readonly lastRegistered = signal<ProjectDto | null>(null);
+  readonly lastRegistered = signal<RegisterProjectResponse | null>(null);
   readonly registrationMessage = signal<string | null>(null);
+  readonly selectedProjectId = signal<string | null>(null);
+  readonly configurationState = signal<ConfigurationUiState>('idle');
+  readonly configurationMessage = signal<string | null>(null);
+  readonly lastConfiguration = signal<ProjectConfigurationVersionDto | null>(
+    null,
+  );
 
   ngOnInit(): void {
     queueMicrotask(() => this.completeBootstrap());
@@ -90,7 +110,12 @@ export class App implements OnInit {
 
   refreshProjects(): void {
     this.http.get<ProjectDto[]>(`${environment.apiBaseUrl}/projects`).subscribe({
-      next: (list) => this.projects.set(list),
+      next: (list) => {
+        this.projects.set(list);
+        if (list.length > 0 && !this.selectedProjectId()) {
+          this.selectedProjectId.set(list[0]!.id);
+        }
+      },
       error: () => {
         // Empty-state still usable if list fails; keep prior list.
       },
@@ -111,11 +136,17 @@ export class App implements OnInit {
     }
 
     this.http
-      .post<ProjectDto>(`${environment.apiBaseUrl}/projects`, body)
+      .post<RegisterProjectResponse>(`${environment.apiBaseUrl}/projects`, body)
       .subscribe({
         next: (project) => {
           this.lastRegistered.set(project);
           this.registrationState.set('success');
+          if (project.configuration.status === 'blocked') {
+            this.registrationMessage.set(project.configuration.error.message);
+          } else {
+            this.lastConfiguration.set(project.configuration.version);
+          }
+          this.selectedProjectId.set(project.id);
           this.refreshProjects();
         },
         error: (err: unknown) => {
@@ -133,6 +164,42 @@ export class App implements OnInit {
           this.registrationState.set(
             status === 422 || status === 409 ? 'blocked' : 'error',
           );
+        },
+      });
+  }
+
+  refreshConfiguration(): void {
+    const id = this.selectedProjectId();
+    if (!id) {
+      return;
+    }
+    this.configurationState.set('loading');
+    this.configurationMessage.set(null);
+
+    this.http
+      .post<ProjectConfigurationVersionDto>(
+        `${environment.apiBaseUrl}/projects/${id}/configuration/refresh`,
+        {},
+      )
+      .subscribe({
+        next: (version) => {
+          this.lastConfiguration.set(version);
+          this.configurationState.set('success');
+          this.refreshProjects();
+        },
+        error: (err: unknown) => {
+          const payload = this.extractError(err);
+          this.configurationMessage.set(
+            payload?.message ?? 'No se pudo actualizar la configuración.',
+          );
+          const status =
+            typeof err === 'object' &&
+            err !== null &&
+            'status' in err &&
+            typeof (err as { status: unknown }).status === 'number'
+              ? (err as { status: number }).status
+              : 0;
+          this.configurationState.set(status === 422 ? 'blocked' : 'error');
         },
       });
   }

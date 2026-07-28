@@ -66,6 +66,25 @@
               <strong>{{ project.displayName }}</strong> ({{ project.slug }})
             </p>
             <p class="shell__path">{{ project.repositoryPath }}</p>
+
+            @if (project.configuration.status === 'attached') {
+              <section data-testid="configuration-attached">
+                <p-message severity="success">{{
+                  copy().configAttachedTitle
+                }}</p-message>
+                <p>
+                  schemaVersion={{ project.configuration.version.schemaVersion }}
+                  hash={{ project.configuration.version.sourceHash.slice(0, 12) }}…
+                </p>
+              </section>
+            } @else {
+              <section data-testid="configuration-blocked">
+                <p-message severity="warn">{{
+                  copy().configBlockedTitle
+                }}</p-message>
+                <p>{{ project.configuration.error.message }}</p>
+              </section>
+            }
           </section>
         }
 
@@ -76,6 +95,64 @@
           <section data-testid="registration-blocked">
             <p-message severity="warn">{{ copy().blockedTitle }}</p-message>
             <p>{{ registrationMessage() }}</p>
+          </section>
+        }
+
+        @if (projects().length > 0) {
+          <section class="shell__refresh" data-testid="configuration-refresh">
+            <p class="shell__tagline">{{ copy().selectProjectHint }}</p>
+            <label class="shell__field">
+              <span>Proyecto</span>
+              <select
+                [ngModel]="selectedProjectId()"
+                (ngModelChange)="selectedProjectId.set($event)"
+                [disabled]="configurationState() === 'loading'"
+              >
+                @for (project of projects(); track project.id) {
+                  <option [value]="project.id">
+                    {{ project.displayName }} ({{ project.slug }})
+                  </option>
+                }
+              </select>
+            </label>
+            <p-button
+              [label]="copy().refreshLabel"
+              (onClick)="refreshConfiguration()"
+              [loading]="configurationState() === 'loading'"
+              [disabled]="
+                configurationState() === 'loading' || !selectedProjectId()
+              "
+            />
+
+            @if (configurationState() === 'loading') {
+              <p data-testid="configuration-loading">{{ copy().loading }}</p>
+            }
+
+            @if (configurationState() === 'success' && lastConfiguration(); as version) {
+              <section data-testid="configuration-refresh-success">
+                <p-message severity="success">{{
+                  copy().refreshSuccessTitle
+                }}</p-message>
+                <p>
+                  schemaVersion={{ version.schemaVersion }} hash={{
+                    version.sourceHash.slice(0, 12)
+                  }}…
+                </p>
+              </section>
+            }
+
+            @if (
+              (configurationState() === 'blocked' ||
+                configurationState() === 'error') &&
+              configurationMessage()
+            ) {
+              <section data-testid="configuration-refresh-blocked">
+                <p-message severity="warn">{{
+                  copy().refreshBlockedTitle
+                }}</p-message>
+                <p>{{ configurationMessage() }}</p>
+              </section>
+            }
           </section>
         }
       </p-card>

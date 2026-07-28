@@ -1,0 +1,18 @@
+exclusions-check: PASS
+date: 2026-07-27
+change: chg-w01-s02-project-configuration
+
+Verified out of scope for this change:
+- no Git / OpenSpec discovery inspection (w01-s03)
+- no project dashboard / discovery-health listing UI (w01-s04)
+- no target-repository writes or delivery/Git/OpenSpec command execution
+- no authentication / multiuser
+- no DeepSeek product API integration calls
+- no reviews, findings, budget ledger, prompts, or context bundles
+- no raw YAML bytes stored in PostgreSQL (hash + normalizedConfig only)
+- no later-wave aggregates (auth, users, budget accounts, etc.)
+
+In scope (allowed):
+- parse / schema-validate / version / persist ProjectConfigurationVersion
+- Project.configurationVersionId linkage
+- attach-on-register + refresh/get configuration HTTP + minimal console outcomes

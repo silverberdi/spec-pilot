@@ -1,0 +1,45 @@
+## Verification Report: chg-w01-s02-project-configuration
+
+timestamp_utc: 2026-07-28T02:20:00Z
+branch: main
+operator_approval: continuous closure authorizing Verify through push (tasks 9.1 + 10.1)
+
+### Summary
+
+| Dimension | Status |
+|---|---|
+| Completeness | Tasks 1.1–9.2 and 10.1 complete; 10.2 is this Verify; 10.3–10.8 are post-Verify closure gates authorized in the same continuous pass |
+| Correctness | `project-yaml-configuration` + five baseline/registration deltas covered by Prisma `ProjectConfigurationVersion`, attach-on-register/`RegisterProjectResponse`, refresh/GET configuration APIs, exact-byte hashing, size cap, fail-closed validation, Angular configuration outcomes, tests/evidence |
+| Coherence | Presence-only eligibility retained; immutable versions + transactional pointer; no discovery/dashboard; RO authorized host mount preserved; axioma-db-dev untouched; main-only |
+| Deterministic checks | `QUALITY_GATES_OK`; `BASELINE_OK`; openspec validate 20/20; human validation PASS (API + Spanish console); Compose rebuild remediation evidenced |
+
+### Completeness
+
+- Planning artifacts: proposal, design, specs, tasks — complete (4/4)
+- Tasks 1.1–8.4: complete with evidence under `evidence/`
+- Task 9.1: operator human validation recorded PASS in `evidence/human-validation.md`
+- Task 9.2: no deferred AC recorded PASS in `evidence/no-deferred-ac.md`
+- Task 10.1: operator authorized continuous closure (Verify → sync → archive → final validation → commit → push)
+- Task 10.2: Verify execution (this report) — **PASS**
+- Tasks 10.3–10.8: authorized next gates in the same continuous stop-on-failure operation
+
+### Correctness (requirement coverage)
+
+| Capability | Evidence / surfaces |
+|---|---|
+| project-yaml-configuration | `project-yaml-validator`, `configuration.service`, reader; exact-byte SHA-256; 262144 cap; transactional insert+pointer; refresh/GET endpoints |
+| local-project-registration (delta) | `RegisterProjectResponse` attach-on-register; blocked attach keeps Project; Spanish console attach/refresh outcomes |
+| postgresql-prisma-persistence-baseline (delta) | `ProjectConfigurationVersion` + `configurationVersionId`; migration `20260728000000_add_project_configuration_version` |
+| shared-libraries-baseline (delta) | DTOs + discriminated union guards in `packages/shared-contracts` |
+| angular-web-console-baseline (delta) | Minimal configuration outcomes + “Actualizar configuración”; no dashboard |
+| application-test-baseline (delta) | Unit + Testcontainers + web tests; quality gates PASS |
+
+### Coherence
+
+- Main-only working policy: branch is `main`
+- Exclusions (s03 discovery, s04 dashboard, auth, DeepSeek product API, target-repo writes, raw YAML in DB) remain absent
+- Compose images rebuilt for w01-s02; host RO mount unchanged; axioma-db-dev Id/StartedAt unchanged
+
+### Verdict
+
+**PASS**

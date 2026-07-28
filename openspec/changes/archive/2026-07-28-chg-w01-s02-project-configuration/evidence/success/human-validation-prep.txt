@@ -1,0 +1,15 @@
+human-validation-prep: READY
+timestamp_utc: see post-remediation evidence
+task_9_1: NOT marked complete (operator confirmation still required)
+
+Runtime remediation complete:
+- rebuilt/recreated specpilot-api and specpilot-web images
+- migrate deploy applied 20260728000000_add_project_configuration_version
+- GET /projects/:id includes configurationVersionId
+- POST /projects/:id/configuration/refresh registered (no framework 404)
+- GET /projects/:id/configuration registered (no framework 404)
+- web bundle contains Actualizar + configuration-refresh
+- axioma-db-dev Id/StartedAt unchanged
+- host repos mount still read-only at identical absolute path
+
+Operator must still perform task 9.1 manually and confirm PASS.

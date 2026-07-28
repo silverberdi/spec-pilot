@@ -6,6 +6,7 @@ import {
   isProjectDto,
   isProjectErrorResponse,
   isReadyResponse,
+  isRegisterProjectResponse,
   validateRegisterProjectRequest,
 } from './shared-contracts';
 
@@ -37,6 +38,16 @@ describe('shared-contracts health validator', () => {
   });
 });
 
+const version = {
+  id: '22222222-2222-2222-2222-222222222222',
+  projectId: '11111111-1111-1111-1111-111111111111',
+  schemaVersion: 1,
+  sourceHash: 'a'.repeat(64),
+  normalizedConfig: { schemaVersion: 1 },
+  validatedAt: '2026-07-27T00:00:00.000Z',
+  createdAt: '2026-07-27T00:00:00.000Z',
+};
+
 describe('shared-contracts project registration', () => {
   it('accepts a well-formed ProjectDto', () => {
     expect(
@@ -48,8 +59,78 @@ describe('shared-contracts project registration', () => {
         status: 'registered',
         registeredAt: '2026-07-27T00:00:00.000Z',
         lastInspectedAt: null,
+        configurationVersionId: null,
       }),
     ).toBe(true);
+  });
+
+  it('accepts attached RegisterProjectResponse', () => {
+    expect(
+      isRegisterProjectResponse({
+        id: '11111111-1111-1111-1111-111111111111',
+        slug: 'demo-repo',
+        displayName: 'demo-repo',
+        repositoryPath: '/tmp/demo-repo',
+        status: 'registered',
+        registeredAt: '2026-07-27T00:00:00.000Z',
+        lastInspectedAt: null,
+        configurationVersionId: version.id,
+        configuration: { status: 'attached', version },
+      }),
+    ).toBe(true);
+  });
+
+  it('accepts blocked RegisterProjectResponse', () => {
+    expect(
+      isRegisterProjectResponse({
+        id: '11111111-1111-1111-1111-111111111111',
+        slug: 'demo-repo',
+        displayName: 'demo-repo',
+        repositoryPath: '/tmp/demo-repo',
+        status: 'registered',
+        registeredAt: '2026-07-27T00:00:00.000Z',
+        lastInspectedAt: null,
+        configurationVersionId: null,
+        configuration: {
+          status: 'blocked',
+          error: { code: 'project_yaml_parse_error', message: 'parse failed' },
+        },
+      }),
+    ).toBe(true);
+  });
+
+  it('rejects ambiguous configuration unions', () => {
+    expect(
+      isRegisterProjectResponse({
+        id: '11111111-1111-1111-1111-111111111111',
+        slug: 'demo-repo',
+        displayName: 'demo-repo',
+        repositoryPath: '/tmp/demo-repo',
+        status: 'registered',
+        registeredAt: '2026-07-27T00:00:00.000Z',
+        lastInspectedAt: null,
+        configurationVersionId: version.id,
+        configuration: { status: 'attached' },
+      }),
+    ).toBe(false);
+
+    expect(
+      isRegisterProjectResponse({
+        id: '11111111-1111-1111-1111-111111111111',
+        slug: 'demo-repo',
+        displayName: 'demo-repo',
+        repositoryPath: '/tmp/demo-repo',
+        status: 'registered',
+        registeredAt: '2026-07-27T00:00:00.000Z',
+        lastInspectedAt: null,
+        configurationVersionId: null,
+        configuration: {
+          status: 'blocked',
+          error: { code: 'x', message: 'y' },
+          version,
+        },
+      }),
+    ).toBe(false);
   });
 
   it('rejects ProjectErrorResponse missing code or message', () => {

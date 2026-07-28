@@ -6,6 +6,7 @@ PostgreSQL persistence baseline for SpecPilot using Prisma under `apps/api`, wit
 
 ## Requirements
 
+
 ### Requirement: Prisma schema and migrations live under apps/api
 The repository SHALL provide a Prisma schema at `apps/api/prisma/schema.prisma` and committed migrations under `apps/api/prisma/migrations/`. The Prisma CLI and Prisma client packages MUST resolve to exactly the same concrete version, be compatible with Node.js 24.18.0 and TypeScript 6.0.3, and be locked in the single root `package-lock.json`. The datasource MUST target PostgreSQL only. SQLite and other non-PostgreSQL stores MUST NOT be introduced.
 
@@ -18,19 +19,19 @@ The repository SHALL provide a Prisma schema at `apps/api/prisma/schema.prisma` 
 - **THEN** the Prisma CLI and Prisma client resolve to the same concrete version without peer-dependency bypasses
 
 ### Requirement: Baseline schema is limited to a persistence probe model
-The Prisma schema MUST retain the non-domain operational metadata probe model (for example `app_metadata` with a primary key, value, and timestamps) used to prove migration application and a typed client round trip. This change MAY add a bounded `Project` registration domain model (and only the registration fields required by `local-project-registration`) with unique constraints on canonical `repositoryPath` and `slug`. The schema MUST NOT introduce product domain models or tables for configuration versions, reviews, findings, budgets, prompts, usage, authentication, or users. `ProjectConfigurationVersion` remains out of scope for this change.
+The Prisma schema MUST retain the non-domain operational metadata probe model (for example `app_metadata` with a primary key, value, and timestamps) used to prove migration application and a typed client round trip. The schema MUST retain the bounded `Project` registration domain model with unique constraints on canonical `repositoryPath` and `slug`. This change MAY add a bounded `ProjectConfigurationVersion` domain model and a nullable `Project.configurationVersionId` active-snapshot linkage required by `project-yaml-configuration`, including a unique constraint on `(projectId, sourceHash)`. The schema MUST NOT introduce product domain models or tables for reviews, findings, budgets, prompts, usage, authentication, or users.
 
 #### Scenario: Probe model remains present
 - **WHEN** the Prisma schema is inspected after this change
 - **THEN** the non-domain operational metadata probe model remains defined
 
-#### Scenario: Project registration model is permitted
+#### Scenario: Project and configuration version models are permitted
 - **WHEN** the Prisma schema is inspected for product domain tables introduced by this change
-- **THEN** a bounded `Project` registration model may be present with unique `repositoryPath` and `slug`, and no configuration-version, review, finding, budget, prompt, usage, authentication, or user models are introduced
+- **THEN** a bounded `Project` model with unique `repositoryPath` and `slug` may be present together with a bounded `ProjectConfigurationVersion` model, unique `(projectId, sourceHash)`, and nullable `Project.configurationVersionId`, and no review, finding, budget, prompt, usage, authentication, or user models are introduced
 
-#### Scenario: Other product aggregates remain excluded
+#### Scenario: Later-wave aggregates remain excluded
 - **WHEN** the Prisma schema is inspected for later-wave aggregates
-- **THEN** no `ProjectConfigurationVersion`, review, finding, budget, prompt, usage, authentication, or user tables are present
+- **THEN** no review, finding, budget, prompt, usage, authentication, or user tables are present
 
 ### Requirement: Prisma client is wired through Nest lifecycle in apps/api
 `apps/api` MUST provide a Nest module and service that owns the Prisma client connect and disconnect lifecycle. The generated Prisma client MUST be consumed only by `apps/api` in this slice. The API MUST be able to perform a successful insert-and-read round trip against the baseline operational metadata model when a migrated PostgreSQL database is available.

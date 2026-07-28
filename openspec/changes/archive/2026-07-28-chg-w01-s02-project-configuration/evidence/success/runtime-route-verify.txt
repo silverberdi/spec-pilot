@@ -1,0 +1,65 @@
+=== post-rebuild verification ===
+timestamp_utc: 2026-07-28T01:54:32Z
+attempt=1 ready=200 body={"status":"ok","service":"api","database":"ok"}
+--- api logs (migrate) ---
+Loaded Prisma config from prisma.config.ts.
+
+Prisma schema loaded from prisma/schema.prisma.
+Datasource "db": PostgreSQL database "specpilot", schema "public" at "postgres:5432"
+
+3 migrations found in prisma/migrations
+
+Applying migration `20260728000000_add_project_configuration_version`
+
+The following migration(s) have been applied:
+
+migrations/
+  └─ 20260728000000_add_project_configuration_version/
+    └─ migration.sql
+
+All migrations have been successfully applied.
+npm notice
+npm notice New major version of npm available! 11.16.0 -> 12.0.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.0.1
+npm notice To update run: npm install -g npm@12.0.1
+npm notice
+[32m[Nest] 76  - [39m07/28/2026, 1:54:12 AM [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 76  - [39m07/28/2026, 1:54:12 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPrismaModule dependencies initialized[39m[38;5;3m +8ms[39m
+[32m[Nest] 76  - [39m07/28/2026, 1:54:12 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 76  - [39m07/28/2026, 1:54:12 AM [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mProjectsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 76  - [39m07/28/2026, 1:54:12 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAppController {/}:[39m[38;5;3m +5ms[39m
+[32m[Nest] 76  - [39m07/28/2026, 1:54:12 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/health, GET} route[39m[38;5;3m +2ms[39m
+[32m[Nest] 76  - [39m07/28/2026, 1:54:12 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/health/ready, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 76  - [39m07/28/2026, 1:54:12 AM [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mProjectsController {/projects}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 76  - [39m07/28/2026, 1:54:12 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/projects, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 76  - [39m07/28/2026, 1:54:12 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/projects, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 76  - [39m07/28/2026, 1:54:12 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/projects/:id/configuration/refresh, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 76  - [39m07/28/2026, 1:54:12 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/projects/:id/configuration, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 76  - [39m07/28/2026, 1:54:12 AM [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/projects/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 76  - [39m07/28/2026, 1:54:12 AM [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +50ms[39m
+[32m[Nest] 76  - [39m07/28/2026, 1:54:12 AM [32m    LOG[39m [32mAPI listening on http://localhost:3000/health[39m
+--- mounts ---
+[{"Type":"bind","Source":"/Users/silveriobernal/Documents/Code/Development","Destination":"/Users/silveriobernal/Documents/Code/Development","Mode":"ro","RW":false,"Propagation":"rprivate"}]
+--- route checks ---
+GET /projects => 1 ['id', 'slug', 'displayName', 'repositoryPath', 'status', 'registeredAt', 'lastInspectedAt', 'configurationVersionId']
+id=8b590467-0fbb-4160-868e-06bd5eee931e
+GET /projects/:id keys: ['configurationVersionId', 'displayName', 'id', 'lastInspectedAt', 'registeredAt', 'repositoryPath', 'slug', 'status']
+True None
+GET_one_HAS_configurationVersionId=PASS
+POST_refresh_http:200
+{"id":"54211646-50a0-42c1-9b84-ccf066ecaebd","projectId":"8b590467-0fbb-4160-868e-06bd5eee931e","schemaVersion":1,"sourceHash":"f1434c7399fa4680d2cec836f0e82f04bd350c44de53c51a2fccb4aeff0f53d4","normalizedConfig":{"review":{"models":{"verify":"deepseek-pro","applied":"deepseek-pro","planning":"deepseek-pro","discovery":"deepseek-flash"},"provider":"deepseek","monthlyBudgetUsd":10},"context":{"exclude":["**/.env","**/.env.*","**/*.pem","**/*.key","**/secrets/**"],"include":["AGENTS.md","docs/cont
+POST_refresh_registered=PASS {'id': '54211646-50a0-42c1-9b84-ccf066ecaebd', 'sourceHash': 'f1434c7399fa4680d2cec836f0e82f04bd350c44de53c51a2fccb4aeff0f53d4'}
+GET_cfg_http:200
+{"id":"54211646-50a0-42c1-9b84-ccf066ecaebd","projectId":"8b590467-0fbb-4160-868e-06bd5eee931e","schemaVersion":1,"sourceHash":"f1434c7399fa4680d2cec836f0e82f04bd350c44de53c51a2fccb4aeff0f53d4","normalizedConfig":{"review":{"models":{"verify":"deepseek-pro","applied":"deepseek-pro","planning":"deepseek-pro","discovery":"deepseek-flash"},"provider":"deepseek","monthlyBudgetUsd":10},"context":{"exclude":["**/.env","**/.env.*","**/*.pem","**/*.key","**/secrets/**"],"include":["AGENTS.md","docs/cont
+GET_configuration_registered=PASS
+--- web bundle strings ---
+--- axioma unchanged ---
+Id=fbdabca10675efab7137dc95fbb31bfa89d4070508d07aaf9b6cd8795438c48f Started=2026-07-27T19:03:39.767345875Z
+--- prisma migrations in db ---
+                  migration_name                  |          finished_at          
+--------------------------------------------------+-------------------------------
+ 20260726000000_init_app_metadata                 | 2026-07-26 04:15:25.793851+00
+ 20260727100000_add_project_registration          | 2026-07-27 21:51:09.189172+00
+ 20260728000000_add_project_configuration_version | 2026-07-28 01:54:12.297001+00
+(3 rows)
+

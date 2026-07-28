@@ -4,9 +4,11 @@ import {
   DISPLAY_NAME_MAX_LENGTH,
   type ProjectDto,
   type RegisterProjectRequest,
+  type RegisterProjectResponse,
   validateRegisterProjectRequest,
 } from '@specpilot/shared-contracts';
 import { PrismaService } from '../prisma.service';
+import { ConfigurationService } from './configuration.service';
 import {
   FILESYSTEM_PORT,
   type FilesystemPort,
@@ -26,9 +28,10 @@ export class ProjectsService {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(FILESYSTEM_PORT) private readonly filesystem: FilesystemPort,
+    private readonly configuration: ConfigurationService,
   ) {}
 
-  async register(body: unknown): Promise<ProjectDto> {
+  async register(body: unknown): Promise<RegisterProjectResponse> {
     const parsed = validateRegisterProjectRequest(body);
     if (!parsed.ok) {
       throw blocked422(parsed.code);
@@ -78,8 +81,9 @@ export class ProjectsService {
       throw conflict409('duplicate_project_slug');
     }
 
+    let created;
     try {
-      const created = await this.prisma.project.create({
+      created = await this.prisma.project.create({
         data: {
           slug,
           displayName,
@@ -87,7 +91,6 @@ export class ProjectsService {
           status: 'registered',
         },
       });
-      return this.toDto(created);
     } catch (error: unknown) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -117,6 +120,22 @@ export class ProjectsService {
       );
       throw internal500();
     }
+
+    // Attach after insert; never roll back the Project on attach failure.
+    const configuration = await this.configuration.attachAfterRegister(
+      created.id,
+      created.repositoryPath,
+    );
+
+    const project =
+      configuration.status === 'attached'
+        ? await this.prisma.project.findUniqueOrThrow({ where: { id: created.id } })
+        : created;
+
+    return {
+      ...this.toDto(project),
+      configuration,
+    };
   }
 
   async list(): Promise<ProjectDto[]> {
@@ -132,6 +151,28 @@ export class ProjectsService {
       throw notFound404();
     }
     return this.toDto(row);
+  }
+
+  async refreshConfiguration(id: string) {
+    const result = await this.configuration.refresh(id);
+    if (result.ok) {
+      return result.version;
+    }
+    if (result.kind === 'unexpected') {
+      throw internal500('configuration_refresh_failed');
+    }
+    if (result.code === 'project_not_found') {
+      throw notFound404('project_not_found');
+    }
+    throw blocked422(result.code);
+  }
+
+  async getConfiguration(id: string) {
+    const result = await this.configuration.getActive(id);
+    if (!result.ok) {
+      throw notFound404(result.code);
+    }
+    return result.version;
   }
 
   private resolveDisplayName(
@@ -154,6 +195,7 @@ export class ProjectsService {
     status: string;
     registeredAt: Date;
     lastInspectedAt: Date | null;
+    configurationVersionId?: string | null;
   }): ProjectDto {
     return {
       id: row.id,
@@ -165,6 +207,7 @@ export class ProjectsService {
       lastInspectedAt: row.lastInspectedAt
         ? row.lastInspectedAt.toISOString()
         : null,
+      configurationVersionId: row.configurationVersionId ?? null,
     };
   }
 }

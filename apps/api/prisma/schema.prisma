@@ -1,5 +1,5 @@
-// SpecPilot persistence: AppMetadata probe + bounded Project registration (w01-s01).
-// ProjectConfigurationVersion and other product aggregates remain later-slice scope.
+// SpecPilot persistence: AppMetadata probe + Project registration + ProjectConfigurationVersion (w01-s02).
+// Reviews, findings, budgets, prompts, auth, and users remain later-slice scope.
 generator client {
   provider = "prisma-client-js"
 }
@@ -18,13 +18,31 @@ model AppMetadata {
 }
 
 model Project {
-  id              String    @id @default(uuid())
-  slug            String    @unique
-  displayName     String    @map("display_name") @db.VarChar(120)
-  repositoryPath  String    @unique @map("repository_path")
-  status          String
-  registeredAt    DateTime  @default(now()) @map("registered_at")
-  lastInspectedAt DateTime? @map("last_inspected_at")
+  id                      String    @id @default(uuid())
+  slug                    String    @unique
+  displayName             String    @map("display_name") @db.VarChar(120)
+  repositoryPath          String    @unique @map("repository_path")
+  status                  String
+  registeredAt            DateTime  @default(now()) @map("registered_at")
+  lastInspectedAt         DateTime? @map("last_inspected_at")
+  configurationVersionId  String?   @map("configuration_version_id")
+  configurationVersions   ProjectConfigurationVersion[] @relation("ProjectVersions")
+  activeConfiguration     ProjectConfigurationVersion?  @relation("ActiveConfiguration", fields: [configurationVersionId], references: [id], onDelete: SetNull)
 
   @@map("projects")
+}
+
+model ProjectConfigurationVersion {
+  id               String   @id @default(uuid())
+  projectId        String   @map("project_id")
+  schemaVersion    Int      @map("schema_version")
+  sourceHash       String   @map("source_hash")
+  normalizedConfig Json     @map("normalized_config")
+  validatedAt      DateTime @map("validated_at")
+  createdAt        DateTime @default(now()) @map("created_at")
+  project          Project  @relation("ProjectVersions", fields: [projectId], references: [id], onDelete: Cascade)
+  activeFor        Project[] @relation("ActiveConfiguration")
+
+  @@unique([projectId, sourceHash])
+  @@map("project_configuration_versions")
 }

@@ -1,0 +1,11 @@
+sync-specs: PASS
+ADDED capability project-yaml-configuration
+MODIFIED local-project-registration :: Register eligible local repositories as durable Project records
+MODIFIED local-project-registration :: Exact HTTP error and lookup contracts for projects
+MODIFIED local-project-registration :: Minimal Spanish-first registration console outcomes
+MODIFIED postgresql-prisma-persistence-baseline :: Baseline schema is limited to a persistence probe model
+MODIFIED shared-libraries-baseline :: Domain packages and shared UI kit are excluded
+MODIFIED shared-libraries-baseline :: Project registration contracts and validators are exported
+MODIFIED angular-web-console-baseline :: Spanish-first i18n-ready baseline shell
+MODIFIED application-test-baseline :: Evidence is captured under the change directory
+ADDED application-test-baseline :: Project YAML configuration success and blocked paths are covered by automated tests
