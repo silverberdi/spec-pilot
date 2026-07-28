@@ -1,0 +1,5 @@
+archive: PASS
+timestamp_utc: 2026-07-28T18:05:00Z
+target: openspec/changes/archive/2026-07-28-chg-w01-s03-git-and-openspec-discovery
+specsUpdated: false (already synced in 11.3; archive used --skip-specs)
+active_changes_remaining: 0

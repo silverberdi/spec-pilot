@@ -135,8 +135,89 @@ export const PROJECT_ERROR_CODES = [
   'invalid_context_patterns',
   'configuration_attach_failed',
   'configuration_refresh_failed',
+  'not_a_git_repository',
+  'git_inspect_failed',
+  'git_inspection_timeout',
+  'openspec_root_missing',
+  'openspec_inspect_failed',
+  'openspec_path_escape',
+  'openspec_inspection_limit_exceeded',
+  'discovery_not_found',
+  'discovery_refresh_failed',
   'internal_error',
 ] as const;
+
+export const GIT_DISCOVERY_BLOCKED_CODES = [
+  'not_a_git_repository',
+  'git_inspect_failed',
+  'git_inspection_timeout',
+] as const;
+
+export type GitDiscoveryBlockedCode =
+  (typeof GIT_DISCOVERY_BLOCKED_CODES)[number];
+
+export const OPENSPEC_DISCOVERY_BLOCKED_CODES = [
+  'openspec_root_missing',
+  'openspec_inspect_failed',
+  'openspec_path_escape',
+  'openspec_inspection_limit_exceeded',
+] as const;
+
+export type OpenSpecDiscoveryBlockedCode =
+  (typeof OPENSPEC_DISCOVERY_BLOCKED_CODES)[number];
+
+export type OpenSpecChangeSummaryDto = {
+  name: string;
+  hasProposal: boolean;
+  hasDesign: boolean;
+  hasTasks: boolean;
+  hasSpecs: boolean;
+};
+
+export type GitDiscoveryOk = {
+  status: 'ok';
+  isRepo: true;
+  headSha: string | null;
+  branch: string | null;
+  dirty: boolean;
+  upstream: string | null;
+};
+
+export type GitDiscoveryBlocked = {
+  status: 'blocked';
+  code: GitDiscoveryBlockedCode;
+  message: string;
+};
+
+export type GitDiscoveryDto = GitDiscoveryOk | GitDiscoveryBlocked;
+
+export type OpenSpecDiscoveryOk = {
+  status: 'ok';
+  rootPresent: true;
+  activeChanges: OpenSpecChangeSummaryDto[];
+  archivedChangeCount: number;
+  cliAvailable: boolean;
+};
+
+export type OpenSpecDiscoveryBlocked = {
+  status: 'blocked';
+  code: OpenSpecDiscoveryBlockedCode;
+  message: string;
+};
+
+export type OpenSpecDiscoveryDto = OpenSpecDiscoveryOk | OpenSpecDiscoveryBlocked;
+
+export type ProjectDiscoveryDto = {
+  projectId: string;
+  inspectedAt: string;
+  git: GitDiscoveryDto;
+  openspec: OpenSpecDiscoveryDto;
+};
+
+export const GIT_EXEC_TIMEOUT_MS = 5000;
+export const GIT_EXEC_MAX_BUFFER = 1048576;
+export const OPENSPEC_MAX_ACTIVE_CHANGES = 500;
+export const OPENSPEC_MAX_SPECS_ENTRIES = 10000;
 
 export type ProjectErrorCode = (typeof PROJECT_ERROR_CODES)[number];
 
@@ -223,6 +304,127 @@ export function isRegisterProjectResponse(
     return record['configurationVersionId'] === null;
   }
   return false;
+}
+
+function isGitDiscoveryBlockedCode(
+  value: unknown,
+): value is GitDiscoveryBlockedCode {
+  return (
+    typeof value === 'string' &&
+    (GIT_DISCOVERY_BLOCKED_CODES as readonly string[]).includes(value)
+  );
+}
+
+function isOpenSpecDiscoveryBlockedCode(
+  value: unknown,
+): value is OpenSpecDiscoveryBlockedCode {
+  return (
+    typeof value === 'string' &&
+    (OPENSPEC_DISCOVERY_BLOCKED_CODES as readonly string[]).includes(value)
+  );
+}
+
+function isOpenSpecChangeSummaryDto(
+  value: unknown,
+): value is OpenSpecChangeSummaryDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record['name'] === 'string' &&
+    typeof record['hasProposal'] === 'boolean' &&
+    typeof record['hasDesign'] === 'boolean' &&
+    typeof record['hasTasks'] === 'boolean' &&
+    typeof record['hasSpecs'] === 'boolean'
+  );
+}
+
+export function isGitDiscoveryDto(value: unknown): value is GitDiscoveryDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (record['status'] === 'ok') {
+    if ('code' in record) {
+      return false;
+    }
+    const headSha = record['headSha'];
+    const branch = record['branch'];
+    const upstream = record['upstream'];
+    const headOk =
+      headSha === null ||
+      (typeof headSha === 'string' && /^[a-f0-9]{40}$/.test(headSha));
+    const branchOk =
+      branch === null ||
+      (typeof branch === 'string' && branch.length > 0 && branch !== 'HEAD');
+    return (
+      record['isRepo'] === true &&
+      headOk &&
+      branchOk &&
+      typeof record['dirty'] === 'boolean' &&
+      (upstream === null || typeof upstream === 'string')
+    );
+  }
+  if (record['status'] === 'blocked') {
+    return (
+      isGitDiscoveryBlockedCode(record['code']) &&
+      typeof record['message'] === 'string' &&
+      !('isRepo' in record)
+    );
+  }
+  return false;
+}
+
+export function isOpenSpecDiscoveryDto(
+  value: unknown,
+): value is OpenSpecDiscoveryDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (record['status'] === 'ok') {
+    if ('code' in record) {
+      return false;
+    }
+    if (record['rootPresent'] !== true) {
+      return false;
+    }
+    if (!Array.isArray(record['activeChanges'])) {
+      return false;
+    }
+    if (!record['activeChanges'].every(isOpenSpecChangeSummaryDto)) {
+      return false;
+    }
+    return (
+      typeof record['archivedChangeCount'] === 'number' &&
+      Number.isFinite(record['archivedChangeCount']) &&
+      typeof record['cliAvailable'] === 'boolean'
+    );
+  }
+  if (record['status'] === 'blocked') {
+    return (
+      isOpenSpecDiscoveryBlockedCode(record['code']) &&
+      typeof record['message'] === 'string' &&
+      !('rootPresent' in record)
+    );
+  }
+  return false;
+}
+
+export function isProjectDiscoveryDto(
+  value: unknown,
+): value is ProjectDiscoveryDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record['projectId'] === 'string' &&
+    typeof record['inspectedAt'] === 'string' &&
+    isGitDiscoveryDto(record['git']) &&
+    isOpenSpecDiscoveryDto(record['openspec'])
+  );
 }
 
 /**

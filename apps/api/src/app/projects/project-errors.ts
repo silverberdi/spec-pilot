@@ -43,6 +43,22 @@ export const OPERATOR_MESSAGES: Record<ProjectErrorCode, string> = {
     'El proyecto se registró, pero no se pudo adjuntar la configuración.',
   configuration_refresh_failed:
     'Ocurrió un error interno al actualizar la configuración.',
+  not_a_git_repository: 'La ruta no es un repositorio Git de trabajo.',
+  git_inspect_failed: 'No se pudo inspeccionar el estado Git del repositorio.',
+  git_inspection_timeout:
+    'La inspección Git superó el tiempo máximo permitido.',
+  openspec_root_missing:
+    'No se encontró el directorio openspec en el repositorio.',
+  openspec_inspect_failed:
+    'No se pudo inspeccionar el estado OpenSpec del repositorio.',
+  openspec_path_escape:
+    'Se detectó una ruta fuera del repositorio canónico durante el descubrimiento OpenSpec.',
+  openspec_inspection_limit_exceeded:
+    'Se superó el límite de recorrido del descubrimiento OpenSpec.',
+  discovery_not_found:
+    'El proyecto aún no tiene un descubrimiento inspeccionado.',
+  discovery_refresh_failed:
+    'Ocurrió un error interno al actualizar el descubrimiento.',
   internal_error: 'Ocurrió un error interno al registrar el proyecto.',
 };
 
@@ -64,13 +80,19 @@ export function conflict409(code: 'duplicate_repository_path' | 'duplicate_proje
 }
 
 export function notFound404(
-  code: 'project_not_found' | 'configuration_not_found' = 'project_not_found',
+  code:
+    | 'project_not_found'
+    | 'configuration_not_found'
+    | 'discovery_not_found' = 'project_not_found',
 ): ProjectHttpError {
   return new ProjectHttpError(HttpStatus.NOT_FOUND, code);
 }
 
 export function internal500(
-  code: 'internal_error' | 'configuration_refresh_failed' = 'internal_error',
+  code:
+    | 'internal_error'
+    | 'configuration_refresh_failed'
+    | 'discovery_refresh_failed' = 'internal_error',
 ): ProjectHttpError {
   return new ProjectHttpError(HttpStatus.INTERNAL_SERVER_ERROR, code);
 }

@@ -2,7 +2,7 @@
 FROM node:24.18.0-bookworm-slim AS build
 WORKDIR /app
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && apt-get install -y --no-install-recommends openssl ca-certificates git \
   && rm -rf /var/lib/apt/lists/*
 COPY package.json package-lock.json nx.json tsconfig.base.json tsconfig.json ./
 COPY apps/api apps/api
@@ -18,7 +18,7 @@ FROM node:24.18.0-bookworm-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends openssl ca-certificates \
+  && apt-get install -y --no-install-recommends openssl ca-certificates git \
   && rm -rf /var/lib/apt/lists/*
 COPY --from=build /app /app
 WORKDIR /app/apps/api

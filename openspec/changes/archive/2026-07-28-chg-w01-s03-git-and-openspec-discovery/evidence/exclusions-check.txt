@@ -1,0 +1,13 @@
+Exclusions check for chg-w01-s03-git-and-openspec-discovery
+
+PASS — scope excludes:
+- project dashboard / multi-project discovery-health UI (w01-s04)
+- target-repo writes or delivery/Git-write/OpenSpec apply-verify-sync-archive execution
+- PATH/global OpenSpec CLI resolution (local node_modules/.bin/openspec only)
+- auth/multiuser
+- DeepSeek product API calls
+- reviews/findings/budget ledger/prompts/context bundles
+- immutable discovery-version history table
+- later-wave scope
+
+Checked against proposal.md, design.md, specs/, and tasks.md.

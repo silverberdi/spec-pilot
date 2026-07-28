@@ -238,4 +238,135 @@ describe('Project registration and configuration (Testcontainers)', () => {
     expect(response.statusCode).toBe(404);
     expect(JSON.parse(response.body).code).toBe('project_not_found');
   });
+
+  it('GET discovery before refresh returns discovery_not_found', async () => {
+    const repo = await makeEligibleRepo('discovery-empty');
+    const created = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: repo },
+    });
+    expect(created.statusCode).toBe(201);
+    const project = JSON.parse(created.body);
+    expect(project.lastInspectedAt).toBeNull();
+
+    const getDiscovery = await app.inject({
+      method: 'GET',
+      url: `/projects/${project.id}/discovery`,
+    });
+    expect(getDiscovery.statusCode).toBe(404);
+    expect(JSON.parse(getDiscovery.body).code).toBe('discovery_not_found');
+  });
+
+  it('discovery refresh persists snapshot for git+openspec layout', async () => {
+    const repo = await makeEligibleRepo('discovery-ok');
+    execFileSync('git', ['init'], { cwd: repo, stdio: 'pipe' });
+    execFileSync('git', ['config', 'user.email', 'test@example.com'], {
+      cwd: repo,
+      stdio: 'pipe',
+    });
+    execFileSync('git', ['config', 'user.name', 'Test'], {
+      cwd: repo,
+      stdio: 'pipe',
+    });
+    await writeFile(join(repo, 'README.md'), 'hello');
+    execFileSync('git', ['add', 'README.md'], { cwd: repo, stdio: 'pipe' });
+    execFileSync('git', ['commit', '-m', 'init'], { cwd: repo, stdio: 'pipe' });
+    await mkdir(join(repo, 'openspec', 'changes', 'chg-a', 'specs', 'cap'), {
+      recursive: true,
+    });
+    await writeFile(
+      join(repo, 'openspec', 'changes', 'chg-a', 'proposal.md'),
+      'p',
+    );
+    await writeFile(
+      join(repo, 'openspec', 'changes', 'chg-a', 'specs', 'cap', 'spec.md'),
+      's',
+    );
+
+    const created = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: repo },
+    });
+    const project = JSON.parse(created.body);
+
+    const refresh = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/discovery/refresh`,
+    });
+    expect(refresh.statusCode).toBe(200);
+    const body = JSON.parse(refresh.body);
+    expect(body.projectId).toBe(project.id);
+    expect(body.git.status).toBe('ok');
+    expect(body.openspec.status).toBe('ok');
+    expect(body.openspec.activeChanges[0].hasProposal).toBe(true);
+    expect(body.openspec.activeChanges[0].hasSpecs).toBe(true);
+
+    const getProject = await app.inject({
+      method: 'GET',
+      url: `/projects/${project.id}`,
+    });
+    expect(JSON.parse(getProject.body).lastInspectedAt).toBe(body.inspectedAt);
+
+    const getDiscovery = await app.inject({
+      method: 'GET',
+      url: `/projects/${project.id}/discovery`,
+    });
+    expect(getDiscovery.statusCode).toBe(200);
+    expect(JSON.parse(getDiscovery.body).inspectedAt).toBe(body.inspectedAt);
+  });
+
+  it('discovery refresh persists blocked git for non-git directory', async () => {
+    const repo = await makeEligibleRepo('discovery-nongit');
+    const created = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: repo },
+    });
+    const project = JSON.parse(created.body);
+
+    const refresh = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/discovery/refresh`,
+    });
+    expect(refresh.statusCode).toBe(200);
+    const body = JSON.parse(refresh.body);
+    expect(body.git.status).toBe('blocked');
+    expect(body.git.code).toBe('not_a_git_repository');
+    expect(body.openspec.status).toBe('blocked');
+    expect(body.openspec.code).toBe('openspec_root_missing');
+
+    const getProject = await app.inject({
+      method: 'GET',
+      url: `/projects/${project.id}`,
+    });
+    expect(JSON.parse(getProject.body).lastInspectedAt).toBe(body.inspectedAt);
+  });
+
+  it('discovery refresh hard path failure does not update fields', async () => {
+    const repo = await makeEligibleRepo('discovery-gone');
+    const created = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: repo },
+    });
+    const project = JSON.parse(created.body);
+
+    const { rm } = await import('node:fs/promises');
+    await rm(repo, { recursive: true, force: true });
+
+    const refresh = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/discovery/refresh`,
+    });
+    expect(refresh.statusCode).toBe(422);
+    expect(JSON.parse(refresh.body).code).toBe('repository_not_found');
+
+    const getProject = await app.inject({
+      method: 'GET',
+      url: `/projects/${project.id}`,
+    });
+    expect(JSON.parse(getProject.body).lastInspectedAt).toBeNull();
+  });
 });

@@ -1,0 +1,347 @@
+=== final validation set ===
+timestamp_utc: 2026-07-28T18:02:25Z
+--- openspec validate --all --strict ---
+- Validating...
+✓ spec/agent-operating-contracts
+✓ spec/angular-web-console-baseline
+✓ spec/application-test-baseline
+✓ spec/baseline-validation-and-secret-scanning
+✓ spec/closure-evidence-and-process-gates
+✓ spec/context-and-package-integrity
+✓ spec/delivery-graph-and-id-validation
+✓ spec/deterministic-ci-pipeline
+✓ spec/docker-compose-local-runtime
+✓ spec/git-and-openspec-discovery
+✓ spec/immutable-openspec-integrations
+✓ spec/local-project-registration
+✓ spec/nestjs-fastify-api-baseline
+✓ spec/nx-dependency-boundaries
+✓ spec/nx-monorepo-baseline
+✓ spec/openspec-verified-lifecycle
+✓ spec/postgresql-prisma-persistence-baseline
+✓ spec/project-yaml-configuration
+✓ spec/repository-governance
+✓ spec/required-quality-gates
+✓ spec/shared-libraries-baseline
+Totals: 21 passed, 0 failed (21 items)
+--- openspec list ---
+{
+  "changes": [],
+  "root": {
+    "path": "/Users/silveriobernal/Documents/Code/Development/spec-pilot",
+    "source": "nearest"
+  }
+}
+--- package-summary ---
+wrote /Users/silveriobernal/Documents/Code/Development/spec-pilot/package-summary.json fileCount=264 (excludes self) candidates=7 waves=12 slices=42 stories=126
+package-summary PASS 264
+--- delivery-graph ---
+delivery graph check delegated to baseline
+--- secret scan ---
+no heuristic secrets found
+--- baseline ---
+=== SpecPilot baseline validation ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+PASS  openspec --version => 1.6.0
+PASS  openspec schema validate spec-driven
+PASS  openspec validate --all
+PASS  openspec doctor
+PASS  cursor commands: 12
+PASS  cursor skills: 12
+PASS  codex skills: 12
+PASS  opencode commands: 12
+PASS  opencode skills: 12
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+PASS  delivery graph + machine IDs
+INFO  active OpenSpec change directories: 0
+PASS  product scaffolding present (apps/packages/package.json)
+fileCount=264 waves=12 slices=42 stories=126
+PASS  package-summary semantics
+no heuristic secrets found
+PASS  secret scan
+PASS  git branch: main
+=== summary ===
+BASELINE_OK
+--- branch ---
+main
+--- sensitive path names ---
+39:.env.example
+168:docs/backlog/user-stories/us-w02-s02-secret-detection-and-exclusion-001.md
+169:docs/backlog/user-stories/us-w02-s02-secret-detection-and-exclusion-002.md
+170:docs/backlog/user-stories/us-w02-s02-secret-detection-and-exclusion-003.md
+312:openspec/changes/archive/2026-07-25-chg-w00-s01-repository-governance-and-openspec-foundation/evidence/failure/fake-secret-sample.txt
+317:openspec/changes/archive/2026-07-25-chg-w00-s01-repository-governance-and-openspec-foundation/evidence/failure/secret-scan.txt
+332:openspec/changes/archive/2026-07-25-chg-w00-s01-repository-governance-and-openspec-foundation/specs/baseline-validation-and-secret-scanning/spec.md
+349:openspec/changes/archive/2026-07-26-chg-w00-s02-nx-angular-nest-baseline/evidence/license-safety-check.txt
+353:openspec/changes/archive/2026-07-26-chg-w00-s02-nx-angular-nest-baseline/evidence/primeui-license-config.md
+367:openspec/changes/archive/2026-07-26-chg-w00-s02-nx-angular-nest-baseline/evidence/success/web-build-after-primeui-license-wiring.txt
+369:openspec/changes/archive/2026-07-26-chg-w00-s02-nx-angular-nest-baseline/evidence/success/web-tests-after-primeui-license-wiring.txt
+395:openspec/changes/archive/2026-07-26-chg-w00-s03-postgresql-prisma-and-local-runtime/evidence/secret-safety-check.txt
+405:openspec/changes/archive/2026-07-26-chg-w00-s03-postgresql-prisma-and-local-runtime/evidence/success/secret-scan.txt
+430:openspec/changes/archive/2026-07-26-chg-w00-s04-ci-quality-and-security-baseline/evidence/nx-cloud-check.txt
+449:openspec/changes/archive/2026-07-26-chg-w00-s04-ci-quality-and-security-baseline/specs/baseline-validation-and-secret-scanning/spec.md
+467:openspec/changes/archive/2026-07-27-chg-w01-s01-project-registration/evidence/secret-safety-check.txt
+499:openspec/changes/archive/2026-07-28-chg-w01-s02-project-configuration/evidence/secret-safety-check.txt
+525:openspec/specs/baseline-validation-and-secret-scanning/spec.md
+557:scripts/scan-secrets.py
+.gitignore:21:.env	.env
+.gitignore:33:compose.override.yaml	compose.override.yaml
+--- tracked .env / secrets ---
+.env.example
+--- git status (short) ---
+ M apps/api/Dockerfile
+ M apps/api/prisma/schema.prisma
+ M apps/api/src/app/projects/project-errors.ts
+ M apps/api/src/app/projects/projects.controller.ts
+ M apps/api/src/app/projects/projects.integration.spec.ts
+ M apps/api/src/app/projects/projects.module.ts
+ M apps/web/src/app/app.html
+ M apps/web/src/app/app.spec.ts
+ M apps/web/src/app/app.ts
+ M docs/context/current-state.md
+ M openspec/specs/angular-web-console-baseline/spec.md
+ M openspec/specs/application-test-baseline/spec.md
+ M openspec/specs/local-project-registration/spec.md
+ M openspec/specs/postgresql-prisma-persistence-baseline/spec.md
+ M openspec/specs/shared-libraries-baseline/spec.md
+ M package-summary.json
+ M packages/shared-contracts/src/lib/shared-contracts.spec.ts
+ M packages/shared-contracts/src/lib/shared-contracts.ts
+?? apps/api/prisma/migrations/20260728120000_add_project_last_discovery/
+?? apps/api/src/app/projects/discovery.service.ts
+?? apps/api/src/app/projects/git-inspector.spec.ts
+?? apps/api/src/app/projects/git-inspector.ts
+?? apps/api/src/app/projects/openspec-inspector.spec.ts
+?? apps/api/src/app/projects/openspec-inspector.ts
+?? openspec/changes/archive/2026-07-28-chg-w01-s02-project-configuration/evidence/success/post-push.txt
+?? openspec/changes/archive/2026-07-28-chg-w01-s03-git-and-openspec-discovery/
+?? openspec/specs/git-and-openspec-discovery/
+--- quality gates ---
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> spec-pilot@0.0.0 quality-gates
+> bash scripts/run-quality-gates.sh
+
+=== SpecPilot quality gates ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+note: local full-gate PASS is mandatory before commit/push (main-only policy).
+note: GitHub Actions re-runs this orchestrator as post-push remote verification only.
+INFO  gate: install integrity
+PASS  install integrity (npm ci --dry-run)
+INFO  gate: prisma generate
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+Loaded Prisma config from apps/api/prisma.config.ts.
+
+Prisma schema loaded from apps/api/prisma/schema.prisma.
+
+✔ Generated Prisma Client (v7.9.0) to ./node_modules/@prisma/client in 68ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+PASS  prisma generate
+INFO  gate: typecheck
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> spec-pilot@0.0.0 typecheck
+> tsc -p packages/shared-contracts/tsconfig.lib.json --noEmit && tsc -p apps/api/tsconfig.app.json --noEmit && tsc -p apps/web/tsconfig.app.json --noEmit
+
+PASS  typecheck
+INFO  gate: dependency-boundary lint
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ NX   Running target lint for 3 projects:
+
+- shared-contracts
+- api
+- web
+
+
+
+> nx run shared-contracts:lint  [existing outputs match the cache, left as is]
+
+> eslint .
+
+(node:24787) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> nx run api:lint  [existing outputs match the cache, left as is]
+
+> eslint .
+
+(node:24788) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> nx run web:lint  [existing outputs match the cache, left as is]
+
+> eslint .
+
+(node:24805) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+
+ NX   Successfully ran target lint for 3 projects
+
+Nx read the output from the cache instead of running the command for 3 out of 3 tasks.
+
+Your AI agent configuration is outdated. Run "nx configure-ai-agents" to update.
+
+  Run duration:      29ms
+  Cache:             3/3 hit (100%)
+  Critical path:     1ms (1 task)
+  Recoverable time:  <1ms
+PASS  dependency-boundary lint
+INFO  gate: automated tests
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ NX   Running target test for 3 projects and 1 task they depend on:
+
+- shared-contracts
+- api
+- web
+
+
+
+> nx run shared-contracts:build  [existing outputs match the cache, left as is]
+
+(node:24836) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Compiling TypeScript files for project "shared-contracts"...
+Done compiling TypeScript files for project "shared-contracts".
+
+> nx run shared-contracts:test  [existing outputs match the cache, left as is]
+
+> jest
+
+(node:24854) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m13 passed[39m[22m, 13 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        0.628 s, estimated 1 s
+[2mRan all test suites[22m[2m.[22m
+
+> nx run api:test  [existing outputs match the cache, left as is]
+
+> jest --passWithNoTests=true
+
+(node:24913) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24974) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24969) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24975) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24971) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24970) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24973) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:24972) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /Users/silveriobernal/Documents/Code/Development/spec-pilot/packages/shared-contracts/dist/src/index.js). To fix this:
+  - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+  - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+
+[1mTest Suites: [22m[1m[32m8 passed[39m[22m, 8 total
+[1mTests:       [22m[1m[32m51 passed[39m[22m, 51 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        [1m[33m6.213 s[39m[22m
+[2mRan all test suites[22m[2m.[22m
+
+> nx run web:test
+
+(node:47415) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+The `@nx/jest:jest` executor is deprecated and will be removed in Nx v24. Run `nx g @nx/jest:convert-to-inferred` to migrate to the `@nx/jest/plugin` inferred targets. See https://nx.dev/docs/guides/tasks--caching/convert-to-inferred for details.
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m7 passed[39m[22m, 7 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        1.653 s
+[2mRan all test suites[22m[2m.[22m
+
+
+
+ NX   Successfully ran target test for 3 projects and 1 task they depend on
+
+Nx read the output from the cache instead of running the command for 3 out of 4 tasks.
+
+Your AI agent configuration is outdated. Run "nx configure-ai-agents" to update.
+
+  Run duration:      2.1s
+  Cache:             3/4 hit (75%)
+  Critical path:     2.1s (2 tasks)
+  Recoverable time:  <1ms
+
+  Recommendations:
+    - Speed up or split the longest tasks on the critical path:
+        web:test    2.0s
+PASS  automated tests
+INFO  gate: baseline validation
+=== SpecPilot baseline validation ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+PASS  openspec --version => 1.6.0
+PASS  openspec schema validate spec-driven
+PASS  openspec validate --all
+PASS  openspec doctor
+PASS  cursor commands: 12
+PASS  cursor skills: 12
+PASS  codex skills: 12
+PASS  opencode commands: 12
+PASS  opencode skills: 12
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+PASS  delivery graph + machine IDs
+INFO  active OpenSpec change directories: 0
+PASS  product scaffolding present (apps/packages/package.json)
+fileCount=264 waves=12 slices=42 stories=126
+PASS  package-summary semantics
+no heuristic secrets found
+PASS  secret scan
+PASS  git branch: main
+=== summary ===
+BASELINE_OK
+PASS  baseline validation
+INFO  gate: secret scanning
+no heuristic secrets found
+PASS  secret scanning
+=== summary ===
+QUALITY_GATES_OK
+=== FINAL_VALIDATION_OK ===

@@ -153,6 +153,81 @@
                 <p>{{ configurationMessage() }}</p>
               </section>
             }
+
+            <section class="shell__refresh" data-testid="discovery-refresh">
+              <p class="shell__tagline">{{ copy().discoveryReadOnlyHint }}</p>
+              <p-button
+                [label]="copy().discoveryRefreshLabel"
+                (onClick)="refreshDiscovery()"
+                [loading]="discoveryState() === 'loading'"
+                [disabled]="
+                  discoveryState() === 'loading' || !selectedProjectId()
+                "
+              />
+
+              @if (discoveryState() === 'idle' && !lastDiscovery()) {
+                <p data-testid="discovery-empty">{{ copy().discoveryEmpty }}</p>
+              }
+
+              @if (discoveryState() === 'loading') {
+                <p data-testid="discovery-loading">{{ copy().loading }}</p>
+              }
+
+              @if (
+                (discoveryState() === 'success' ||
+                  discoveryState() === 'blocked') &&
+                lastDiscovery();
+                as discovery
+              ) {
+                <section data-testid="discovery-refresh-success">
+                  <p-message
+                    [severity]="
+                      discoveryState() === 'success' ? 'success' : 'warn'
+                    "
+                    >{{
+                      discoveryState() === 'success'
+                        ? copy().discoverySuccessTitle
+                        : copy().discoveryBlockedTitle
+                    }}</p-message
+                  >
+                  <p>Inspeccionado: {{ discovery.inspectedAt }}</p>
+                  <p>
+                    Git:
+                    @if (discovery.git.status === 'ok') {
+                      {{ discovery.git.branch ?? 'detached' }}
+                      dirty={{ discovery.git.dirty }}
+                      sha={{ discovery.git.headSha?.slice(0, 12) ?? 'null' }}
+                    } @else {
+                      bloqueado ({{ discovery.git.code }})
+                    }
+                  </p>
+                  <p>
+                    OpenSpec:
+                    @if (discovery.openspec.status === 'ok') {
+                      activos={{ discovery.openspec.activeChanges.length }}
+                      archivados={{ discovery.openspec.archivedChangeCount }}
+                      cli={{ discovery.openspec.cliAvailable }}
+                    } @else {
+                      bloqueado ({{ discovery.openspec.code }})
+                    }
+                  </p>
+                  @if (discoveryMessage()) {
+                    <p>{{ discoveryMessage() }}</p>
+                  }
+                </section>
+              }
+
+              @if (
+                discoveryState() === 'error' && discoveryMessage()
+              ) {
+                <section data-testid="discovery-refresh-error">
+                  <p-message severity="error">{{
+                    copy().discoveryErrorTitle
+                  }}</p-message>
+                  <p>{{ discoveryMessage() }}</p>
+                </section>
+              }
+            </section>
           </section>
         }
       </p-card>

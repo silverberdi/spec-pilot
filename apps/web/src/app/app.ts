@@ -8,6 +8,7 @@ import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import type {
   ProjectConfigurationVersionDto,
+  ProjectDiscoveryDto,
   ProjectDto,
   ProjectErrorResponse,
   RegisterProjectResponse,
@@ -23,6 +24,12 @@ export type RegistrationUiState =
   | 'blocked'
   | 'error';
 export type ConfigurationUiState =
+  | 'idle'
+  | 'loading'
+  | 'success'
+  | 'blocked'
+  | 'error';
+export type DiscoveryUiState =
   | 'idle'
   | 'loading'
   | 'success'
@@ -52,7 +59,15 @@ export const shellCopy = {
     refreshLabel: 'Actualizar configuración',
     refreshSuccessTitle: 'Configuración actualizada',
     refreshBlockedTitle: 'Actualización de configuración bloqueada',
-    selectProjectHint: 'Seleccione un proyecto registrado para actualizar su configuración.',
+    selectProjectHint:
+      'Seleccione un proyecto registrado para actualizar configuración o descubrimiento (solo lectura).',
+    discoveryRefreshLabel: 'Actualizar descubrimiento',
+    discoveryEmpty: 'Aún no se ha inspeccionado este proyecto.',
+    discoverySuccessTitle: 'Descubrimiento actualizado',
+    discoveryBlockedTitle: 'Descubrimiento con incidencias',
+    discoveryErrorTitle: 'Error al actualizar el descubrimiento',
+    discoveryReadOnlyHint:
+      'Inspección de solo lectura: SpecPilot no modifica el repositorio ni ejecuta flujos de entrega.',
   },
 } as const;
 
@@ -94,6 +109,9 @@ export class App implements OnInit {
   readonly lastConfiguration = signal<ProjectConfigurationVersionDto | null>(
     null,
   );
+  readonly discoveryState = signal<DiscoveryUiState>('idle');
+  readonly discoveryMessage = signal<string | null>(null);
+  readonly lastDiscovery = signal<ProjectDiscoveryDto | null>(null);
 
   ngOnInit(): void {
     queueMicrotask(() => this.completeBootstrap());
@@ -200,6 +218,57 @@ export class App implements OnInit {
               ? (err as { status: number }).status
               : 0;
           this.configurationState.set(status === 422 ? 'blocked' : 'error');
+        },
+      });
+  }
+
+  refreshDiscovery(): void {
+    const id = this.selectedProjectId();
+    if (!id) {
+      return;
+    }
+    this.discoveryState.set('loading');
+    this.discoveryMessage.set(null);
+
+    this.http
+      .post<ProjectDiscoveryDto>(
+        `${environment.apiBaseUrl}/projects/${id}/discovery/refresh`,
+        {},
+      )
+      .subscribe({
+        next: (discovery) => {
+          this.lastDiscovery.set(discovery);
+          const blocked =
+            discovery.git.status === 'blocked' ||
+            discovery.openspec.status === 'blocked';
+          this.discoveryState.set(blocked ? 'blocked' : 'success');
+          if (blocked) {
+            const parts: string[] = [];
+            if (discovery.git.status === 'blocked') {
+              parts.push(discovery.git.message);
+            }
+            if (discovery.openspec.status === 'blocked') {
+              parts.push(discovery.openspec.message);
+            }
+            this.discoveryMessage.set(parts.join(' '));
+          }
+          this.refreshProjects();
+        },
+        error: (err: unknown) => {
+          const payload = this.extractError(err);
+          this.discoveryMessage.set(
+            payload?.message ?? 'No se pudo actualizar el descubrimiento.',
+          );
+          const status =
+            typeof err === 'object' &&
+            err !== null &&
+            'status' in err &&
+            typeof (err as { status: unknown }).status === 'number'
+              ? (err as { status: number }).status
+              : 0;
+          this.discoveryState.set(
+            status === 422 || status === 404 ? 'blocked' : 'error',
+          );
         },
       });
   }

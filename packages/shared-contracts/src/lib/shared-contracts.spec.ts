@@ -3,6 +3,7 @@ import {
   createReadyResponse,
   DISPLAY_NAME_MAX_LENGTH,
   isHealthResponse,
+  isProjectDiscoveryDto,
   isProjectDto,
   isProjectErrorResponse,
   isReadyResponse,
@@ -161,5 +162,86 @@ describe('shared-contracts project registration', () => {
       expect(result.request.repositoryPath).toBe('/tmp/demo');
       expect(result.request.displayName).toBe(' Demo ');
     }
+  });
+});
+
+describe('shared-contracts discovery', () => {
+  const okDiscovery = {
+    projectId: '11111111-1111-1111-1111-111111111111',
+    inspectedAt: '2026-07-28T00:00:00.000Z',
+    git: {
+      status: 'ok' as const,
+      isRepo: true as const,
+      headSha: 'a'.repeat(40),
+      branch: 'main',
+      dirty: false,
+      upstream: null,
+    },
+    openspec: {
+      status: 'ok' as const,
+      rootPresent: true as const,
+      activeChanges: [
+        {
+          name: 'chg-demo',
+          hasProposal: true,
+          hasDesign: false,
+          hasTasks: false,
+          hasSpecs: true,
+        },
+      ],
+      archivedChangeCount: 0,
+      cliAvailable: false,
+    },
+  };
+
+  it('accepts a well-formed ProjectDiscoveryDto', () => {
+    expect(isProjectDiscoveryDto(okDiscovery)).toBe(true);
+  });
+
+  it('accepts blocked git and openspec unions with closed codes', () => {
+    expect(
+      isProjectDiscoveryDto({
+        ...okDiscovery,
+        git: {
+          status: 'blocked',
+          code: 'not_a_git_repository',
+          message: 'no git',
+        },
+        openspec: {
+          status: 'blocked',
+          code: 'openspec_root_missing',
+          message: 'missing',
+        },
+      }),
+    ).toBe(true);
+  });
+
+  it('rejects unknown blocked codes and ambiguous shapes', () => {
+    expect(
+      isProjectDiscoveryDto({
+        ...okDiscovery,
+        git: { status: 'blocked', code: 'weird', message: 'x' },
+      }),
+    ).toBe(false);
+    expect(
+      isProjectDiscoveryDto({
+        ...okDiscovery,
+        git: {
+          status: 'ok',
+          isRepo: true,
+          headSha: 'a'.repeat(40),
+          branch: 'main',
+          dirty: false,
+          upstream: null,
+          code: 'not_a_git_repository',
+        },
+      }),
+    ).toBe(false);
+    expect(
+      isProjectDiscoveryDto({
+        ...okDiscovery,
+        openspec: { status: 'blocked', message: 'missing code' },
+      }),
+    ).toBe(false);
   });
 });

@@ -257,4 +257,76 @@ describe('App shell and registration', () => {
       ),
     ).toBeTruthy();
   });
+
+  it('shows empty discovery then success after refresh', async () => {
+    fixture = TestBed.createComponent(App);
+    fixture.componentRef.setInput('bootstrapMode', 'ok');
+    fixture.detectChanges();
+    await flushMicrotasks();
+    flushProjectsList([
+      {
+        id: '11111111-1111-1111-1111-111111111111',
+        slug: 'demo-repo',
+        displayName: 'demo-repo',
+        repositoryPath: '/tmp/demo-repo',
+        status: 'registered',
+        registeredAt: '2026-07-27T00:00:00.000Z',
+        lastInspectedAt: null,
+        configurationVersionId: null,
+      },
+    ]);
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="discovery-empty"]'),
+    ).toBeTruthy();
+
+    fixture.componentInstance.refreshDiscovery();
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="discovery-loading"]'),
+    ).toBeTruthy();
+
+    const refresh = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/discovery/refresh`,
+    );
+    expect(refresh.request.method).toBe('POST');
+    refresh.flush({
+      projectId: '11111111-1111-1111-1111-111111111111',
+      inspectedAt: '2026-07-28T12:00:00.000Z',
+      git: {
+        status: 'ok',
+        isRepo: true,
+        headSha: 'a'.repeat(40),
+        branch: 'main',
+        dirty: false,
+        upstream: null,
+      },
+      openspec: {
+        status: 'ok',
+        rootPresent: true,
+        activeChanges: [],
+        archivedChangeCount: 0,
+        cliAvailable: false,
+      },
+    });
+    flushProjectsList([
+      {
+        id: '11111111-1111-1111-1111-111111111111',
+        slug: 'demo-repo',
+        displayName: 'demo-repo',
+        repositoryPath: '/tmp/demo-repo',
+        status: 'registered',
+        registeredAt: '2026-07-27T00:00:00.000Z',
+        lastInspectedAt: '2026-07-28T12:00:00.000Z',
+        configurationVersionId: null,
+      },
+    ]);
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="discovery-refresh-success"]',
+      ),
+    ).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('solo lectura');
+  });
 });

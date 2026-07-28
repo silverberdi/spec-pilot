@@ -6,9 +6,8 @@ Register and validate local macOS repositories as durable Project records with r
 
 ## Requirements
 
-
 ### Requirement: Register eligible local repositories as durable Project records
-The system SHALL register a local macOS repository as a durable `Project` when registration eligibility succeeds. Eligibility remains presence-only as defined by this capability's preflight requirements. On eligibility success the system MUST insert the `Project` first, then attempt configuration attach as defined by `project-yaml-configuration`. The `Project` MUST NOT be rolled back or deleted because of later attach failures. On success, `POST /projects` MUST return HTTP 201 with `RegisterProjectResponse`: a `ProjectDto` containing `id`, `slug`, `displayName`, `repositoryPath`, `status`, `registeredAt`, `lastInspectedAt`, and `configurationVersionId`, plus a required `configuration` discriminated outcome. Initial `status` MUST be `registered`. `lastInspectedAt` MUST be null until a later discovery slice sets it. When attach succeeds, `configuration.status` MUST be `attached`, `configuration.version` MUST be present, and `configurationVersionId` MUST equal `version.id`. When attach is blocked (expected validation/filesystem/size/parse failures or unexpected attach infrastructure failure), `configuration.status` MUST be `blocked`, `configuration.error` MUST be present with a machine-readable `code`, and `configurationVersionId` MUST be `null`. Unexpected attach failures MUST use `code` `configuration_attach_failed` with a safe message and MUST NOT insert a partial snapshot.
+The system SHALL register a local macOS repository as a durable `Project` when registration eligibility succeeds. Eligibility remains presence-only as defined by this capability's preflight requirements. On eligibility success the system MUST insert the `Project` first, then attempt configuration attach as defined by `project-yaml-configuration`. The `Project` MUST NOT be rolled back or deleted because of later attach failures. On success, `POST /projects` MUST return HTTP 201 with `RegisterProjectResponse`: a `ProjectDto` containing `id`, `slug`, `displayName`, `repositoryPath`, `status`, `registeredAt`, `lastInspectedAt`, and `configurationVersionId`, plus a required `configuration` discriminated outcome. Initial `status` MUST be `registered`. `lastInspectedAt` MUST be null on registration success; `git-and-openspec-discovery` MAY set `lastInspectedAt` and `lastDiscovery` afterward via explicit discovery refresh. Registration MUST NOT auto-run discovery. When attach succeeds, `configuration.status` MUST be `attached`, `configuration.version` MUST be present, and `configurationVersionId` MUST equal `version.id`. When attach is blocked (expected validation/filesystem/size/parse failures or unexpected attach infrastructure failure), `configuration.status` MUST be `blocked`, `configuration.error` MUST be present with a machine-readable `code`, and `configurationVersionId` MUST be `null`. Unexpected attach failures MUST use `code` `configuration_attach_failed` with a safe message and MUST NOT insert a partial snapshot.
 
 #### Scenario: Successful registration returns RegisterProjectResponse with attached configuration
 - **WHEN** an operator submits a valid absolute path to an eligible local repository that contains a schema-valid `.specpilot/project.yaml` within size limits and no conflicting project exists
@@ -22,9 +21,13 @@ The system SHALL register a local macOS repository as a durable `Project` when r
 - **WHEN** eligibility succeeds and an unexpected infrastructure failure occurs during configuration attach
 - **THEN** the response is HTTP 201 with `configuration.status` `blocked`, `code` `configuration_attach_failed`, `configurationVersionId` null, no partial snapshot, and the registered `Project` retained
 
-#### Scenario: Successful registration returns ProjectDto fields
+#### Scenario: Successful registration returns ProjectDto fields with null lastInspectedAt
 - **WHEN** an operator submits a valid absolute path to an eligible local repository that contains `.specpilot/project.yaml` as a regular file and no conflicting project exists
-- **THEN** the system persists a `Project` row and responds with HTTP 201 including a `ProjectDto` whose `repositoryPath` is the canonical realpath and whose `status` is `registered`
+- **THEN** the system persists a `Project` row and responds with HTTP 201 including a `ProjectDto` whose `repositoryPath` is the canonical realpath, whose `status` is `registered`, and whose `lastInspectedAt` is null
+
+#### Scenario: Registration does not auto-run discovery
+- **WHEN** registration succeeds
+- **THEN** discovery refresh is not invoked as part of registration and `lastDiscovery` remains unset until an explicit discovery refresh
 
 ### Requirement: Persisted repositoryPath uses filesystem realpath canonicalization
 The system MUST validate that the received `repositoryPath` is absolute before filesystem work. After confirming the target exists, the system MUST obtain identity via filesystem realpath (following symlinks only to resolve the real target). The persisted `repositoryPath` MUST be the canonical absolute path of the real directory—not merely `path.resolve` and not the raw textual input. Trailing slashes and redundant segments MUST be removed by that canonicalization. Two different textual paths or symlinks that resolve to the same real directory MUST be treated as the same repository. The system MUST NOT store a symlink alternate path as an additional identity in this slice.
@@ -126,7 +129,7 @@ PostgreSQL unique constraints on `repositoryPath` and `slug` MUST be the final g
 - **THEN** the losing attempt results in HTTP 409 with the corresponding duplicate `code` after the unique constraint rejects the insert
 
 ### Requirement: Minimal Spanish-first registration console outcomes
-`apps/web` MUST expose a minimal Spanish-first project registration flow (not a discovery-health dashboard) with explicit empty, loading, success, and blocked/error outcomes driven by the projects API contracts. On HTTP 201, the UI MUST present the `RegisterProjectResponse.configuration` outcome (attached summary versus blocked reason/`code`) and MUST NOT pretend configuration succeeded when `configuration.status` is `blocked`. Eligibility blocked or error responses (HTTP 422 or 409) MUST show the operator-facing `message` and MUST NOT pretend registration success. The surface MAY include an explicit configuration refresh action for a known project id that surfaces refresh success, 422 blocked, and 500 error outcomes without becoming a project dashboard.
+`apps/web` MUST expose a minimal Spanish-first project registration flow (not a discovery-health dashboard) with explicit empty, loading, success, and blocked/error outcomes driven by the projects API contracts. On HTTP 201, the UI MUST present the `RegisterProjectResponse.configuration` outcome (attached summary versus blocked reason/`code`) and MUST NOT pretend configuration succeeded when `configuration.status` is `blocked`. Eligibility blocked or error responses (HTTP 422 or 409) MUST show the operator-facing `message` and MUST NOT pretend registration success. The surface MAY include an explicit configuration refresh action and an explicit discovery refresh action for a known project id that surfaces success, blocked subsystem, 422, and 500 outcomes without becoming a project dashboard.
 
 #### Scenario: Empty registry state
 - **WHEN** the registration surface loads and `GET /projects` returns an empty list
@@ -147,3 +150,4 @@ PostgreSQL unique constraints on `repositoryPath` and `slug` MUST be the final g
 #### Scenario: Eligibility blocked state surfaces API message
 - **WHEN** `POST /projects` returns HTTP 422 or 409 with `{ code, message }`
 - **THEN** the UI shows the blocked/error outcome using the operator-facing message and does not show registration success
+

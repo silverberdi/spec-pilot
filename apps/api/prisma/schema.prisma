@@ -1,4 +1,5 @@
-// SpecPilot persistence: AppMetadata probe + Project registration + ProjectConfigurationVersion (w01-s02).
+// SpecPilot persistence: AppMetadata probe + Project registration + ProjectConfigurationVersion (w01-s02)
+// + latest discovery snapshot on Project (w01-s03).
 // Reviews, findings, budgets, prompts, auth, and users remain later-slice scope.
 generator client {
   provider = "prisma-client-js"
@@ -25,6 +26,7 @@ model Project {
   status                  String
   registeredAt            DateTime  @default(now()) @map("registered_at")
   lastInspectedAt         DateTime? @map("last_inspected_at")
+  lastDiscovery           Json?     @map("last_discovery")
   configurationVersionId  String?   @map("configuration_version_id")
   configurationVersions   ProjectConfigurationVersion[] @relation("ProjectVersions")
   activeConfiguration     ProjectConfigurationVersion?  @relation("ActiveConfiguration", fields: [configurationVersionId], references: [id], onDelete: SetNull)
