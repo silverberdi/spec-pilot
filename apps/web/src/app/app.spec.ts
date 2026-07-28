@@ -146,7 +146,7 @@ describe('App shell and registration', () => {
     ).toBeNull();
     // Selector shares the same projects() collection.
     const options = fixture.nativeElement.querySelectorAll(
-      '[data-testid="configuration-refresh"] select option',
+      '[data-testid="project-select"] option',
     );
     expect(options.length).toBe(2);
     expect(options[0].textContent).toContain('newer');
@@ -475,5 +475,115 @@ describe('App shell and registration', () => {
       ),
     ).toBeTruthy();
     expect(fixture.nativeElement.textContent).toContain('solo lectura');
+  });
+
+  it('resolves context sources with idle loading success empty blocked and path cap', async () => {
+    fixture = TestBed.createComponent(App);
+    fixture.componentRef.setInput('bootstrapMode', 'ok');
+    fixture.detectChanges();
+    await flushMicrotasks();
+    flushProjectsList([
+      {
+        id: '11111111-1111-1111-1111-111111111111',
+        slug: 'demo-repo',
+        displayName: 'demo-repo',
+        repositoryPath: '/tmp/demo-repo',
+        status: 'registered',
+        registeredAt: '2026-07-27T00:00:00.000Z',
+        lastInspectedAt: null,
+        configurationVersionId: '22222222-2222-2222-2222-222222222222',
+        discoveryHealth: neverInspectedHealth,
+      },
+    ]);
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="context-resolve-idle"]'),
+    ).toBeTruthy();
+
+    fixture.componentInstance.resolveContextSources();
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="context-resolve-loading"]',
+      ),
+    ).toBeTruthy();
+
+    const req = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/context-sources/resolve`,
+    );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ stage: 'planning' });
+    const paths = Array.from({ length: 201 }, (_, i) => `docs/f${i}.md`);
+    req.flush({
+      status: 'ok',
+      projectId: '11111111-1111-1111-1111-111111111111',
+      stage: 'planning',
+      configurationVersionId: '22222222-2222-2222-2222-222222222222',
+      sourceHash: 'a'.repeat(64),
+      resolvedAt: '2026-07-28T00:00:00.000Z',
+      include: ['docs/**'],
+      exclude: ['**/.env'],
+      pathCount: 201,
+      paths,
+    });
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="context-resolve-success"]',
+      ),
+    ).toBeTruthy();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="context-resolve-cap"]')
+        ?.textContent,
+    ).toContain('Mostrando 200 de 201');
+    const listItems = fixture.nativeElement.querySelectorAll(
+      '[data-testid="context-resolve-paths"] li',
+    );
+    expect(listItems.length).toBe(200);
+
+    fixture.componentInstance.resolveContextSources();
+    fixture.detectChanges();
+    const emptyReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/context-sources/resolve`,
+    );
+    emptyReq.flush({
+      status: 'ok',
+      projectId: '11111111-1111-1111-1111-111111111111',
+      stage: 'planning',
+      configurationVersionId: '22222222-2222-2222-2222-222222222222',
+      sourceHash: 'a'.repeat(64),
+      resolvedAt: '2026-07-28T00:00:00.000Z',
+      include: ['docs/**'],
+      exclude: ['**/.env'],
+      pathCount: 0,
+      paths: [],
+    });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Sin rutas candidatas');
+
+    fixture.componentInstance.resolveContextSources();
+    fixture.detectChanges();
+    const blockedReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/context-sources/resolve`,
+    );
+    blockedReq.flush(
+      {
+        status: 'blocked',
+        projectId: '11111111-1111-1111-1111-111111111111',
+        stage: 'planning',
+        code: 'configuration_not_found',
+        message: 'Sin configuración activa',
+      },
+      { status: 422, statusText: 'Unprocessable Entity' },
+    );
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="context-resolve-blocked"]',
+      ),
+    ).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain(
+      'Sin configuración activa',
+    );
   });
 });

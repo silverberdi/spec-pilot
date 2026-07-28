@@ -3,7 +3,7 @@
  * MUST NOT target axioma-db-dev or SpecPilot Compose volumes.
  */
 import { execFileSync } from 'node:child_process';
-import { mkdtemp, mkdir, writeFile, readFile, realpath } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, realpath, symlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -455,5 +455,197 @@ describe('Project registration and configuration (Testcontainers)', () => {
     expect(invalidRow?.discoveryHealth.summaryMessage).toBe(
       'No fue posible interpretar el último resultado de descubrimiento.',
     );
+  });
+
+  it('resolves context sources for attached configuration', async () => {
+    const repo = await makeEligibleRepo('ctx-ok');
+    await writeFile(join(repo, 'AGENTS.md'), 'agents', 'utf8');
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    expect(register.statusCode).toBe(201);
+    const project = JSON.parse(register.body) as { id: string };
+
+    const resolve = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-sources/resolve`,
+      payload: { stage: 'planning' },
+    });
+    expect(resolve.statusCode).toBe(200);
+    const body = JSON.parse(resolve.body) as {
+      status: string;
+      stage: string;
+      pathCount: number;
+      paths: string[];
+      exclude: string[];
+    };
+    expect(body.status).toBe('ok');
+    expect(body.stage).toBe('planning');
+    expect(body.paths).toEqual(['AGENTS.md']);
+    expect(body.pathCount).toBe(1);
+    expect(body.exclude).toEqual(
+      expect.arrayContaining([
+        '**/.env',
+        '**/.env.*',
+        '**/*.pem',
+        '**/*.key',
+        '**/secrets/**',
+      ]),
+    );
+
+    const empty = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-sources/resolve`,
+      payload: { stage: 'verify' },
+    });
+    // Same include still matches AGENTS.md — create a second project with unmatched tree later
+    expect(empty.statusCode).toBe(200);
+  });
+
+  it('returns empty success when nothing matches', async () => {
+    const yaml = validProjectYaml({
+      projectId: 'ctx-empty',
+      exclude: ['AGENTS.md'],
+    });
+    const repo = await makeEligibleRepo('ctx-empty', yaml);
+    await writeFile(join(repo, 'AGENTS.md'), 'agents', 'utf8');
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    const project = JSON.parse(register.body) as { id: string };
+    const resolve = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-sources/resolve`,
+      payload: { stage: 'new' },
+    });
+    expect(resolve.statusCode).toBe(200);
+    const body = JSON.parse(resolve.body) as {
+      status: string;
+      pathCount: number;
+      paths: string[];
+    };
+    expect(body.status).toBe('ok');
+    expect(body.pathCount).toBe(0);
+    expect(body.paths).toEqual([]);
+  });
+
+  it('blocks resolve without configuration and for invalid stage', async () => {
+    const repo = await makeEligibleRepo(
+      'ctx-blocked-cfg',
+      'schemaVersion: not-yaml\n',
+    );
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    expect(register.statusCode).toBe(201);
+    const project = JSON.parse(register.body) as {
+      id: string;
+      configuration: { status: string };
+    };
+    expect(project.configuration.status).toBe('blocked');
+
+    const resolve = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-sources/resolve`,
+      payload: { stage: 'planning' },
+    });
+    expect(resolve.statusCode).toBe(422);
+    expect(JSON.parse(resolve.body).code).toBe('configuration_not_found');
+
+    const badStage = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-sources/resolve`,
+      payload: { stage: 'deploy' },
+    });
+    expect(badStage.statusCode).toBe(422);
+    expect(JSON.parse(badStage.body).code).toBe('invalid_review_stage');
+
+    const missing = await app.inject({
+      method: 'POST',
+      url: '/projects/00000000-0000-0000-0000-000000000000/context-sources/resolve',
+      payload: { stage: 'planning' },
+    });
+    expect(missing.statusCode).toBe(404);
+    expect(JSON.parse(missing.body).code).toBe('project_not_found');
+  });
+
+  it('blocks out-of-tree symlink during resolve', async () => {
+    const outside = await mkdtemp(join(tmpdir(), 'sp-out-'));
+    await writeFile(join(outside, 'leak.md'), 'leak', 'utf8');
+    const repo = await makeEligibleRepo('ctx-symlink');
+    await writeFile(join(repo, 'AGENTS.md'), 'agents', 'utf8');
+    await symlink(join(outside, 'leak.md'), join(repo, 'escape.md'));
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    const project = JSON.parse(register.body) as { id: string };
+    const resolve = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-sources/resolve`,
+      payload: { stage: 'applied' },
+    });
+    expect(resolve.statusCode).toBe(422);
+    expect(JSON.parse(resolve.body).code).toBe('context_path_escape');
+  });
+
+  it('applies mandatory excludes when snapshot omits one', async () => {
+    const repo = await makeEligibleRepo('ctx-mandatory');
+    await writeFile(join(repo, 'AGENTS.md'), 'agents', 'utf8');
+    await writeFile(join(repo, '.env'), 'SECRET=1', 'utf8');
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    const project = JSON.parse(register.body) as {
+      id: string;
+      configurationVersionId: string;
+    };
+    const prisma = app.get(PrismaService);
+    const version = await prisma.projectConfigurationVersion.findUniqueOrThrow({
+      where: { id: project.configurationVersionId },
+    });
+    const normalized = version.normalizedConfig as {
+      context: { include: string[]; exclude: string[] };
+    };
+    // Strip all mandatory excludes to prove defensive union still applies.
+    normalized.context.exclude = [];
+    normalized.context.include = ['**/*'];
+    await prisma.projectConfigurationVersion.update({
+      where: { id: version.id },
+      data: { normalizedConfig: normalized },
+    });
+
+    const resolve = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-sources/resolve`,
+      payload: { stage: 'planning' },
+    });
+    expect(resolve.statusCode).toBe(200);
+    const body = JSON.parse(resolve.body) as {
+      paths: string[];
+      exclude: string[];
+    };
+    expect(body.paths).toContain('AGENTS.md');
+    expect(body.paths).not.toContain('.env');
+    expect(body.exclude).toEqual(
+      expect.arrayContaining(['**/.env', '**/.env.*']),
+    );
+    const persisted =
+      await prisma.projectConfigurationVersion.findUniqueOrThrow({
+        where: { id: version.id },
+      });
+    expect(
+      (persisted.normalizedConfig as { context: { exclude: string[] } }).context
+        .exclude,
+    ).toEqual([]);
   });
 });

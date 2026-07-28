@@ -7,15 +7,19 @@ import { ProgressSpinner } from 'primeng/progressspinner';
 import { Button } from 'primeng/button';
 import { InputText } from 'primeng/inputtext';
 import type {
+  ContextSourceResolveOkDto,
   ProjectConfigurationVersionDto,
   ProjectDiscoveryDto,
   ProjectDto,
   ProjectErrorResponse,
   RegisterProjectResponse,
+  ReviewStage,
 } from '@specpilot/shared-contracts';
 import {
+  isContextSourceResolveOkDto,
   isProjectDto,
   isProjectErrorResponse,
+  REVIEW_STAGES,
 } from '@specpilot/shared-contracts';
 import { environment } from '../environments/environment.local';
 
@@ -33,6 +37,12 @@ export type ConfigurationUiState =
   | 'blocked'
   | 'error';
 export type DiscoveryUiState =
+  | 'idle'
+  | 'loading'
+  | 'success'
+  | 'blocked'
+  | 'error';
+export type ContextResolveUiState =
   | 'idle'
   | 'loading'
   | 'success'
@@ -72,6 +82,18 @@ export const shellCopy = {
     discoveryErrorTitle: 'Error al actualizar el descubrimiento',
     discoveryReadOnlyHint:
       'Inspección de solo lectura: SpecPilot no modifica el repositorio ni ejecuta flujos de entrega.',
+    contextResolveTitle: 'Resolver fuentes de contexto',
+    contextResolveHint:
+      'Resolución de rutas de solo lectura por etapa (sin leer contenido ni enviar a proveedores).',
+    contextResolveLabel: 'Resolver fuentes de contexto',
+    contextStageLabel: 'Etapa de revisión',
+    contextResolveIdle: 'Aún no se han resuelto fuentes de contexto para este proyecto.',
+    contextResolveSuccessTitle: 'Fuentes de contexto resueltas',
+    contextResolveEmptyTitle: 'Sin rutas candidatas',
+    contextResolveBlockedTitle: 'Resolución de fuentes bloqueada',
+    contextResolveErrorTitle: 'Error al resolver fuentes de contexto',
+    contextShowingCap: 'Mostrando 200 de',
+    contextShowingCapSuffix: 'rutas',
     dashboardTitle: 'Proyectos',
     dashboardHint:
       'Estado de descubrimiento según la última inspección persistida (sin re-probar al cargar).',
@@ -130,6 +152,28 @@ export class App implements OnInit {
   readonly discoveryMessage = signal<string | null>(null);
   readonly lastDiscovery = signal<ProjectDiscoveryDto | null>(null);
   readonly dashboardListState = signal<DashboardListState>('idle');
+  readonly reviewStages = REVIEW_STAGES;
+  readonly selectedReviewStage = signal<ReviewStage>('planning');
+  readonly contextResolveState = signal<ContextResolveUiState>('idle');
+  readonly contextResolveMessage = signal<string | null>(null);
+  readonly lastContextResolve = signal<ContextSourceResolveOkDto | null>(null);
+
+  readonly displayedContextPaths = computed(() => {
+    const result = this.lastContextResolve();
+    if (!result) {
+      return [] as string[];
+    }
+    return result.paths.slice(0, 200);
+  });
+
+  readonly contextPathCapCopy = computed(() => {
+    const result = this.lastContextResolve();
+    if (!result || result.pathCount <= 200) {
+      return null;
+    }
+    const copy = this.copy();
+    return `${copy.contextShowingCap} ${result.pathCount} ${copy.contextShowingCapSuffix}`;
+  });
 
   ngOnInit(): void {
     queueMicrotask(() => this.completeBootstrap());
@@ -316,11 +360,73 @@ export class App implements OnInit {
       });
   }
 
+  resolveContextSources(): void {
+    const id = this.selectedProjectId();
+    if (!id) {
+      return;
+    }
+    this.contextResolveState.set('loading');
+    this.contextResolveMessage.set(null);
+    this.lastContextResolve.set(null);
+
+    this.http
+      .post<unknown>(
+        `${environment.apiBaseUrl}/projects/${id}/context-sources/resolve`,
+        { stage: this.selectedReviewStage() },
+      )
+      .subscribe({
+        next: (payload) => {
+          if (!isContextSourceResolveOkDto(payload)) {
+            this.contextResolveState.set('error');
+            this.contextResolveMessage.set(
+              'La respuesta de resolución no es válida.',
+            );
+            return;
+          }
+          this.lastContextResolve.set(payload);
+          this.contextResolveState.set('success');
+        },
+        error: (err: unknown) => {
+          const payload = this.extractError(err);
+          this.contextResolveMessage.set(
+            payload?.message ?? 'No se pudieron resolver las fuentes de contexto.',
+          );
+          const status =
+            typeof err === 'object' &&
+            err !== null &&
+            'status' in err &&
+            typeof (err as { status: unknown }).status === 'number'
+              ? (err as { status: number }).status
+              : 0;
+          this.contextResolveState.set(
+            status === 422 || status === 404 ? 'blocked' : 'error',
+          );
+        },
+      });
+  }
+
   private extractError(err: unknown): ProjectErrorResponse | null {
     if (typeof err !== 'object' || err === null || !('error' in err)) {
       return null;
     }
     const body = (err as { error: unknown }).error;
-    return isProjectErrorResponse(body) ? body : null;
+    if (isProjectErrorResponse(body)) {
+      return body;
+    }
+    // 422 blocked resolve DTO also carries message/code
+    if (
+      typeof body === 'object' &&
+      body !== null &&
+      'code' in body &&
+      'message' in body &&
+      typeof (body as { code: unknown }).code === 'string' &&
+      typeof (body as { message: unknown }).message === 'string'
+    ) {
+      return {
+        code: (body as { code: string }).code,
+        message: (body as { message: string }).message,
+      };
+    }
+    return null;
   }
 }

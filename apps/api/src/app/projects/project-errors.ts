@@ -59,13 +59,30 @@ export const OPERATOR_MESSAGES: Record<ProjectErrorCode, string> = {
     'El proyecto aún no tiene un descubrimiento inspeccionado.',
   discovery_refresh_failed:
     'Ocurrió un error interno al actualizar el descubrimiento.',
+  invalid_review_stage:
+    'La etapa de revisión no es válida; use new, planning, applied o verify.',
+  context_path_escape:
+    'Se detectó un enlace simbólico fuera del repositorio canónico.',
+  context_entry_unreadable:
+    'No se pudo leer una entrada del repositorio durante la resolución de fuentes.',
+  context_resolution_limit_exceeded:
+    'Se superó el límite de recorrido o de rutas durante la resolución de fuentes.',
+  context_resolution_timeout:
+    'La resolución de fuentes de contexto superó el tiempo máximo permitido.',
+  context_resolve_failed:
+    'Ocurrió un error interno al resolver las fuentes de contexto.',
   internal_error: 'Ocurrió un error interno al registrar el proyecto.',
 };
 
 export class ProjectHttpError extends HttpException {
-  constructor(status: number, code: ProjectErrorCode, message?: string) {
+  constructor(
+    status: number,
+    code: ProjectErrorCode,
+    message?: string,
+    body?: Record<string, unknown>,
+  ) {
     super(
-      { code, message: message ?? OPERATOR_MESSAGES[code] },
+      body ?? { code, message: message ?? OPERATOR_MESSAGES[code] },
       status,
     );
   }
@@ -92,7 +109,8 @@ export function internal500(
   code:
     | 'internal_error'
     | 'configuration_refresh_failed'
-    | 'discovery_refresh_failed' = 'internal_error',
+    | 'discovery_refresh_failed'
+    | 'context_resolve_failed' = 'internal_error',
 ): ProjectHttpError {
   return new ProjectHttpError(HttpStatus.INTERNAL_SERVER_ERROR, code);
 }

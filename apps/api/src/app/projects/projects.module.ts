@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma.module';
 import { ConfigurationService } from './configuration.service';
+import { ContextSourceResolutionService } from './context-source-resolution.service';
 import { DiscoveryService } from './discovery.service';
 import { FILESYSTEM_PORT } from './filesystem.port';
 import { NodeFilesystemAdapter } from './node-filesystem.adapter';
@@ -15,6 +16,7 @@ import { ProjectsService } from './projects.service';
     ProjectsService,
     ConfigurationService,
     DiscoveryService,
+    ContextSourceResolutionService,
     ProjectYamlReader,
     NodeFilesystemAdapter,
     { provide: FILESYSTEM_PORT, useExisting: NodeFilesystemAdapter },

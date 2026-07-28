@@ -1,0 +1,8 @@
+archive: PASS
+timestamp_utc: 2026-07-28T23:53:00Z
+change: chg-w02-s01-context-source-resolution
+archive_path: openspec/changes/archive/2026-07-28-chg-w02-s01-context-source-resolution
+specsUpdated: false
+note: Specs synced before archive (task 9.3); archive does not re-sync.
+active_changes_remaining: 0
+operator_approval: continuous closure authorizing Verify through push

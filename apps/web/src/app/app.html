@@ -169,6 +169,7 @@
             <label class="shell__field">
               <span>Proyecto</span>
               <select
+                data-testid="project-select"
                 [ngModel]="selectedProjectId()"
                 (ngModelChange)="selectedProjectId.set($event)"
                 [disabled]="configurationState() === 'loading'"
@@ -290,6 +291,84 @@
                     copy().discoveryErrorTitle
                   }}</p-message>
                   <p>{{ discoveryMessage() }}</p>
+                </section>
+              }
+            </section>
+
+            <section class="shell__refresh" data-testid="context-resolve">
+              <p class="shell__tagline">{{ copy().contextResolveHint }}</p>
+              <label for="context-stage">{{ copy().contextStageLabel }}</label>
+              <select
+                id="context-stage"
+                data-testid="context-stage-select"
+                [ngModel]="selectedReviewStage()"
+                (ngModelChange)="selectedReviewStage.set($event)"
+              >
+                @for (stage of reviewStages; track stage) {
+                  <option [value]="stage">{{ stage }}</option>
+                }
+              </select>
+              <p-button
+                [label]="copy().contextResolveLabel"
+                (onClick)="resolveContextSources()"
+                [loading]="contextResolveState() === 'loading'"
+                [disabled]="
+                  contextResolveState() === 'loading' || !selectedProjectId()
+                "
+              />
+
+              @if (contextResolveState() === 'idle' && !lastContextResolve()) {
+                <p data-testid="context-resolve-idle">{{
+                  copy().contextResolveIdle
+                }}</p>
+              }
+
+              @if (contextResolveState() === 'loading') {
+                <p data-testid="context-resolve-loading">{{ copy().loading }}</p>
+              }
+
+              @if (
+                contextResolveState() === 'success' && lastContextResolve();
+                as resolved
+              ) {
+                <section data-testid="context-resolve-success">
+                  <p-message severity="success">{{
+                    resolved.pathCount === 0
+                      ? copy().contextResolveEmptyTitle
+                      : copy().contextResolveSuccessTitle
+                  }}</p-message>
+                  <p>
+                    etapa={{ resolved.stage }} rutas={{ resolved.pathCount }}
+                    hash={{ resolved.sourceHash.slice(0, 12) }}…
+                  </p>
+                  @if (contextPathCapCopy(); as cap) {
+                    <p data-testid="context-resolve-cap">{{ cap }}</p>
+                  }
+                  <ul data-testid="context-resolve-paths">
+                    @for (path of displayedContextPaths(); track path) {
+                      <li>{{ path }}</li>
+                    }
+                  </ul>
+                </section>
+              }
+
+              @if (
+                (contextResolveState() === 'blocked' ||
+                  contextResolveState() === 'error') &&
+                contextResolveMessage()
+              ) {
+                <section data-testid="context-resolve-blocked">
+                  <p-message
+                    [severity]="
+                      contextResolveState() === 'blocked' ? 'warn' : 'error'
+                    "
+                    >{{
+                      contextResolveState() === 'blocked'
+                        ? copy().contextResolveBlockedTitle
+                        : copy().contextResolveErrorTitle
+                    }}</p-message
+                  >
+                  <p>{{ contextResolveMessage() }}</p>
                 </section>
               }
             </section>

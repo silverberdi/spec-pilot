@@ -1,0 +1,18 @@
+exclusions-check (chg-w02-s01-context-source-resolution)
+
+PASS — scope verified against proposal/design/specs/tasks:
+
+[x] No Prisma schema/migration for resolve snapshots
+[x] No schemaVersion:1 per-stage context.stages overlays
+[x] No secret-content scanning / entropy detectors (w02-s02)
+[x] No immutable manifests, content hashes, token estimates (w02-s03)
+[x] No context preview/approval UI or gates (w02-s04)
+[x] No candidate file-byte reads for matching/hashing/tokens/preview
+[x] No DeepSeek product API calls
+[x] No delivery / Git-write / OpenSpec apply-verify-sync-archive controls
+[x] No authentication / multiuser
+[x] No Git subprocesses for submodule detection
+[x] No API pagination or per-path follow-up endpoints
+[x] No later-wave (w03+) review engine / budget / prompts scope
+
+Checked: 2026-07-28 during apply of chg-w02-s01-context-source-resolution.

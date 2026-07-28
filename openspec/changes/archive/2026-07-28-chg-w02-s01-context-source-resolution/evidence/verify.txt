@@ -1,0 +1,16 @@
+verify: PASS
+timestamp_utc: 2026-07-28T23:50:00Z
+change: chg-w02-s01-context-source-resolution
+operator_approval: continuous closure authorizing Verify through push (tasks 8.1 + 9.1)
+
+| Dimension | Result |
+|---|---|
+| Completeness | Tasks 1.1–8.2 and 9.1 complete; 9.2 is this Verify; 9.3–9.8 are post-Verify closure gates authorized in the same continuous pass |
+| Correctness | New `context-source-resolution` + five modified baselines covered by shared resolve DTOs/guards, walker/matcher (`lstat`, mandatory excludes, picomatch options, bounds), `POST /projects/:id/context-sources/resolve`, Spanish resolve console (200-path cap), unit/integration/web tests, operator human validation PASS (466 paths / empty success / invalid_review_stage) |
+| Coherence | Design D3–D7 binding (ephemeral resolve, closed 422 codes, symlink/lstat policy, defensive excludes, no content reads, no DB persistence of resolve results) reflected in API/web/contracts |
+| Deterministic checks | `QUALITY_GATES_OK`; `BASELINE_OK`; openspec validate --all --strict; human validation PASS (operator script) |
+
+Notes:
+- Task 8.1: operator human validation recorded PASS in `evidence/human-validation.md`
+- Task 8.2: no deferred AC recorded PASS in `evidence/no-deferred-ac.md`
+- Walker include-based directory pruning keeps SpecPilot self-resolve within timeout; axioma-db-dev untouched

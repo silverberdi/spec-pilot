@@ -31,7 +31,9 @@ Canonical context index for operator orientation. Formal integrity/generation ru
 | Shared contracts | `packages/shared-contracts/**` |
 | Prisma schema/migrations | `apps/api/prisma/**`, `apps/api/prisma.config.ts` |
 | Project registration (API) | `apps/api/src/app/projects/**` |
-| Project registration (web) | `apps/web` registration surface in `apps/web/src/app/*` |
+| Context-source resolution (API) | `apps/api/src/app/projects/context-source-*.ts`, `POST /projects/:id/context-sources/resolve` |
+| Project registration / resolve (web) | `apps/web` operator surfaces in `apps/web/src/app/*` |
+| Canonical capability: context-source-resolution | `openspec/specs/context-source-resolution/spec.md` |
 | Local Compose runtime | `compose.yaml`, `compose.override.example.yaml` (local `compose.override.yaml` gitignored), `apps/api/Dockerfile`, `apps/web/Dockerfile`, `.dockerignore`, `.env.example` |
 | Portable project contract (this repo) | `.specpilot/project.yaml` |
 | Quality-gate orchestrator | `scripts/run-quality-gates.sh` (`npm run quality-gates`) |
@@ -68,6 +70,6 @@ Refresh only with `openspec update`. Generated Codex and OpenCode inventories ar
 
 ## Active change
 
-- None (active OpenSpec change directory empty after archive of `chg-w00-s04-ci-quality-and-security-baseline`)
-- Latest archived: `openspec/changes/archive/2026-07-26-chg-w00-s04-ci-quality-and-security-baseline`
-- Prior archived: `openspec/changes/archive/2026-07-26-chg-w00-s03-postgresql-prisma-and-local-runtime`, `openspec/changes/archive/2026-07-26-chg-w00-s02-nx-angular-nest-baseline`, `openspec/changes/archive/2026-07-25-chg-w00-s01-repository-governance-and-openspec-foundation`
+- None (active OpenSpec change directory empty after archive of `chg-w02-s01-context-source-resolution`)
+- Latest archived: `openspec/changes/archive/2026-07-28-chg-w02-s01-context-source-resolution`
+- Prior archived: `openspec/changes/archive/2026-07-28-chg-w01-s04-project-dashboard`, `openspec/changes/archive/2026-07-28-chg-w01-s03-git-and-openspec-discovery`, `openspec/changes/archive/2026-07-28-chg-w01-s02-project-configuration`, `openspec/changes/archive/2026-07-27-chg-w01-s01-project-registration`, and Wave 0 archives under `openspec/changes/archive/`

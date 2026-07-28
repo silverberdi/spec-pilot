@@ -1,7 +1,7 @@
 {
   "project": "spec-pilot",
   "generated": "2026-07-28",
-  "fileCount": 266,
+  "fileCount": 269,
   "fileCountExcludesSelf": true,
   "semantics": {
     "fileCountExcludesSelf": true,
@@ -77,8 +77,8 @@
     },
     {
       "path": "apps/api/package.json",
-      "bytes": 564,
-      "sha256": "90a987cf378373e227079a96fcf02585a5c9c2568a84f3c918121f1926b1d8d1"
+      "bytes": 625,
+      "sha256": "6c06295c18baea346b19d4b7350f67297c45f7fd8aca8e2ed24c194451e92140"
     },
     {
       "path": "apps/api/prisma/migrations/20260726000000_init_app_metadata/migration.sql",
@@ -166,6 +166,21 @@
       "sha256": "ef19dbc12a492ca1ee682af308636bb64b2ccc64546f98d48e182933b878c598"
     },
     {
+      "path": "apps/api/src/app/projects/context-source-resolution.service.ts",
+      "bytes": 5340,
+      "sha256": "4a5f454c060336f9db100d21749a57cb80836381dfa976751caaf62aa32dbd6e"
+    },
+    {
+      "path": "apps/api/src/app/projects/context-source-walker.spec.ts",
+      "bytes": 7388,
+      "sha256": "977d6b1e6ce13bf14cf71ed390335555256207a7ce29476046d284ab6136d338"
+    },
+    {
+      "path": "apps/api/src/app/projects/context-source-walker.ts",
+      "bytes": 7913,
+      "sha256": "4493487462b52130f106594e1712188dec15acae545b5b27ff37a987abb560a3"
+    },
+    {
       "path": "apps/api/src/app/projects/discovery-health.spec.ts",
       "bytes": 4459,
       "sha256": "42ddde66f10986a6fcbac42e6580c96ee0fe17381670d0599adb42a8659b0019"
@@ -217,8 +232,8 @@
     },
     {
       "path": "apps/api/src/app/projects/project-errors.ts",
-      "bytes": 4336,
-      "sha256": "1f68bd1f62eb58391c355f5147288219e3abd8ccf87c421c4a5035481dd6cffe"
+      "bytes": 5076,
+      "sha256": "4c2f4013cfeffec25bb2f704a2af023b09f95195852dc75c88345e04dcb95b73"
     },
     {
       "path": "apps/api/src/app/projects/project-yaml-reader.ts",
@@ -237,18 +252,18 @@
     },
     {
       "path": "apps/api/src/app/projects/projects.controller.ts",
-      "bytes": 1546,
-      "sha256": "bd8ea937fcc22695a057abb2f1711154451177c18b3bcbe1d4f5e1f1b65b2d64"
+      "bytes": 1995,
+      "sha256": "a005cab471098ee808f626e06666c2a1600a5c061ef3c7aa9e9471f6a5bf14f3"
     },
     {
       "path": "apps/api/src/app/projects/projects.integration.spec.ts",
-      "bytes": 15780,
-      "sha256": "60d856d042d9fd9c17d6dd7a1193410b4a17bc43f145afbc40ade83c39d357e6"
+      "bytes": 22450,
+      "sha256": "cd4a58e6c84e8f1486b713cbe2496b136e8e0e9b5d333cffb7e5555c0e8e8a21"
     },
     {
       "path": "apps/api/src/app/projects/projects.module.ts",
-      "bytes": 821,
-      "sha256": "49f2f252fc9c7fdb409cba3ca7232cc526817010c43caf29a860acb24d402b7e"
+      "bytes": 943,
+      "sha256": "3f39be1347ef3c41e0bd14fc69cdbc33c89e8d3361f3cd611e1e4b47da165c1f"
     },
     {
       "path": "apps/api/src/app/projects/projects.service.ts",
@@ -337,18 +352,18 @@
     },
     {
       "path": "apps/web/src/app/app.html",
-      "bytes": 11337,
-      "sha256": "36f4256cf271138123827620dfd94afdf9cc54571647c5cd052fee2d7aafecca"
+      "bytes": 14573,
+      "sha256": "fea80c712dcb6c5b1098dea435f16a7ebc8c11af1c6f5431e3ecbbcf423a700c"
     },
     {
       "path": "apps/web/src/app/app.spec.ts",
-      "bytes": 16118,
-      "sha256": "43aecc11eeb8ab0ba06cc0ee0326ae29692ae58b950f8abfbd79c85ba8794736"
+      "bytes": 19875,
+      "sha256": "5c4b8d525a61b9e05d944821773d232239b594707bfcb6c2bcb305b15ad2442b"
     },
     {
       "path": "apps/web/src/app/app.ts",
-      "bytes": 11268,
-      "sha256": "6fe1f0f485579dbc234e508457ecce6825881e28936d893d91e11a1e4f93ee33"
+      "bytes": 14913,
+      "sha256": "6127f0ae86b98cfd9727d2e53439e775ca9e0464d73d67eb1f6f19ac5f7f8548"
     },
     {
       "path": "apps/web/src/environments/environment.local.example.ts",
@@ -1082,13 +1097,13 @@
     },
     {
       "path": "docs/context/current-state.md",
-      "bytes": 1227,
-      "sha256": "b99b22ea2e2bbf63675985551c26bfcb92dd4224112dfe358f575acd4e50d85d"
+      "bytes": 1497,
+      "sha256": "5d09610fe4c95714b93ae54654382231aa45242430c272e9841260381f6b5577"
     },
     {
       "path": "docs/context/file-index.md",
-      "bytes": 3732,
-      "sha256": "29042f9aa9d2fd6defe074d7182675b6bea6506484e1fb8b0e1d098e54daa390"
+      "bytes": 4049,
+      "sha256": "13fb1e5846158a957cc6abea5311b2e1a4543d05be577854f660015a80019272"
     },
     {
       "path": "docs/context/package-summary-semantics.md",
@@ -1272,8 +1287,8 @@
     },
     {
       "path": "package-lock.json",
-      "bytes": 1153699,
-      "sha256": "0babd8d6c9d9a4d395b3ee404dc0af2afdc791ece331575ea24c3bd6c3cca3ea"
+      "bytes": 1154520,
+      "sha256": "13555fd0a0d978910081da7b67ea5783be5a3756b8005f69993f6754f92464ba"
     },
     {
       "path": "package.json",
@@ -1312,18 +1327,18 @@
     },
     {
       "path": "packages/shared-contracts/dist/src/lib/shared-contracts.d.ts",
-      "bytes": 6826,
-      "sha256": "cc5b248ea66a1d43d76505ebb0fa26420f2890dc0360556359329f3c1bccc4a9"
+      "bytes": 9449,
+      "sha256": "d4e0e5343f0796959fdba333eeac72d1402a1f32f9a13bbf226c76560ac1fe8c"
     },
     {
       "path": "packages/shared-contracts/dist/src/lib/shared-contracts.js",
-      "bytes": 11835,
-      "sha256": "006286aa41b112ff22c3063f489d904e4f31494ef02d338a60be080871af1522"
+      "bytes": 15968,
+      "sha256": "66aee936f0cbd22fb765afe6ae8f000227ef497762c765a34f701efdc1175862"
     },
     {
       "path": "packages/shared-contracts/dist/src/lib/shared-contracts.js.map",
-      "bytes": 9309,
-      "sha256": "2af0b64a7b8122911df6dbdf896309cd3ffd0ed9b0df6aac881855a9705fc519"
+      "bytes": 12358,
+      "sha256": "22d4ab895b997a1c22dff05daf2b25a38555c54031d71adbc85ad6fa6e90ab46"
     },
     {
       "path": "packages/shared-contracts/jest.config.cts",
@@ -1347,13 +1362,13 @@
     },
     {
       "path": "packages/shared-contracts/src/lib/shared-contracts.spec.ts",
-      "bytes": 8571,
-      "sha256": "7334474ddd9b7b325f2ec1a5e5f29fba38db9a053c86b0ccc13e01052e906533"
+      "bytes": 10722,
+      "sha256": "b98d1bae541ed2b02f4839a7e46aeb1cde07caadc32e3622f15de39f93a7c8fb"
     },
     {
       "path": "packages/shared-contracts/src/lib/shared-contracts.ts",
-      "bytes": 14552,
-      "sha256": "d9c4370439ab5960d2e1d83154c5c8bca90ea7e8e4e61ce7dd0abf941c8dcce1"
+      "bytes": 19225,
+      "sha256": "07f11ed1f83f144a9f11fe1695378f43e07530f2c2a24b97c771588859bef269"
     },
     {
       "path": "packages/shared-contracts/tsconfig.json",

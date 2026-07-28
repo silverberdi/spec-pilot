@@ -2,12 +2,17 @@ import {
   createHealthResponse,
   createReadyResponse,
   DISPLAY_NAME_MAX_LENGTH,
+  isContextSourceResolveBlockedCode,
+  isContextSourceResolveBlockedDto,
+  isContextSourceResolveDto,
+  isContextSourceResolveOkDto,
   isHealthResponse,
   isProjectDiscoveryDto,
   isProjectDto,
   isProjectErrorResponse,
   isReadyResponse,
   isRegisterProjectResponse,
+  parseContextSourceResolveRequest,
   validateRegisterProjectRequest,
 } from './shared-contracts';
 
@@ -288,6 +293,80 @@ describe('shared-contracts discovery', () => {
       isProjectDiscoveryDto({
         ...okDiscovery,
         openspec: { status: 'blocked', message: 'missing code' },
+      }),
+    ).toBe(false);
+  });
+});
+
+describe('shared-contracts context-source resolution', () => {
+  const okResolve = {
+    status: 'ok' as const,
+    projectId: '11111111-1111-1111-1111-111111111111',
+    stage: 'planning' as const,
+    configurationVersionId: '22222222-2222-2222-2222-222222222222',
+    sourceHash: 'a'.repeat(64),
+    resolvedAt: '2026-07-28T00:00:00.000Z',
+    include: ['AGENTS.md'],
+    exclude: ['**/.env'],
+    pathCount: 1,
+    paths: ['AGENTS.md'],
+  };
+
+  it('accepts a well-formed ContextSourceResolveOkDto', () => {
+    expect(isContextSourceResolveOkDto(okResolve)).toBe(true);
+  });
+
+  it('rejects unknown review stages', () => {
+    expect(
+      isContextSourceResolveOkDto({ ...okResolve, stage: 'deploy' }),
+    ).toBe(false);
+    expect(parseContextSourceResolveRequest({ stage: 'deploy' }).ok).toBe(
+      false,
+    );
+  });
+
+  it('rejects unknown blocked codes including context_resolve_failed', () => {
+    expect(
+      isContextSourceResolveBlockedDto({
+        status: 'blocked',
+        projectId: okResolve.projectId,
+        stage: 'planning',
+        code: 'context_resolve_failed',
+        message: 'nope',
+      }),
+    ).toBe(false);
+    expect(
+      isContextSourceResolveBlockedCode('context_resolve_failed'),
+    ).toBe(false);
+  });
+
+  it('accepts closed blocked codes', () => {
+    expect(
+      isContextSourceResolveBlockedDto({
+        status: 'blocked',
+        projectId: okResolve.projectId,
+        stage: null,
+        code: 'invalid_review_stage',
+        message: 'bad stage',
+      }),
+    ).toBe(true);
+  });
+
+  it('rejects ambiguous resolve shapes', () => {
+    expect(
+      isContextSourceResolveOkDto({
+        ...okResolve,
+        pathCount: 2,
+      }),
+    ).toBe(false);
+    expect(
+      isContextSourceResolveDto({
+        status: 'blocked',
+        projectId: okResolve.projectId,
+        stage: 'planning',
+        code: 'configuration_not_found',
+        message: 'missing',
+        paths: [],
       }),
     ).toBe(false);
   });

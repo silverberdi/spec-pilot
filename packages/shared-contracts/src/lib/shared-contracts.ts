@@ -171,8 +171,87 @@ export const PROJECT_ERROR_CODES = [
   'openspec_inspection_limit_exceeded',
   'discovery_not_found',
   'discovery_refresh_failed',
+  'invalid_review_stage',
+  'context_path_escape',
+  'context_entry_unreadable',
+  'context_resolution_limit_exceeded',
+  'context_resolution_timeout',
+  'context_resolve_failed',
   'internal_error',
 ] as const;
+
+export const REVIEW_STAGES = [
+  'new',
+  'planning',
+  'applied',
+  'verify',
+] as const;
+
+export type ReviewStage = (typeof REVIEW_STAGES)[number];
+
+export type ContextSourceResolveRequest = {
+  stage: ReviewStage;
+};
+
+export const CONTEXT_SOURCE_RESOLVE_BLOCKED_CODES = [
+  'invalid_review_stage',
+  'configuration_not_found',
+  'invalid_context_patterns',
+  'context_path_escape',
+  'context_entry_unreadable',
+  'context_resolution_limit_exceeded',
+  'context_resolution_timeout',
+  'repository_not_found',
+  'repository_not_directory',
+  'repository_not_readable',
+] as const;
+
+export type ContextSourceResolveBlockedCode =
+  (typeof CONTEXT_SOURCE_RESOLVE_BLOCKED_CODES)[number];
+
+export type ContextSourceResolveOkDto = {
+  status: 'ok';
+  projectId: string;
+  stage: ReviewStage;
+  configurationVersionId: string;
+  sourceHash: string;
+  resolvedAt: string;
+  include: string[];
+  exclude: string[];
+  pathCount: number;
+  paths: string[];
+};
+
+export type ContextSourceResolveBlockedDto = {
+  status: 'blocked';
+  projectId: string;
+  stage: ReviewStage | null;
+  code: ContextSourceResolveBlockedCode;
+  message: string;
+};
+
+export type ContextSourceResolveDto =
+  | ContextSourceResolveOkDto
+  | ContextSourceResolveBlockedDto;
+
+export const CONTEXT_SOURCE_MAX_VISITED_ENTRIES = 100000;
+export const CONTEXT_SOURCE_MAX_MATCHED_FILES = 20000;
+export const CONTEXT_SOURCE_MAX_PATH_BYTES = 4194304;
+export const CONTEXT_SOURCE_RESOLVE_TIMEOUT_MS = 15000;
+
+export const MANDATORY_CONTEXT_EXCLUDES = [
+  '**/.env',
+  '**/.env.*',
+  '**/*.pem',
+  '**/*.key',
+  '**/secrets/**',
+] as const;
+
+export const PICOMATCH_RESOLVE_OPTIONS = {
+  dot: true,
+  nocase: false,
+  nonegate: true,
+} as const;
 
 export const GIT_DISCOVERY_BLOCKED_CODES = [
   'not_a_git_repository',
@@ -519,4 +598,99 @@ export function validateRegisterProjectRequest(
     ok: true,
     request: displayName === undefined ? { repositoryPath } : { repositoryPath, displayName },
   };
+}
+
+export function isReviewStage(value: unknown): value is ReviewStage {
+  return (
+    typeof value === 'string' &&
+    (REVIEW_STAGES as readonly string[]).includes(value)
+  );
+}
+
+export function isContextSourceResolveBlockedCode(
+  value: unknown,
+): value is ContextSourceResolveBlockedCode {
+  return (
+    typeof value === 'string' &&
+    (CONTEXT_SOURCE_RESOLVE_BLOCKED_CODES as readonly string[]).includes(value)
+  );
+}
+
+function isStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((item) => typeof item === 'string');
+}
+
+export function isContextSourceResolveOkDto(
+  value: unknown,
+): value is ContextSourceResolveOkDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (record['status'] !== 'ok') {
+    return false;
+  }
+  if ('code' in record) {
+    return false;
+  }
+  return (
+    typeof record['projectId'] === 'string' &&
+    isReviewStage(record['stage']) &&
+    typeof record['configurationVersionId'] === 'string' &&
+    typeof record['sourceHash'] === 'string' &&
+    typeof record['resolvedAt'] === 'string' &&
+    isStringArray(record['include']) &&
+    isStringArray(record['exclude']) &&
+    typeof record['pathCount'] === 'number' &&
+    Number.isFinite(record['pathCount']) &&
+    isStringArray(record['paths']) &&
+    record['pathCount'] === (record['paths'] as string[]).length
+  );
+}
+
+export function isContextSourceResolveBlockedDto(
+  value: unknown,
+): value is ContextSourceResolveBlockedDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (record['status'] !== 'blocked') {
+    return false;
+  }
+  if ('paths' in record || 'pathCount' in record) {
+    return false;
+  }
+  const stage = record['stage'];
+  const stageOk = stage === null || isReviewStage(stage);
+  return (
+    typeof record['projectId'] === 'string' &&
+    stageOk &&
+    isContextSourceResolveBlockedCode(record['code']) &&
+    typeof record['message'] === 'string'
+  );
+}
+
+export function isContextSourceResolveDto(
+  value: unknown,
+): value is ContextSourceResolveDto {
+  return (
+    isContextSourceResolveOkDto(value) ||
+    isContextSourceResolveBlockedDto(value)
+  );
+}
+
+export function parseContextSourceResolveRequest(
+  value: unknown,
+):
+  | { ok: true; request: ContextSourceResolveRequest }
+  | { ok: false; code: 'invalid_review_stage' } {
+  if (typeof value !== 'object' || value === null) {
+    return { ok: false, code: 'invalid_review_stage' };
+  }
+  const record = value as Record<string, unknown>;
+  if (!isReviewStage(record['stage'])) {
+    return { ok: false, code: 'invalid_review_stage' };
+  }
+  return { ok: true, request: { stage: record['stage'] } };
 }

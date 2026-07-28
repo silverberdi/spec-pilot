@@ -1,0 +1,25 @@
+OpenSpec spec sync for chg-w02-s01-context-source-resolution
+Date: 2026-07-28
+
+Created:
+- openspec/specs/context-source-resolution/spec.md (NEW capability; 9 requirements from ADDED delta)
+
+Modified:
+- openspec/specs/shared-libraries-baseline/spec.md (2 MODIFIED requirements)
+  - Domain packages and shared UI kit are excluded
+  - Project registration contracts and validators are exported
+- openspec/specs/local-project-registration/spec.md (1 ADDED requirement)
+  - Project-scoped context-source resolve endpoint is exposed under projects
+- openspec/specs/project-yaml-configuration/spec.md (1 ADDED requirement)
+  - Active configuration snapshots remain consumable for context-source resolution without schema expansion
+- openspec/specs/angular-web-console-baseline/spec.md (1 MODIFIED + 1 ADDED requirement)
+  - Spanish-first i18n-ready baseline shell
+  - Minimal Spanish-first context-source resolve console outcomes
+- openspec/specs/application-test-baseline/spec.md (1 MODIFIED + 1 ADDED requirement)
+  - Evidence is captured under the change directory (updated to chg-w02-s01-context-source-resolution)
+  - Context-source resolution success and blocked paths are covered by automated tests (appended)
+
+Validation:
+Command: ./node_modules/.bin/openspec validate --all --strict (+ package-summary, delivery-graph, secret scan, baseline, quality-gates)
+Result: PASS
+Totals: 24 passed, 0 failed (24 items)

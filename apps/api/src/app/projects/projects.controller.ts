@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
+import { ContextSourceResolutionService } from './context-source-resolution.service';
 import { DiscoveryService } from './discovery.service';
 import { ProjectsService } from './projects.service';
 
@@ -8,6 +9,7 @@ export class ProjectsController {
   constructor(
     private readonly projects: ProjectsService,
     private readonly discovery: DiscoveryService,
+    private readonly contextSources: ContextSourceResolutionService,
   ) {}
 
   @Post()
@@ -53,6 +55,17 @@ export class ProjectsController {
   @Get(':id/discovery')
   getDiscovery(@Param('id') id: string) {
     return this.discovery.getDiscovery(id);
+  }
+
+  @Post(':id/context-sources/resolve')
+  async resolveContextSources(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
+    const result = await this.contextSources.resolve(id, body);
+    reply.code(200);
+    return result;
   }
 
   @Get(':id')
