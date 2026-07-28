@@ -10,6 +10,15 @@ import Aura from '@primeuix/themes/aura';
 import { App } from './app';
 import { environment } from '../environments/environment.local';
 
+const neverInspectedHealth = {
+  status: 'never_inspected' as const,
+  inspectedAt: null,
+  gitStatus: 'unknown' as const,
+  openspecStatus: 'unknown' as const,
+  summaryMessage: null,
+};
+
+
 const version = {
   id: '22222222-2222-2222-2222-222222222222',
   projectId: '11111111-1111-1111-1111-111111111111',
@@ -69,7 +78,137 @@ describe('App shell and registration', () => {
     const el: HTMLElement = fixture.nativeElement;
     expect(el.textContent).toContain('SpecPilot');
     expect(el.querySelector('[data-state="success"]')).toBeTruthy();
+    expect(el.querySelector('[data-testid="dashboard-empty"]')).toBeTruthy();
     expect(el.querySelector('[data-testid="empty-registry"]')).toBeTruthy();
+  });
+
+  it('shows dashboard loading then populated health rows in API order', async () => {
+    fixture = TestBed.createComponent(App);
+    fixture.componentRef.setInput('bootstrapMode', 'ok');
+    fixture.detectChanges();
+    await flushMicrotasks();
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="dashboard-loading"]'),
+    ).toBeTruthy();
+
+    flushProjectsList([
+      {
+        id: 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+        slug: 'newer',
+        displayName: 'newer',
+        repositoryPath: '/tmp/newer',
+        status: 'registered',
+        registeredAt: '2026-07-28T02:00:00.000Z',
+        lastInspectedAt: null,
+        configurationVersionId: null,
+        discoveryHealth: neverInspectedHealth,
+      },
+      {
+        id: 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+        slug: 'older-blocked',
+        displayName: 'older-blocked',
+        repositoryPath: '/tmp/older',
+        status: 'registered',
+        registeredAt: '2026-07-28T01:00:00.000Z',
+        lastInspectedAt: '2026-07-28T01:30:00.000Z',
+        configurationVersionId: version.id,
+        discoveryHealth: {
+          status: 'blocked',
+          inspectedAt: '2026-07-28T01:30:00.000Z',
+          gitStatus: 'blocked',
+          openspecStatus: 'ok',
+          summaryMessage: 'No es un repositorio Git.',
+        },
+      },
+    ]);
+    fixture.detectChanges();
+
+    const rows = fixture.nativeElement.querySelectorAll(
+      '[data-testid="dashboard-row"]',
+    );
+    expect(rows.length).toBe(2);
+    expect(rows[0].getAttribute('data-project-id')).toBe(
+      'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+    );
+    expect(rows[0].getAttribute('data-health')).toBe('never_inspected');
+    expect(rows[1].getAttribute('data-health')).toBe('blocked');
+    expect(fixture.nativeElement.textContent).toContain('Sin inspeccionar');
+    expect(fixture.nativeElement.textContent).toContain('Con incidencias');
+    expect(fixture.nativeElement.textContent).toContain(
+      'No es un repositorio Git.',
+    );
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="dashboard-loading"]'),
+    ).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="dashboard-empty"]'),
+    ).toBeNull();
+    // Selector shares the same projects() collection.
+    const options = fixture.nativeElement.querySelectorAll(
+      '[data-testid="configuration-refresh"] select option',
+    );
+    expect(options.length).toBe(2);
+    expect(options[0].textContent).toContain('newer');
+    expect(options[1].textContent).toContain('older-blocked');
+    expect(rows[0].querySelector('[data-testid="dashboard-identity"]')?.textContent).toContain(
+      'newer',
+    );
+    expect(rows[0].querySelector('[data-testid="dashboard-config"]')?.textContent).toContain(
+      'Sin configuración activa',
+    );
+  });
+
+  it('rejects stale list payload missing discoveryHealth without rendering a bullet row', async () => {
+    fixture = TestBed.createComponent(App);
+    fixture.componentRef.setInput('bootstrapMode', 'ok');
+    fixture.detectChanges();
+    await flushMicrotasks();
+    flushProjectsList([
+      {
+        id: '11111111-1111-1111-1111-111111111111',
+        slug: 'spec-pilot',
+        displayName: 'spec-pilot',
+        repositoryPath: '/tmp/spec-pilot',
+        status: 'registered',
+        registeredAt: '2026-07-28T00:00:00.000Z',
+        lastInspectedAt: '2026-07-28T19:39:24.485Z',
+        configurationVersionId: version.id,
+        // intentionally omit discoveryHealth (stale API contract)
+      },
+    ]);
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="dashboard-error"]'),
+    ).toBeTruthy();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="dashboard-row"]'),
+    ).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="dashboard-list"]'),
+    ).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="dashboard-loading"]'),
+    ).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="dashboard-empty"]'),
+    ).toBeNull();
+  });
+
+  it('shows dashboard error when list request fails', async () => {
+    fixture = TestBed.createComponent(App);
+    fixture.componentRef.setInput('bootstrapMode', 'ok');
+    fixture.detectChanges();
+    await flushMicrotasks();
+    const req = httpMock.expectOne(`${environment.apiBaseUrl}/projects`);
+    req.flush(
+      { code: 'internal_error', message: 'boom' },
+      { status: 500, statusText: 'Server Error' },
+    );
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="dashboard-error"]'),
+    ).toBeTruthy();
   });
 
   it('surfaces an explicit error state for invalid bootstrap', async () => {
@@ -111,6 +250,7 @@ describe('App shell and registration', () => {
       registeredAt: '2026-07-27T00:00:00.000Z',
       lastInspectedAt: null,
       configurationVersionId: version.id,
+      discoveryHealth: neverInspectedHealth,
       configuration: { status: 'attached', version },
     });
     flushProjectsList([
@@ -123,6 +263,7 @@ describe('App shell and registration', () => {
         registeredAt: '2026-07-27T00:00:00.000Z',
         lastInspectedAt: null,
         configurationVersionId: version.id,
+        discoveryHealth: neverInspectedHealth,
       },
     ]);
     fixture.detectChanges();
@@ -156,6 +297,7 @@ describe('App shell and registration', () => {
       registeredAt: '2026-07-27T00:00:00.000Z',
       lastInspectedAt: null,
       configurationVersionId: null,
+      discoveryHealth: neverInspectedHealth,
       configuration: {
         status: 'blocked',
         error: {
@@ -174,6 +316,7 @@ describe('App shell and registration', () => {
         registeredAt: '2026-07-27T00:00:00.000Z',
         lastInspectedAt: null,
         configurationVersionId: null,
+        discoveryHealth: neverInspectedHealth,
       },
     ]);
     fixture.detectChanges();
@@ -223,6 +366,7 @@ describe('App shell and registration', () => {
         registeredAt: '2026-07-27T00:00:00.000Z',
         lastInspectedAt: null,
         configurationVersionId: null,
+        discoveryHealth: neverInspectedHealth,
       },
     ]);
     fixture.detectChanges();
@@ -248,6 +392,7 @@ describe('App shell and registration', () => {
         registeredAt: '2026-07-27T00:00:00.000Z',
         lastInspectedAt: null,
         configurationVersionId: version.id,
+        discoveryHealth: neverInspectedHealth,
       },
     ]);
     fixture.detectChanges();
@@ -273,6 +418,7 @@ describe('App shell and registration', () => {
         registeredAt: '2026-07-27T00:00:00.000Z',
         lastInspectedAt: null,
         configurationVersionId: null,
+        discoveryHealth: neverInspectedHealth,
       },
     ]);
     fixture.detectChanges();
@@ -319,6 +465,7 @@ describe('App shell and registration', () => {
         registeredAt: '2026-07-27T00:00:00.000Z',
         lastInspectedAt: '2026-07-28T12:00:00.000Z',
         configurationVersionId: null,
+        discoveryHealth: neverInspectedHealth,
       },
     ]);
     fixture.detectChanges();

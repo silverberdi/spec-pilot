@@ -16,6 +16,7 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { AppModule } from '../app.module';
+import { PrismaService } from '../prisma.service';
 import { DISPLAY_NAME_MAX_LENGTH } from '@specpilot/shared-contracts';
 import { validProjectYaml } from './valid-project-yaml.fixture';
 
@@ -96,6 +97,13 @@ describe('Project registration and configuration (Testcontainers)', () => {
     expect(body.repositoryPath).toBe(expectedCanonical);
     expect(body.status).toBe('registered');
     expect(body.lastInspectedAt).toBeNull();
+    expect(body.discoveryHealth).toEqual({
+      status: 'never_inspected',
+      inspectedAt: null,
+      gitStatus: 'unknown',
+      openspecStatus: 'unknown',
+      summaryMessage: null,
+    });
     expect(body.configuration.status).toBe('attached');
     expect(body.configurationVersionId).toBe(body.configuration.version.id);
     expect(body.configuration.version.sourceHash).toMatch(/^[a-f0-9]{64}$/);
@@ -368,5 +376,84 @@ describe('Project registration and configuration (Testcontainers)', () => {
       url: `/projects/${project.id}`,
     });
     expect(JSON.parse(getProject.body).lastInspectedAt).toBeNull();
+  });
+
+  it('GET /projects returns discoveryHealth and registeredAt DESC order', async () => {
+    const empty = await app.inject({ method: 'GET', url: '/projects' });
+    expect(empty.statusCode).toBe(200);
+    // Prior tests may have left projects; still assert ordering among new pair.
+    const olderRepo = await makeEligibleRepo('dash-older');
+    const newerRepo = await makeEligibleRepo('dash-newer');
+
+    const older = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: olderRepo },
+    });
+    expect(older.statusCode).toBe(201);
+    const olderBody = JSON.parse(older.body);
+
+    await new Promise((r) => setTimeout(r, 20));
+
+    const newer = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: newerRepo },
+    });
+    expect(newer.statusCode).toBe(201);
+    const newerBody = JSON.parse(newer.body);
+
+    const list = await app.inject({ method: 'GET', url: '/projects' });
+    expect(list.statusCode).toBe(200);
+    const rows = JSON.parse(list.body) as Array<{
+      id: string;
+      registeredAt: string;
+      discoveryHealth: { status: string };
+    }>;
+    expect(Array.isArray(rows)).toBe(true);
+    expect(rows.every((r) => r.discoveryHealth?.status)).toBe(true);
+
+    const olderIdx = rows.findIndex((r) => r.id === olderBody.id);
+    const newerIdx = rows.findIndex((r) => r.id === newerBody.id);
+    expect(olderIdx).toBeGreaterThanOrEqual(0);
+    expect(newerIdx).toBeGreaterThanOrEqual(0);
+    expect(newerIdx).toBeLessThan(olderIdx);
+    expect(newerBody.discoveryHealth.status).toBe('never_inspected');
+
+    // Blocked discovery should surface on list health.
+    const blockedRefresh = await app.inject({
+      method: 'POST',
+      url: `/projects/${newerBody.id}/discovery/refresh`,
+    });
+    expect(blockedRefresh.statusCode).toBe(200);
+
+    const listAfter = await app.inject({ method: 'GET', url: '/projects' });
+    const afterRows = JSON.parse(listAfter.body) as Array<{
+      id: string;
+      discoveryHealth: { status: string };
+      lastDiscovery?: unknown;
+    }>;
+    const newerAfter = afterRows.find((r) => r.id === newerBody.id);
+    expect(newerAfter?.discoveryHealth.status).toBe('blocked');
+    expect(newerAfter).not.toHaveProperty('lastDiscovery');
+
+    // Partial persistence → invalid, list still 200.
+    const prisma = app.get(PrismaService);
+    await prisma.project.update({
+      where: { id: olderBody.id },
+      data: { lastInspectedAt: new Date('2026-07-28T15:00:00.000Z') },
+    });
+    const listInvalid = await app.inject({ method: 'GET', url: '/projects' });
+    expect(listInvalid.statusCode).toBe(200);
+    const invalidRow = (
+      JSON.parse(listInvalid.body) as Array<{
+        id: string;
+        discoveryHealth: { status: string; summaryMessage: string | null };
+      }>
+    ).find((r) => r.id === olderBody.id);
+    expect(invalidRow?.discoveryHealth.status).toBe('invalid');
+    expect(invalidRow?.discoveryHealth.summaryMessage).toBe(
+      'No fue posible interpretar el último resultado de descubrimiento.',
+    );
   });
 });

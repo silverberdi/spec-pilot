@@ -25,15 +25,15 @@ The repository SHALL provide `apps/web` as an Angular major 22 standalone applic
 - **THEN** PrimeNG 22, PrimeIcons, and the required official themes package are present and PrimeNG is configured via official standalone providers
 
 ### Requirement: Spanish-first i18n-ready baseline shell
-The web console MUST present SpecPilot-branded content with Spanish as the default operator-facing locale and MUST remain i18n-ready through a minimal translation or locale boundary. This change MAY implement a minimal project-registration, project-configuration, and Git/OpenSpec discovery operator surface in `apps/web` as required by `local-project-registration`, `project-yaml-configuration`, and `git-and-openspec-discovery` (register attach outcomes, explicit configuration refresh, and explicit discovery refresh/get outcomes). This change MUST NOT implement complete product internationalization, accessibility polish, light/dark/system theme switching, or a project dashboard / multi-project discovery-health listing UI (those remain later-slice scope).
+The web console MUST present SpecPilot-branded content with Spanish as the default operator-facing locale and MUST remain i18n-ready through a minimal translation or locale boundary. This change MAY implement a minimal project-registration, project-configuration, Git/OpenSpec discovery, and multi-project project-dashboard operator surface in `apps/web` as required by `local-project-registration`, `project-yaml-configuration`, `git-and-openspec-discovery`, and `project-dashboard` (register attach outcomes, explicit configuration refresh, explicit discovery refresh/get outcomes, and discovery-health listing). This change MUST NOT implement complete product internationalization, accessibility polish, or light/dark/system theme switching (those remain later-slice scope).
 
-#### Scenario: Spanish registration configuration and discovery surface is allowed
-- **WHEN** the web console loads the project-registration, configuration-outcomes, and discovery-outcomes operator surface delivered by this change
-- **THEN** SpecPilot-branded Spanish default operator-facing copy is shown for that registration, configuration, and discovery flow
+#### Scenario: Spanish registration configuration discovery and dashboard surface is allowed
+- **WHEN** the web console loads the project-registration, configuration-outcomes, discovery-outcomes, and project-dashboard operator surfaces delivered by this change
+- **THEN** SpecPilot-branded Spanish default operator-facing copy is shown for those flows
 
-#### Scenario: Dashboard and theme product features remain deferred
+#### Scenario: Full i18n and theme product features remain deferred
 - **WHEN** the web console scope for this change is inspected
-- **THEN** full product i18n coverage, accessibility polish, light/dark/system theme switching, and project dashboard / multi-project discovery-health UI are not required or claimed as delivered by this change
+- **THEN** full product i18n coverage, accessibility polish, and light/dark/system theme switching are not required or claimed as delivered by this change
 
 ### Requirement: Shell exposes success, loading, and error behavior
 The baseline shell MUST expose clear success, loading, and error behavior for shell bootstrap. If a shell region has no content yet, the UI MUST show an explicit empty placeholder rather than a blank failure state.

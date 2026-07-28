@@ -1,0 +1,8 @@
+post-push: recorded
+timestamp_utc: 2026-07-28T18:10:00Z
+task_11_8: GitHub Actions is independent post-push remote verification.
+commit: 7d6671d feat(projects): add read-only Git and OpenSpec discovery
+push: origin/main updated 089f50f..7d6671d
+ci_run: https://github.com/silverberdi/spec-pilot/actions/runs/30385967888
+ci_conclusion: success
+note: Local post-push evidence and task 11.7/11.8 checkbox updates remain working-tree-only; no second routine follow-up commit.

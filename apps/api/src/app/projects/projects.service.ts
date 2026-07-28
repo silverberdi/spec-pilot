@@ -2,6 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import {
   DISPLAY_NAME_MAX_LENGTH,
+  isProjectDiscoveryDto,
   type ProjectDto,
   type RegisterProjectRequest,
   type RegisterProjectResponse,
@@ -9,6 +10,7 @@ import {
 } from '@specpilot/shared-contracts';
 import { PrismaService } from '../prisma.service';
 import { ConfigurationService } from './configuration.service';
+import { deriveDiscoveryHealth } from './discovery-health';
 import {
   FILESYSTEM_PORT,
   type FilesystemPort,
@@ -140,7 +142,7 @@ export class ProjectsService {
 
   async list(): Promise<ProjectDto[]> {
     const rows = await this.prisma.project.findMany({
-      orderBy: { registeredAt: 'asc' },
+      orderBy: [{ registeredAt: 'desc' }, { id: 'asc' }],
     });
     return rows.map((row) => this.toDto(row));
   }
@@ -195,8 +197,17 @@ export class ProjectsService {
     status: string;
     registeredAt: Date;
     lastInspectedAt: Date | null;
+    lastDiscovery?: unknown;
     configurationVersionId?: string | null;
   }): ProjectDto {
+    if (
+      row.lastDiscovery != null &&
+      !isProjectDiscoveryDto(row.lastDiscovery)
+    ) {
+      this.logger.warn(
+        `Stored lastDiscovery failed type guard for project ${row.id}`,
+      );
+    }
     return {
       id: row.id,
       slug: row.slug,
@@ -208,6 +219,11 @@ export class ProjectsService {
         ? row.lastInspectedAt.toISOString()
         : null,
       configurationVersionId: row.configurationVersionId ?? null,
+      discoveryHealth: deriveDiscoveryHealth(
+        row.id,
+        row.lastInspectedAt,
+        row.lastDiscovery ?? null,
+      ),
     };
   }
 }

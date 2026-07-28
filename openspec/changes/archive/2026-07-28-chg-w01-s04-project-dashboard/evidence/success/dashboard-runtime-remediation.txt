@@ -1,0 +1,16 @@
+=== root cause remediation evidence ===
+timestamp_utc: 2026-07-28T19:50:35Z
+root_cause: stale specpilot-api image lacked ProjectDto.discoveryHealth; web template NPE left lone bullet + stuck loading
+remediation: rebuilt/recreated specpilot-api + specpilot-web; web fail-closed isProjectDto list guard; regression tests
+
+=== GET /projects ===
+[{"id":"8b590467-0fbb-4160-868e-06bd5eee931e","slug":"spec-pilot","displayName":"spec-pilot","repositoryPath":"/Users/silveriobernal/Documents/Code/Development/spec-pilot","status":"registered","registeredAt":"2026-07-27T22:18:09.064Z","lastInspectedAt":"2026-07-28T19:39:24.485Z","configurationVersionId":"54211646-50a0-42c1-9b84-ccf066ecaebd","discoveryHealth":{"status":"ok","inspectedAt":"2026-07-28T19:39:24.485Z","gitStatus":"ok","openspecStatus":"ok","summaryMessage":null}}]
+
+=== containers ===
+specpilot-web	Up 33 seconds	2026-07-28 14:50:01 -0500 -05
+specpilot-api	Up 2 minutes	2026-07-28 14:47:42 -0500 -05
+specpilot-postgres	Up 22 hours (healthy)	2026-07-27 16:51:02 -0500 -05
+axioma-db-dev	Up 25 hours	2026-03-14 19:23:56 -0500 -05
+
+=== axioma unchanged ===
+name=/axioma-db-dev status=running started=2026-07-27T19:03:39.767345875Z

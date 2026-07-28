@@ -1,0 +1,5 @@
+archive: PASS
+timestamp_utc: 2026-07-28T20:05:00Z
+target: openspec/changes/archive/2026-07-28-chg-w01-s04-project-dashboard
+specsUpdated: false (already synced in 9.3; archive used --skip-specs)
+active_changes_remaining: 0

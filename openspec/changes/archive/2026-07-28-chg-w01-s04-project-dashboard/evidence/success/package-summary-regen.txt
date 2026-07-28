@@ -1,0 +1,1 @@
+wrote /Users/silveriobernal/Documents/Code/Development/spec-pilot/package-summary.json fileCount=266 (excludes self) candidates=7 waves=12 slices=42 stories=126

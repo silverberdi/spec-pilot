@@ -1,0 +1,16 @@
+verify: PASS
+timestamp_utc: 2026-07-28T20:00:00Z
+change: chg-w01-s04-project-dashboard
+operator_approval: continuous closure authorizing Verify through push (tasks 8.1 + 9.1)
+
+| Dimension | Result |
+|---|---|
+| Completeness | Tasks 1.1–8.2 and 9.1 complete; 9.2 is this Verify; 9.3–9.8 are post-Verify closure gates authorized in the same continuous pass |
+| Correctness | `project-dashboard` + five modified baselines covered by `discoveryHealth` derivation/mapper, enriched `ProjectDto` list/detail/register, Spanish Proyectos dashboard, fail-closed list parse, tests/evidence, operator human validation PASS |
+| Coherence | Design D2/D3/D4 binding (fail-closed matrix, closed Spanish summaryMessage, registeredAt DESC/id ASC, no auto-discovery, no GET /dashboard) reflected in API/web/contracts |
+| Deterministic checks | `QUALITY_GATES_OK`; `BASELINE_OK`; openspec validate --all --strict; human validation PASS (Spanish console) |
+
+Notes:
+- Task 8.1: operator human validation recorded PASS in `evidence/human-validation.md`
+- Task 8.2: no deferred AC recorded PASS in `evidence/no-deferred-ac.md`
+- Prior stale-API remediation verified; axioma-db-dev untouched

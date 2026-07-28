@@ -13,7 +13,10 @@ import type {
   ProjectErrorResponse,
   RegisterProjectResponse,
 } from '@specpilot/shared-contracts';
-import { isProjectErrorResponse } from '@specpilot/shared-contracts';
+import {
+  isProjectDto,
+  isProjectErrorResponse,
+} from '@specpilot/shared-contracts';
 import { environment } from '../environments/environment.local';
 
 export type ShellState = 'loading' | 'success' | 'error';
@@ -35,6 +38,7 @@ export type DiscoveryUiState =
   | 'success'
   | 'blocked'
   | 'error';
+export type DashboardListState = 'idle' | 'loading' | 'success' | 'error';
 
 /** Minimal i18n-ready copy boundary (Spanish default). */
 export const shellCopy = {
@@ -68,6 +72,19 @@ export const shellCopy = {
     discoveryErrorTitle: 'Error al actualizar el descubrimiento',
     discoveryReadOnlyHint:
       'Inspección de solo lectura: SpecPilot no modifica el repositorio ni ejecuta flujos de entrega.',
+    dashboardTitle: 'Proyectos',
+    dashboardHint:
+      'Estado de descubrimiento según la última inspección persistida (sin re-probar al cargar).',
+    dashboardEmpty: 'Aún no hay proyectos registrados.',
+    dashboardLoading: 'Cargando proyectos…',
+    dashboardError: 'No se pudo cargar el listado de proyectos.',
+    dashboardHealthNever: 'Sin inspeccionar',
+    dashboardHealthOk: 'Correcto',
+    dashboardHealthBlocked: 'Con incidencias',
+    dashboardHealthInvalid: 'Inválido',
+    dashboardConfigAttached: 'Configuración activa',
+    dashboardConfigMissing: 'Sin configuración activa',
+    dashboardInspectedAt: 'Inspeccionado',
   },
 } as const;
 
@@ -112,6 +129,7 @@ export class App implements OnInit {
   readonly discoveryState = signal<DiscoveryUiState>('idle');
   readonly discoveryMessage = signal<string | null>(null);
   readonly lastDiscovery = signal<ProjectDiscoveryDto | null>(null);
+  readonly dashboardListState = signal<DashboardListState>('idle');
 
   ngOnInit(): void {
     queueMicrotask(() => this.completeBootstrap());
@@ -126,16 +144,41 @@ export class App implements OnInit {
     queueMicrotask(() => this.refreshProjects());
   }
 
+  discoveryHealthLabel(
+    status: ProjectDto['discoveryHealth']['status'],
+  ): string {
+    const copy = this.copy();
+    switch (status) {
+      case 'never_inspected':
+        return copy.dashboardHealthNever;
+      case 'ok':
+        return copy.dashboardHealthOk;
+      case 'blocked':
+        return copy.dashboardHealthBlocked;
+      case 'invalid':
+        return copy.dashboardHealthInvalid;
+    }
+  }
+
   refreshProjects(): void {
-    this.http.get<ProjectDto[]>(`${environment.apiBaseUrl}/projects`).subscribe({
-      next: (list) => {
-        this.projects.set(list);
-        if (list.length > 0 && !this.selectedProjectId()) {
-          this.selectedProjectId.set(list[0]!.id);
+    this.dashboardListState.set('loading');
+    this.http.get<unknown>(`${environment.apiBaseUrl}/projects`).subscribe({
+      next: (payload) => {
+        if (!Array.isArray(payload) || !payload.every(isProjectDto)) {
+          // Fail closed: do not render a partial/invalid list as success.
+          this.dashboardListState.set('error');
+          return;
+        }
+        // Preserve API order (registeredAt DESC, id ASC); no client-side sort.
+        this.projects.set(payload);
+        this.dashboardListState.set('success');
+        if (payload.length > 0 && !this.selectedProjectId()) {
+          this.selectedProjectId.set(payload[0]!.id);
         }
       },
       error: () => {
-        // Empty-state still usable if list fails; keep prior list.
+        this.dashboardListState.set('error');
+        // Keep prior list if present; do not pretend empty solely on failure.
       },
     });
   }

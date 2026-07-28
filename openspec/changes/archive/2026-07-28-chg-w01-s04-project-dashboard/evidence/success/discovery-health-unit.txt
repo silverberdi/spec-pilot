@@ -1,0 +1,164 @@
+=== unit/app tests ===
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> nx run shared-contracts:test
+
+> jest
+
+(node:78285) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m15 passed[39m[22m, 15 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        0.802 s, estimated 1 s
+[2mRan all test suites[22m[2m.[22m
+
+
+
+ NX   Successfully ran target test for project shared-contracts
+
+
+Your AI agent configuration is outdated. Run "nx configure-ai-agents" to update.
+
+  Run duration:      1.2s
+  Cache:             Skipped (--skip-nx-cache)
+  Critical path:     1.2s (1 task)
+  Recoverable time:  <1ms
+
+  Recommendations:
+    - Cache: drop --skip-nx-cache to restore unchanged tasks instantly.
+    - Speed up or split the longest tasks on the critical path:
+        shared-contracts:test    1.2s
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ NX   Running target test for project api and 1 task it depends on:
+
+
+
+> nx run shared-contracts:build
+
+(node:78376) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Compiling TypeScript files for project "shared-contracts"...
+Done compiling TypeScript files for project "shared-contracts".
+
+> nx run api:test --testPathPatterns=discovery-health|projects.integration|git-inspector|openspec-inspector|project-yaml
+
+> jest --passWithNoTests=true --testPathPatterns="discovery-health|projects.integration|git-inspector|openspec-inspector|project-yaml"
+
+(node:78382) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:78436) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:78435) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:78437) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:78439) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:78438) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /Users/silveriobernal/Documents/Code/Development/spec-pilot/packages/shared-contracts/dist/src/index.js). To fix this:
+  - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+  - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+
+[1mTest Suites: [22m[1m[32m5 passed[39m[22m, 5 total
+[1mTests:       [22m[1m[32m43 passed[39m[22m, 43 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        6.38 s, estimated 8 s
+[2mRan all test suites[22m[2m matching [22mdiscovery-health|projects.integration|git-inspector|openspec-inspector|project-yaml[2m.[22m
+
+
+
+ NX   Successfully ran target test for project api and 1 task it depends on
+
+
+Your AI agent configuration is outdated. Run "nx configure-ai-agents" to update.
+
+  Run duration:      7.5s
+  Cache:             Skipped (--skip-nx-cache)
+  Critical path:     7.4s (2 tasks)
+  Recoverable time:  <1ms
+
+  Recommendations:
+    - Cache: drop --skip-nx-cache to restore unchanged tasks instantly.
+    - Speed up or split the longest tasks on the critical path:
+        api:test                   6.6s
+        shared-contracts:build    771ms
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ NX   Running target test for project web and 1 task it depends on:
+
+
+
+> nx run shared-contracts:build
+
+(node:78878) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Compiling TypeScript files for project "shared-contracts"...
+Done compiling TypeScript files for project "shared-contracts".
+
+> nx run web:test
+
+(node:78896) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+The `@nx/jest:jest` executor is deprecated and will be removed in Nx v24. Run `nx g @nx/jest:convert-to-inferred` to migrate to the `@nx/jest/plugin` inferred targets. See https://nx.dev/docs/guides/tasks--caching/convert-to-inferred for details.
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m9 passed[39m[22m, 9 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        1.515 s, estimated 2 s
+[2mRan all test suites[22m[2m.[22m
+
+
+
+ NX   Successfully ran target test for project web and 1 task it depends on
+
+
+Your AI agent configuration is outdated. Run "nx configure-ai-agents" to update.
+
+  Run duration:      2.8s
+  Cache:             Skipped (--skip-nx-cache)
+  Critical path:     2.8s (2 tasks)
+  Recoverable time:  <1ms
+
+  Recommendations:
+    - Cache: drop --skip-nx-cache to restore unchanged tasks instantly.
+    - Speed up or split the longest tasks on the critical path:
+        web:test                   1.9s
+        shared-contracts:build    915ms

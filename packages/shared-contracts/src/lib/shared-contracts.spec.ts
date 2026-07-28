@@ -49,6 +49,14 @@ const version = {
   createdAt: '2026-07-27T00:00:00.000Z',
 };
 
+const neverInspectedHealth = {
+  status: 'never_inspected' as const,
+  inspectedAt: null,
+  gitStatus: 'unknown' as const,
+  openspecStatus: 'unknown' as const,
+  summaryMessage: null,
+};
+
 describe('shared-contracts project registration', () => {
   it('accepts a well-formed ProjectDto', () => {
     expect(
@@ -61,8 +69,43 @@ describe('shared-contracts project registration', () => {
         registeredAt: '2026-07-27T00:00:00.000Z',
         lastInspectedAt: null,
         configurationVersionId: null,
+        discoveryHealth: neverInspectedHealth,
       }),
     ).toBe(true);
+  });
+
+  it('rejects ProjectDto missing discoveryHealth', () => {
+    expect(
+      isProjectDto({
+        id: '11111111-1111-1111-1111-111111111111',
+        slug: 'demo-repo',
+        displayName: 'demo-repo',
+        repositoryPath: '/tmp/demo-repo',
+        status: 'registered',
+        registeredAt: '2026-07-27T00:00:00.000Z',
+        lastInspectedAt: null,
+        configurationVersionId: null,
+      }),
+    ).toBe(false);
+  });
+
+  it('rejects unknown discoveryHealth status', () => {
+    expect(
+      isProjectDto({
+        id: '11111111-1111-1111-1111-111111111111',
+        slug: 'demo-repo',
+        displayName: 'demo-repo',
+        repositoryPath: '/tmp/demo-repo',
+        status: 'registered',
+        registeredAt: '2026-07-27T00:00:00.000Z',
+        lastInspectedAt: null,
+        configurationVersionId: null,
+        discoveryHealth: {
+          ...neverInspectedHealth,
+          status: 'healthy',
+        },
+      }),
+    ).toBe(false);
   });
 
   it('accepts attached RegisterProjectResponse', () => {
@@ -76,6 +119,7 @@ describe('shared-contracts project registration', () => {
         registeredAt: '2026-07-27T00:00:00.000Z',
         lastInspectedAt: null,
         configurationVersionId: version.id,
+        discoveryHealth: neverInspectedHealth,
         configuration: { status: 'attached', version },
       }),
     ).toBe(true);
@@ -92,6 +136,7 @@ describe('shared-contracts project registration', () => {
         registeredAt: '2026-07-27T00:00:00.000Z',
         lastInspectedAt: null,
         configurationVersionId: null,
+        discoveryHealth: neverInspectedHealth,
         configuration: {
           status: 'blocked',
           error: { code: 'project_yaml_parse_error', message: 'parse failed' },
@@ -111,6 +156,7 @@ describe('shared-contracts project registration', () => {
         registeredAt: '2026-07-27T00:00:00.000Z',
         lastInspectedAt: null,
         configurationVersionId: version.id,
+        discoveryHealth: neverInspectedHealth,
         configuration: { status: 'attached' },
       }),
     ).toBe(false);
@@ -125,6 +171,7 @@ describe('shared-contracts project registration', () => {
         registeredAt: '2026-07-27T00:00:00.000Z',
         lastInspectedAt: null,
         configurationVersionId: null,
+        discoveryHealth: neverInspectedHealth,
         configuration: {
           status: 'blocked',
           error: { code: 'x', message: 'y' },

@@ -1,0 +1,27 @@
+OpenSpec spec sync for chg-w01-s04-project-dashboard
+Date: 2026-07-28
+
+Created:
+- openspec/specs/project-dashboard/spec.md (NEW capability; 4 requirements from ADDED delta)
+
+Modified:
+- openspec/specs/local-project-registration/spec.md (3 MODIFIED requirements)
+  - Register eligible local repositories as durable Project records
+  - Exact HTTP error and lookup contracts for projects
+  - Minimal Spanish-first registration console outcomes
+- openspec/specs/git-and-openspec-discovery/spec.md (1 MODIFIED requirement)
+  - Minimal Spanish-first discovery console outcomes
+- openspec/specs/shared-libraries-baseline/spec.md (2 MODIFIED requirements)
+  - Domain packages and shared UI kit are excluded
+  - Project registration contracts and validators are exported
+- openspec/specs/angular-web-console-baseline/spec.md (1 MODIFIED requirement)
+  - Spanish-first i18n-ready baseline shell
+- openspec/specs/application-test-baseline/spec.md (1 MODIFIED + 1 ADDED requirement)
+  - Evidence is captured under the change directory (updated to chg-w01-s04-project-dashboard)
+  - Project dashboard listing and discovery-health paths are covered by automated tests (appended)
+
+Validation:
+Command: ./node_modules/.bin/openspec validate --all --strict
+Result: PASS
+Totals: 23 passed, 0 failed (23 items)
+wrote /Users/silveriobernal/Documents/Code/Development/spec-pilot/package-summary.json fileCount=266 (excludes self) candidates=7 waves=12 slices=42 stories=126

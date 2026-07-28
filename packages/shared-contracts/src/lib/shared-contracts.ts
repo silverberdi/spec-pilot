@@ -70,6 +70,32 @@ export interface RegisterProjectRequest {
   displayName?: string;
 }
 
+export const DISCOVERY_HEALTH_STATUSES = [
+  'never_inspected',
+  'ok',
+  'blocked',
+  'invalid',
+] as const;
+
+export type DiscoveryHealthStatus = (typeof DISCOVERY_HEALTH_STATUSES)[number];
+
+export const DISCOVERY_HEALTH_SUBSYSTEM_STATUSES = [
+  'ok',
+  'blocked',
+  'unknown',
+] as const;
+
+export type DiscoveryHealthSubsystemStatus =
+  (typeof DISCOVERY_HEALTH_SUBSYSTEM_STATUSES)[number];
+
+export type ProjectDiscoveryHealthDto = {
+  status: DiscoveryHealthStatus;
+  inspectedAt: string | null;
+  gitStatus: DiscoveryHealthSubsystemStatus;
+  openspecStatus: DiscoveryHealthSubsystemStatus;
+  summaryMessage: string | null;
+};
+
 export interface ProjectDto {
   id: string;
   slug: string;
@@ -79,6 +105,7 @@ export interface ProjectDto {
   registeredAt: string;
   lastInspectedAt: string | null;
   configurationVersionId: string | null;
+  discoveryHealth: ProjectDiscoveryHealthDto;
 }
 
 export interface ProjectConfigurationVersionDto {
@@ -251,6 +278,34 @@ export function isProjectConfigurationVersionDto(
   );
 }
 
+export function isProjectDiscoveryHealthDto(
+  value: unknown,
+): value is ProjectDiscoveryHealthDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  const status = record['status'];
+  const gitStatus = record['gitStatus'];
+  const openspecStatus = record['openspecStatus'];
+  return (
+    typeof status === 'string' &&
+    (DISCOVERY_HEALTH_STATUSES as readonly string[]).includes(status) &&
+    (record['inspectedAt'] === null ||
+      typeof record['inspectedAt'] === 'string') &&
+    typeof gitStatus === 'string' &&
+    (DISCOVERY_HEALTH_SUBSYSTEM_STATUSES as readonly string[]).includes(
+      gitStatus,
+    ) &&
+    typeof openspecStatus === 'string' &&
+    (DISCOVERY_HEALTH_SUBSYSTEM_STATUSES as readonly string[]).includes(
+      openspecStatus,
+    ) &&
+    (record['summaryMessage'] === null ||
+      typeof record['summaryMessage'] === 'string')
+  );
+}
+
 export function isProjectDto(value: unknown): value is ProjectDto {
   if (typeof value !== 'object' || value === null) {
     return false;
@@ -266,7 +321,8 @@ export function isProjectDto(value: unknown): value is ProjectDto {
     (record['lastInspectedAt'] === null ||
       typeof record['lastInspectedAt'] === 'string') &&
     (record['configurationVersionId'] === null ||
-      typeof record['configurationVersionId'] === 'string')
+      typeof record['configurationVersionId'] === 'string') &&
+    isProjectDiscoveryHealthDto(record['discoveryHealth'])
   );
 }
 

@@ -50,6 +50,11 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile
+      args:
+        # Required: set PRIMEUI_LICENSE in gitignored repo-root `.env`.
+        # Same Community key as apps/web/src/environments/environment.local.ts.
+        PRIMEUI_LICENSE: ${PRIMEUI_LICENSE:?Set PRIMEUI_LICENSE in .env for Compose web builds}
+        API_BASE_URL: ${WEB_API_BASE_URL:-http://localhost:3000}
     container_name: specpilot-web
     networks:
       - specpilot-net

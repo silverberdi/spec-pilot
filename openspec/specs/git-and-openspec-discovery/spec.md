@@ -132,7 +132,7 @@ Shared contracts MUST define closed unions: Git blocked codes exactly `not_a_git
 - **THEN** validation fails
 
 ### Requirement: Minimal Spanish-first discovery console outcomes
-`apps/web` MUST expose a minimal Spanish-first discovery outcomes surface (not a multi-project discovery-health dashboard) with explicit empty, loading, success, and blocked/error outcomes driven by the discovery API. The surface MUST provide an explicit refresh action for a known project id and MUST show last inspection time when present plus Git and OpenSpec summaries after refresh or get. The surface MUST NOT claim delivery execution capability.
+`apps/web` MUST expose a Spanish-first discovery outcomes surface with explicit empty, loading, success, and blocked/error outcomes driven by the discovery API. The surface MUST provide an explicit refresh action for a known project id and MUST show last inspection time when present plus Git and OpenSpec summaries after refresh or get. The surface MUST NOT claim delivery execution capability. Multi-project discovery-health listing is delivered by `project-dashboard` using persisted `lastInspectedAt` / `lastDiscovery` projections and MUST NOT replace these per-project discovery refresh/get semantics or invent a second discovery engine. Dashboard load MUST NOT auto-run discovery refresh.
 
 #### Scenario: Empty never-inspected state
 - **WHEN** the discovery surface loads for a known project that has never been inspected
@@ -149,3 +149,7 @@ Shared contracts MUST define closed unions: Git blocked codes exactly `not_a_git
 #### Scenario: Hard API error surfaces operator message
 - **WHEN** refresh returns HTTP 422 or 500 with `{ code, message }`
 - **THEN** the UI shows the blocked/error outcome using the operator-facing message
+
+#### Scenario: Dashboard consumes persisted discovery without replacing refresh
+- **WHEN** the project dashboard presents discovery health for registered projects
+- **THEN** health is derived from persisted discovery fields without replacing explicit per-project discovery refresh/get endpoints

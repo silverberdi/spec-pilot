@@ -1,0 +1,15 @@
+exclusions-check: PASS
+change: chg-w01-s04-project-dashboard
+checked:
+- no auto-discovery or configuration refresh on dashboard load
+- no GET /dashboard endpoint
+- no full lastDiscovery blob on list/detail ProjectDto
+- no N+1 GET /projects/:id/discovery from dashboard load
+- no client-side sorting, filtering, pagination, or virtual scrolling
+- no Prisma migration introduced for this slice
+- list/detail enrichment does not open target-repository paths
+- no delivery controls (apply/verify/sync/archive, Git write, commit, PR)
+- no auth/multiuser
+- no DeepSeek product API calls
+- no reviews/findings/budget ledger/prompts/context bundles
+- no later-wave scope

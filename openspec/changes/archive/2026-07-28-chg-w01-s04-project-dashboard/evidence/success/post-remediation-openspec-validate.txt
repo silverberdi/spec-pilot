@@ -1,0 +1,24 @@
+- Validating...
+✓ spec/agent-operating-contracts
+✓ spec/angular-web-console-baseline
+✓ spec/application-test-baseline
+✓ spec/baseline-validation-and-secret-scanning
+✓ change/chg-w01-s04-project-dashboard
+✓ spec/closure-evidence-and-process-gates
+✓ spec/context-and-package-integrity
+✓ spec/delivery-graph-and-id-validation
+✓ spec/deterministic-ci-pipeline
+✓ spec/docker-compose-local-runtime
+✓ spec/git-and-openspec-discovery
+✓ spec/immutable-openspec-integrations
+✓ spec/local-project-registration
+✓ spec/nestjs-fastify-api-baseline
+✓ spec/nx-dependency-boundaries
+✓ spec/nx-monorepo-baseline
+✓ spec/openspec-verified-lifecycle
+✓ spec/postgresql-prisma-persistence-baseline
+✓ spec/project-yaml-configuration
+✓ spec/repository-governance
+✓ spec/required-quality-gates
+✓ spec/shared-libraries-baseline
+Totals: 22 passed, 0 failed (22 items)
