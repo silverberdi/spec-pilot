@@ -1,0 +1,16 @@
+operator-human-validation smoke 20260729T163418
+PASS_COUNT=29
+FAIL_COUNT=0
+probe_real=PASS
+stage=discovery
+modelAlias=deepseek-flash
+resolvedModelId=deepseek-v4-flash
+schemaId=deepseek-gateway-probe-v1
+attemptCount=1
+providerHttpStatus=200
+latencyMs=983
+usagePresent=True
+parsedMessageLength=16
+blocks=invalid_stage,unknown_stage,extra_field
+missing_key=PASS
+secret_safety=see report

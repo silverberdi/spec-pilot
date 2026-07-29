@@ -1,0 +1,17 @@
+verify: PASS
+timestamp_utc: 2026-07-29T21:40:00Z
+change: chg-w03-s01-deepseek-api-gateway
+operator_approval: continuous closure authorizing Verify through push (tasks 10.1/10.2 + 11.1)
+
+| Dimension | Result |
+|---|---|
+| Completeness | Tasks 1.1–10.2 and 11.1 complete; 11.2 is this Verify; 11.3–11.8 are post-Verify closure gates authorized in the same continuous pass |
+| Correctness | New `deepseek-api-gateway` + eight modified baselines covered by shared contracts/guards (`DeepseekProbeStage`, probe DTOs, closed codes), Nest `DeepseekModule` + fixed `https://api.deepseek.com` adapter (envelope validation, deterministic retries, injected clock/sleeper), `POST /projects/:id/deepseek/probe`, Compose `DEEPSEEK_API_KEY` only (no `DEEPSEEK_BASE_URL`), Spanish probe console, unit/integration/web tests, operator human validation PASS (real probe + invalid stage/unknown/extra + missing-key temp harness + secret-safety + axioma untouched) |
+| Coherence | Design decisions reflected: `DeepseekProbeStage` distinct from `ReviewStage` (reject `new`); fixed base URL; synthetic probe payload only; no provider-call Prisma persistence; fail-closed envelope/schema; retries only for allowed transients; zero attempts when key missing; no repository/bundle/disclosure reads on probe path; health remains ok without key |
+| Deterministic checks | `QUALITY_GATES_OK`; `BASELINE_OK`; openspec validate --all --strict (27/27); human validation PASS (operator script); secret scan clean; no provider-call migration/table |
+
+Notes:
+- Task 10.1: operator human validation recorded PASS in `evidence/human-validation.md`
+- Task 10.2: no deferred AC recorded PASS in `evidence/no-deferred-ac.md`
+- SpecPilot repo CI secret scanner unweakened; `.env` gitignored; axioma-db-dev untouched
+- Exact result: PASS (not PASS WITH NOTES)

@@ -42,6 +42,7 @@ services:
     environment:
       DATABASE_URL: postgresql://specpilot:specpilot@postgres:5432/specpilot?schema=public
       PORT: '3000'
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
     depends_on:
       postgres:
         condition: service_healthy

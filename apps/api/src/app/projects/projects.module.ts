@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { DeepseekModule } from '../deepseek/deepseek.module';
 import { PrismaModule } from '../prisma.module';
 import { ContextBundleService } from './context-bundle.service';
 import { ContextDisclosureService } from './context-disclosure.service';
@@ -13,7 +14,7 @@ import { ProjectsService } from './projects.service';
 import { SecretDetectionService } from './secret-detection.service';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, DeepseekModule],
   controllers: [ProjectsController],
   providers: [
     ProjectsService,

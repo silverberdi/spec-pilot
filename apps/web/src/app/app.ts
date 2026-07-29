@@ -23,8 +23,11 @@ import type {
   ContextDisclosureStatusOkDto,
   SecretScanBlockedDto,
   SecretScanOkDto,
+  DeepseekProbeOkDto,
+  DeepseekProbeStage,
 } from '@specpilot/shared-contracts';
 import {
+  DEEPSEEK_PROBE_STAGES,
   isContextBundleBlockedDto,
   isContextBundleLatestListDto,
   isContextBundleOkDto,
@@ -33,6 +36,7 @@ import {
   isContextDisclosurePreviewOkDto,
   isContextDisclosureStatusOkDto,
   isContextSourceResolveOkDto,
+  isDeepseekProbeOkDto,
   isProjectDto,
   isProjectErrorResponse,
   isSecretScanBlockedDto,
@@ -97,6 +101,12 @@ export type DisclosureStatusUiState =
   | 'blocked'
   | 'error';
 export type DisclosureLatestUiState =
+  | 'idle'
+  | 'loading'
+  | 'success'
+  | 'blocked'
+  | 'error';
+export type DeepseekProbeUiState =
   | 'idle'
   | 'loading'
   | 'success'
@@ -204,6 +214,18 @@ export const shellCopy = {
     disclosureLatestBlockedTitle: 'No se pudo cargar la última aprobación',
     disclosureYes: 'sí',
     disclosureNo: 'no',
+    deepseekProbeTitle: 'Prueba de conectividad DeepSeek',
+    deepseekProbeHint:
+      'Comprueba conectividad y salida estructurada con DeepSeek. No inicia una ejecución de revisión ni reserva presupuesto.',
+    deepseekProbeLabel: 'Probar DeepSeek',
+    deepseekProbeStageLabel: 'Etapa de prueba',
+    deepseekProbeIdle:
+      'Aún no se ha probado DeepSeek para este proyecto.',
+    deepseekProbeSuccessTitle: 'Prueba DeepSeek completada',
+    deepseekProbeBlockedTitle: 'Prueba DeepSeek bloqueada',
+    deepseekProbeErrorTitle: 'Error al probar DeepSeek',
+    deepseekProbeNeedProjectHint:
+      'Seleccione un proyecto registrado para probar DeepSeek.',
     dashboardTitle: 'Proyectos',
     dashboardHint:
       'Estado de descubrimiento según la última inspección persistida (sin re-probar al cargar).',
@@ -295,6 +317,11 @@ export class App implements OnInit {
   readonly disclosureLatestMessage = signal<string | null>(null);
   readonly lastDisclosureLatestApproval =
     signal<ContextDisclosureApprovalOkDto | null>(null);
+  readonly deepseekProbeStages = DEEPSEEK_PROBE_STAGES;
+  readonly deepseekProbeStage = signal<DeepseekProbeStage>('discovery');
+  readonly deepseekProbeState = signal<DeepseekProbeUiState>('idle');
+  readonly deepseekProbeMessage = signal<string | null>(null);
+  readonly lastDeepseekProbe = signal<DeepseekProbeOkDto | null>(null);
 
   readonly displayedContextPaths = computed(() => {
     const result = this.lastContextResolve();
@@ -895,6 +922,44 @@ export class App implements OnInit {
               'No se pudo consultar el estado de divulgación.',
           );
           this.disclosureStatusState.set(
+            this.blockedOrError(this.extractStatus(err)),
+          );
+        },
+      });
+  }
+
+  probeDeepseek(): void {
+    const id = this.selectedProjectId();
+    if (!id) {
+      return;
+    }
+    this.deepseekProbeState.set('loading');
+    this.deepseekProbeMessage.set(null);
+    this.lastDeepseekProbe.set(null);
+
+    this.http
+      .post<unknown>(
+        `${environment.apiBaseUrl}/projects/${id}/deepseek/probe`,
+        { stage: this.deepseekProbeStage() },
+      )
+      .subscribe({
+        next: (payload) => {
+          if (!isDeepseekProbeOkDto(payload)) {
+            this.deepseekProbeState.set('error');
+            this.deepseekProbeMessage.set(
+              'La respuesta de la prueba DeepSeek no es válida.',
+            );
+            return;
+          }
+          this.lastDeepseekProbe.set(payload);
+          this.deepseekProbeState.set('success');
+        },
+        error: (err: unknown) => {
+          const payload = this.extractError(err);
+          this.deepseekProbeMessage.set(
+            payload?.message ?? 'No se pudo completar la prueba DeepSeek.',
+          );
+          this.deepseekProbeState.set(
             this.blockedOrError(this.extractStatus(err)),
           );
         },

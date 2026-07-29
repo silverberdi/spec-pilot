@@ -1,0 +1,16 @@
+exclusions-check: PASS
+change: chg-w03-s01-deepseek-api-gateway
+
+[x] No review-run orchestration / state machine (w03-s02)
+[x] No budget estimate/reserve/reconcile/hard-block (w03-s03)
+[x] No findings ledger, consolidated prompts, or run-history product surfaces (w03-s04)
+[x] No provider-call / DeepSeek audit Prisma migration or tables
+[x] No DEEPSEEK_BASE_URL as normal operator/Compose configuration
+[x] Probe uses DeepseekProbeStage only (not ReviewStage); rejects `new`
+[x] No client-supplied prompts, schemas, API keys, base URLs, temperature, tools, or messages
+[x] Probe does not read repository files, ContextBundle bodies, or disclosure excerpts
+[x] No auth/multiuser
+[x] No target-repo writes; no delivery/Git-write/OpenSpec apply-verify-sync-archive from SpecPilot
+[x] No alternate LLM providers
+[x] SpecPilot repo CI secret scanner / quality gates not weakened
+[x] No later-wave (w04+) scope

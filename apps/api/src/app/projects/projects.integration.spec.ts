@@ -1255,4 +1255,47 @@ describe('Project registration and configuration (Testcontainers)', () => {
     });
     expect(after).toBe(before);
   });
+
+  it('DeepSeek probe rejects missing key with zero provider attempts', async () => {
+    const previous = process.env['DEEPSEEK_API_KEY'];
+    delete process.env['DEEPSEEK_API_KEY'];
+    const repo = await makeEligibleRepo('deepseek-probe-nokey');
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    expect(register.statusCode).toBe(201);
+    const project = JSON.parse(register.body) as { id: string };
+    const probe = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/deepseek/probe`,
+      payload: {},
+    });
+    expect(probe.statusCode).toBe(422);
+    expect(JSON.parse(probe.body).code).toBe('deepseek_not_configured');
+    if (previous === undefined) {
+      delete process.env['DEEPSEEK_API_KEY'];
+    } else {
+      process.env['DEEPSEEK_API_KEY'] = previous;
+    }
+  });
+
+  it('DeepSeek probe rejects stage new as invalid_deepseek_probe_request', async () => {
+    process.env['DEEPSEEK_API_KEY'] = 'test-not-used';
+    const repo = await makeEligibleRepo('deepseek-probe-new');
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    const project = JSON.parse(register.body) as { id: string };
+    const probe = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/deepseek/probe`,
+      payload: { stage: 'new' },
+    });
+    expect(probe.statusCode).toBe(422);
+    expect(JSON.parse(probe.body).code).toBe('invalid_deepseek_probe_request');
+  });
 });

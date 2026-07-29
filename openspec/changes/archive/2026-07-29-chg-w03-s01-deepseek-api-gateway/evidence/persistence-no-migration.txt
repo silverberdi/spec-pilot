@@ -1,0 +1,16 @@
+persistence-check: PASS
+change: chg-w03-s01-deepseek-api-gateway
+timestamp_utc: 2026-07-29T20:45:00Z
+
+Inspected apps/api/prisma/schema.prisma models:
+- AppMetadata
+- Project
+- ContextBundle
+- ContextDisclosurePreviewSession
+- ContextDisclosureApproval
+- ProjectConfigurationVersion
+
+Latest migrations present through 20260729120000_add_context_disclosure.
+No additive migration introduced by this slice.
+No DeepseekProviderCall / review-run / budget / finding / prompt / auth / user tables added.
+Probe outcomes remain ephemeral HTTP responses only.

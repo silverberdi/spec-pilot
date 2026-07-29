@@ -855,6 +855,98 @@
                 </section>
               }
             </section>
+
+            <section class="shell__refresh" data-testid="deepseek-probe">
+              <p class="shell__tagline">{{ copy().deepseekProbeHint }}</p>
+
+              @if (!selectedProjectId()) {
+                <p class="shell__empty" data-testid="deepseek-probe-need-project">
+                  {{ copy().deepseekProbeNeedProjectHint }}
+                </p>
+              }
+
+              <label for="deepseek-probe-stage">{{
+                copy().deepseekProbeStageLabel
+              }}</label>
+              <select
+                id="deepseek-probe-stage"
+                data-testid="deepseek-probe-stage-select"
+                [ngModel]="deepseekProbeStage()"
+                (ngModelChange)="deepseekProbeStage.set($event)"
+              >
+                @for (stage of deepseekProbeStages; track stage) {
+                  <option [value]="stage">{{ stage }}</option>
+                }
+              </select>
+              <p-button
+                [label]="copy().deepseekProbeLabel"
+                (onClick)="probeDeepseek()"
+                [loading]="deepseekProbeState() === 'loading'"
+                [disabled]="
+                  deepseekProbeState() === 'loading' || !selectedProjectId()
+                "
+              />
+
+              @if (deepseekProbeState() === 'idle' && !lastDeepseekProbe()) {
+                <p data-testid="deepseek-probe-idle">{{
+                  copy().deepseekProbeIdle
+                }}</p>
+              }
+
+              @if (deepseekProbeState() === 'loading') {
+                <p data-testid="deepseek-probe-loading">{{ copy().loading }}</p>
+              }
+
+              @if (
+                deepseekProbeState() === 'success' && lastDeepseekProbe();
+                as probe
+              ) {
+                <section data-testid="deepseek-probe-success">
+                  <p-message severity="success">{{
+                    copy().deepseekProbeSuccessTitle
+                  }}</p-message>
+                  <p>
+                    etapa={{ probe.stage }} modelo={{
+                      probe.resolvedModelId
+                    }}
+                    schema={{ probe.schemaId }} intentos={{
+                      probe.attemptCount
+                    }}
+                    latenciaMs={{ probe.latencyMs }}
+                  </p>
+                  @if (probe.usage; as usage) {
+                    <p data-testid="deepseek-probe-usage">
+                      tokens: prompt={{ usage.promptTokens ?? '—' }}
+                      completion={{ usage.completionTokens ?? '—' }}
+                      total={{ usage.totalTokens ?? '—' }}
+                    </p>
+                  }
+                  <p data-testid="deepseek-probe-message">{{
+                    probe.parsed.message
+                  }}</p>
+                </section>
+              }
+
+              @if (
+                (deepseekProbeState() === 'blocked' ||
+                  deepseekProbeState() === 'error') &&
+                deepseekProbeMessage()
+              ) {
+                <section data-testid="deepseek-probe-blocked">
+                  <p-message
+                    [severity]="
+                      deepseekProbeState() === 'blocked' ? 'warn' : 'error'
+                    "
+                    >{{
+                      deepseekProbeState() === 'blocked'
+                        ? copy().deepseekProbeBlockedTitle
+                        : copy().deepseekProbeErrorTitle
+                    }}</p-message
+                  >
+                  <p>{{ deepseekProbeMessage() }}</p>
+                </section>
+              }
+            </section>
           </section>
         }
       </p-card>

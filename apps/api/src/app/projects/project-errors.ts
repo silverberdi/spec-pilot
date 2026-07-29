@@ -113,6 +113,38 @@ export const OPERATOR_MESSAGES: Record<ProjectErrorCode, string> = {
     'Ocurrió un error interno al generar la vista previa de divulgación.',
   disclosure_approval_failed:
     'Ocurrió un error interno al registrar la aprobación de divulgación.',
+  deepseek_not_configured:
+    'DeepSeek no está configurado; defina DEEPSEEK_API_KEY en el entorno local.',
+  deepseek_auth_failed:
+    'La autenticación con DeepSeek falló; verifique la clave de API.',
+  deepseek_insufficient_balance:
+    'La cuenta de DeepSeek no tiene saldo suficiente para completar la solicitud.',
+  deepseek_rate_limited:
+    'DeepSeek limitó la tasa de solicitudes; intente de nuevo más tarde.',
+  deepseek_provider_unavailable:
+    'DeepSeek no está disponible temporalmente; intente de nuevo más tarde.',
+  deepseek_transport_failed:
+    'No se pudo completar la conexión de red con DeepSeek.',
+  deepseek_timeout:
+    'La solicitud a DeepSeek superó el tiempo máximo permitido.',
+  deepseek_request_rejected:
+    'DeepSeek rechazó la solicitud de sonda.',
+  deepseek_model_unresolved:
+    'No se pudo resolver el modelo DeepSeek para la etapa solicitada.',
+  deepseek_empty_response:
+    'DeepSeek devolvió una respuesta vacía para la sonda estructurada.',
+  deepseek_truncated_response:
+    'DeepSeek truncó la respuesta estructurada de la sonda.',
+  deepseek_response_invalid:
+    'La respuesta de DeepSeek no es un sobre JSON válido para la sonda.',
+  deepseek_schema_invalid:
+    'La respuesta de DeepSeek no cumple el esquema local de la sonda.',
+  deepseek_model_mismatch:
+    'El modelo devuelto por DeepSeek no coincide con el modelo resuelto.',
+  invalid_deepseek_probe_request:
+    'La solicitud de sonda DeepSeek no es válida; use solo stage discovery|planning|applied|verify.',
+  deepseek_gateway_failed:
+    'Ocurrió un error interno en la pasarela DeepSeek.',
   internal_error: 'Ocurrió un error interno al registrar el proyecto.',
 };
 
@@ -157,7 +189,8 @@ export function internal500(
     | 'secret_scan_failed'
     | 'context_bundle_failed'
     | 'disclosure_preview_failed'
-    | 'disclosure_approval_failed' = 'internal_error',
+    | 'disclosure_approval_failed'
+    | 'deepseek_gateway_failed' = 'internal_error',
 ): ProjectHttpError {
   return new ProjectHttpError(HttpStatus.INTERNAL_SERVER_ERROR, code);
 }

@@ -198,6 +198,22 @@ export const PROJECT_ERROR_CODES = [
   'invalid_disclosure_approval_query',
   'disclosure_preview_failed',
   'disclosure_approval_failed',
+  'deepseek_not_configured',
+  'deepseek_auth_failed',
+  'deepseek_insufficient_balance',
+  'deepseek_rate_limited',
+  'deepseek_provider_unavailable',
+  'deepseek_transport_failed',
+  'deepseek_timeout',
+  'deepseek_request_rejected',
+  'deepseek_model_unresolved',
+  'deepseek_empty_response',
+  'deepseek_truncated_response',
+  'deepseek_response_invalid',
+  'deepseek_schema_invalid',
+  'deepseek_model_mismatch',
+  'invalid_deepseek_probe_request',
+  'deepseek_gateway_failed',
   'internal_error',
 ] as const;
 
@@ -1538,4 +1554,180 @@ export function parseDisclosureApprovalLatestQuery(
     return { ok: false, code: 'invalid_disclosure_approval_query' };
   }
   return { ok: true, stage: record['stage'], limit: 1 };
+}
+
+/**
+ * w03-s01: DeepSeek gateway probe contracts. Distinct from ReviewStage (no `new`).
+ */
+export const DEEPSEEK_PROBE_STAGES = [
+  'discovery',
+  'planning',
+  'applied',
+  'verify',
+] as const;
+
+export type DeepseekProbeStage = (typeof DEEPSEEK_PROBE_STAGES)[number];
+
+export const DEEPSEEK_GATEWAY_PROBE_SCHEMA_ID = 'deepseek-gateway-probe-v1' as const;
+
+export const DEEPSEEK_RESOLVED_MODEL_IDS = [
+  'deepseek-v4-flash',
+  'deepseek-v4-pro',
+] as const;
+
+export type DeepseekResolvedModelId = (typeof DEEPSEEK_RESOLVED_MODEL_IDS)[number];
+
+export type DeepseekProbeRequest = {
+  stage?: DeepseekProbeStage;
+};
+
+export type DeepseekGatewayProbeParsedDto = {
+  ok: true;
+  probe: typeof DEEPSEEK_GATEWAY_PROBE_SCHEMA_ID;
+  message: string;
+};
+
+export type DeepseekProbeUsageDto = {
+  promptTokens?: number;
+  completionTokens?: number;
+  totalTokens?: number;
+};
+
+export type DeepseekProbeOkDto = {
+  status: 'ok';
+  projectId: string;
+  stage: DeepseekProbeStage;
+  providerId: 'deepseek';
+  modelAlias: string;
+  resolvedModelId: DeepseekResolvedModelId;
+  schemaId: typeof DEEPSEEK_GATEWAY_PROBE_SCHEMA_ID;
+  attemptCount: number;
+  providerHttpStatus: 200;
+  providerRequestId?: string;
+  latencyMs: number;
+  usage?: DeepseekProbeUsageDto;
+  parsed: DeepseekGatewayProbeParsedDto;
+};
+
+export function isDeepseekProbeStage(value: unknown): value is DeepseekProbeStage {
+  return (
+    typeof value === 'string' &&
+    (DEEPSEEK_PROBE_STAGES as readonly string[]).includes(value)
+  );
+}
+
+export function isDeepseekGatewayProbeParsedDto(
+  value: unknown,
+): value is DeepseekGatewayProbeParsedDto {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (Object.keys(record).length !== 3) {
+    return false;
+  }
+  if (record['ok'] !== true) {
+    return false;
+  }
+  if (record['probe'] !== DEEPSEEK_GATEWAY_PROBE_SCHEMA_ID) {
+    return false;
+  }
+  if (typeof record['message'] !== 'string') {
+    return false;
+  }
+  const message = record['message'];
+  return message.length > 0 && message.length <= 200;
+}
+
+export function isDeepseekProbeOkDto(value: unknown): value is DeepseekProbeOkDto {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (record['status'] !== 'ok') {
+    return false;
+  }
+  if (typeof record['projectId'] !== 'string' || record['projectId'].length === 0) {
+    return false;
+  }
+  if (!isDeepseekProbeStage(record['stage'])) {
+    return false;
+  }
+  if (record['providerId'] !== 'deepseek') {
+    return false;
+  }
+  if (typeof record['modelAlias'] !== 'string' || record['modelAlias'].length === 0) {
+    return false;
+  }
+  if (
+    !(DEEPSEEK_RESOLVED_MODEL_IDS as readonly string[]).includes(
+      record['resolvedModelId'] as string,
+    )
+  ) {
+    return false;
+  }
+  if (record['schemaId'] !== DEEPSEEK_GATEWAY_PROBE_SCHEMA_ID) {
+    return false;
+  }
+  if (
+    typeof record['attemptCount'] !== 'number' ||
+    !Number.isInteger(record['attemptCount']) ||
+    record['attemptCount'] < 1 ||
+    record['attemptCount'] > 3
+  ) {
+    return false;
+  }
+  if (record['providerHttpStatus'] !== 200) {
+    return false;
+  }
+  if (
+    record['providerRequestId'] !== undefined &&
+    typeof record['providerRequestId'] !== 'string'
+  ) {
+    return false;
+  }
+  if (typeof record['latencyMs'] !== 'number' || !Number.isFinite(record['latencyMs'])) {
+    return false;
+  }
+  if (record['usage'] !== undefined) {
+    if (
+      record['usage'] === null ||
+      typeof record['usage'] !== 'object' ||
+      Array.isArray(record['usage'])
+    ) {
+      return false;
+    }
+    const usage = record['usage'] as Record<string, unknown>;
+    for (const key of ['promptTokens', 'completionTokens', 'totalTokens'] as const) {
+      if (usage[key] !== undefined && typeof usage[key] !== 'number') {
+        return false;
+      }
+    }
+  }
+  return isDeepseekGatewayProbeParsedDto(record['parsed']);
+}
+
+export function parseDeepseekProbeRequest(
+  value: unknown,
+):
+  | { ok: true; stage: DeepseekProbeStage }
+  | { ok: false; code: 'invalid_deepseek_probe_request' } {
+  if (value === null || value === undefined) {
+    return { ok: true, stage: 'discovery' };
+  }
+  if (typeof value !== 'object' || Array.isArray(value)) {
+    return { ok: false, code: 'invalid_deepseek_probe_request' };
+  }
+  const record = value as Record<string, unknown>;
+  const keys = Object.keys(record);
+  if (keys.some((k) => k !== 'stage')) {
+    return { ok: false, code: 'invalid_deepseek_probe_request' };
+  }
+  if (!('stage' in record) || record['stage'] === undefined) {
+    return { ok: true, stage: 'discovery' };
+  }
+  if (!isDeepseekProbeStage(record['stage'])) {
+    return { ok: false, code: 'invalid_deepseek_probe_request' };
+  }
+  return { ok: true, stage: record['stage'] };
 }

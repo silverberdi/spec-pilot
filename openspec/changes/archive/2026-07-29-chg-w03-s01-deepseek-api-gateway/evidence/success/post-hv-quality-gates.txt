@@ -1,0 +1,305 @@
+=== quality-gates ===
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> spec-pilot@0.0.0 quality-gates
+> bash scripts/run-quality-gates.sh
+
+=== SpecPilot quality gates ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+note: local full-gate PASS is mandatory before commit/push (main-only policy).
+note: GitHub Actions re-runs this orchestrator as post-push remote verification only.
+INFO  gate: install integrity
+PASS  install integrity (npm ci --dry-run)
+INFO  gate: prisma generate
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+Loaded Prisma config from apps/api/prisma.config.ts.
+
+Prisma schema loaded from apps/api/prisma/schema.prisma.
+
+✔ Generated Prisma Client (v7.9.0) to ./node_modules/@prisma/client in 144ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+
+PASS  prisma generate
+INFO  gate: typecheck
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+> spec-pilot@0.0.0 typecheck
+> tsc -p packages/shared-contracts/tsconfig.lib.json --noEmit && tsc -p apps/api/tsconfig.app.json --noEmit && tsc -p apps/web/tsconfig.app.json --noEmit
+
+PASS  typecheck
+INFO  gate: dependency-boundary lint
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ NX   Running target lint for 3 projects:
+
+- shared-contracts
+- api
+- web
+
+
+
+> nx run shared-contracts:lint  [existing outputs match the cache, left as is]
+
+> eslint .
+
+(node:49129) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> nx run api:lint  [existing outputs match the cache, left as is]
+
+> eslint .
+
+(node:49131) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+> nx run web:lint  [existing outputs match the cache, left as is]
+
+> eslint .
+
+(node:49144) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+
+
+ NX   Successfully ran target lint for 3 projects
+
+Nx read the output from the cache instead of running the command for 3 out of 3 tasks.
+
+Your AI agent configuration is outdated. Run "nx configure-ai-agents" to update.
+
+  Run duration:      48ms
+  Cache:             3/3 hit (100%)
+  Critical path:     <1ms (1 task)
+  Recoverable time:  <1ms
+PASS  dependency-boundary lint
+INFO  gate: automated tests
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ NX   Running target test for 3 projects and 1 task they depend on:
+
+- shared-contracts
+- api
+- web
+
+
+
+> nx run shared-contracts:build  [existing outputs match the cache, left as is]
+
+(node:49790) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Compiling TypeScript files for project "shared-contracts"...
+Done compiling TypeScript files for project "shared-contracts".
+
+> nx run shared-contracts:test  [existing outputs match the cache, left as is]
+
+> jest
+
+(node:49185) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m50 passed[39m[22m, 50 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        0.756 s, estimated 1 s
+[2mRan all test suites[22m[2m.[22m
+
+> nx run api:test  [existing outputs match the cache, left as is]
+
+> jest --passWithNoTests=true
+
+(node:50206) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50271) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50269) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50270) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50266) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50265) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50268) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:50267) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[Nest] 50269  - 07/29/2026, 3:51:26 PM     LOG [DeepseekProbeService] {"event":"deepseek_probe","projectId":"11111111-1111-4111-8111-111111111111","probeStage":"planning","modelAlias":"deepseek-pro","resolvedModel":"deepseek-v4-pro","attemptCount":1,"latencyMs":11,"statusClass":"2xx","code":"ok"}
+[Nest] 50269  - 07/29/2026, 3:51:26 PM     LOG [DeepseekProbeService] {"event":"deepseek_probe","projectId":"11111111-1111-4111-8111-111111111111","probeStage":"discovery","modelAlias":"deepseek-flash","resolvedModel":"deepseek-v4-flash","attemptCount":0,"code":"deepseek_not_configured"}
+
+[1mTest Suites: [22m[1m[32m17 passed[39m[22m, 17 total
+[1mTests:       [22m[1m[32m151 passed[39m[22m, 151 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        [1m[33m10.699 s[39m[22m
+[2mRan all test suites[22m[2m.[22m
+
+> nx run web:test
+
+(node:74147) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+The `@nx/jest:jest` executor is deprecated and will be removed in Nx v24. Run `nx g @nx/jest:convert-to-inferred` to migrate to the `@nx/jest/plugin` inferred targets. See https://nx.dev/docs/guides/tasks--caching/convert-to-inferred for details.
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+  [2m[33mconsole.warn[39m[22m
+[33m    [PrimeUI] PrimeUI license is not configured.[39m
+[2m[22m
+[2m      [2mat [22m[2m../../node_modules/primeng/fesm2022/primeng-config.mjs[2m:310:25[22m[2m[22m
+
+[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m15 passed[39m[22m, 15 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        2.248 s
+[2mRan all test suites[22m[2m.[22m
+
+
+
+ NX   Successfully ran target test for 3 projects and 1 task they depend on
+
+Nx read the output from the cache instead of running the command for 3 out of 4 tasks.
+
+
+ NX   Nx detected a flaky task
+
+  api:test
+
+Flaky tasks can disrupt your CI pipeline. Automatically retry them with Nx Cloud. Learn more at https://nx.dev/ci/features/flaky-tasks
+
+Your AI agent configuration is outdated. Run "nx configure-ai-agents" to update.
+
+  Run duration:      2.8s
+  Cache:             3/4 hit (75%)
+  Critical path:     2.7s (2 tasks)
+  Recoverable time:  1ms (0% of the run)
+
+  Recommendations:
+    - Speed up or split the longest tasks on the critical path:
+        web:test    2.7s
+PASS  automated tests
+INFO  gate: baseline validation
+=== SpecPilot baseline validation ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+PASS  openspec --version => 1.6.0
+PASS  openspec schema validate spec-driven
+PASS  openspec validate --all
+PASS  openspec doctor
+PASS  cursor commands: 12
+PASS  cursor skills: 12
+PASS  codex skills: 12
+PASS  opencode commands: 12
+PASS  opencode skills: 12
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+PASS  delivery graph + machine IDs
+INFO  active OpenSpec change directories: 1
+PASS  product scaffolding present (apps/packages/package.json)
+fileCount=293 waves=12 slices=42 stories=126
+PASS  package-summary semantics
+no heuristic secrets found
+PASS  secret scan
+PASS  git branch: main
+=== summary ===
+BASELINE_OK
+PASS  baseline validation
+INFO  gate: secret scanning
+no heuristic secrets found
+PASS  secret scanning
+=== summary ===
+QUALITY_GATES_OK
+QUALITY_GATES_EXIT:0
+=== baseline ===
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+npm error Missing script: "validate:baseline"
+npm error
+npm error To see a list of scripts, run:
+npm error   npm run
+npm error A complete log of this run can be found in: /var/folders/th/d_h2lncx1w35f_43_kxmqrmh0000gn/T/cursor-sandbox-cache/55a272828dc1640a06288429f769af84/npm/_logs/2026-07-29T21_35_07_354Z-debug-0.log
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+node:internal/modules/esm/resolve:271
+    throw new ERR_MODULE_NOT_FOUND(
+          ^
+
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/silveriobernal/Documents/Code/Development/spec-pilot/tools/validate-baseline.ts' imported from /Users/silveriobernal/Documents/Code/Development/spec-pilot/
+    at finalizeResolution (node:internal/modules/esm/resolve:271:11)
+    at moduleResolve (node:internal/modules/esm/resolve:865:10)
+    at defaultResolve (node:internal/modules/esm/resolve:992:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:701:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:721:38)
+    at nextStep (node:internal/modules/customization_hooks:189:26)
+    at resolveBaseSync (file:///private/var/folders/th/d_h2lncx1w35f_43_kxmqrmh0000gn/T/cursor-sandbox-cache/55a272828dc1640a06288429f769af84/npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:9102)
+    at resolveDirectorySync (file:///private/var/folders/th/d_h2lncx1w35f_43_kxmqrmh0000gn/T/cursor-sandbox-cache/55a272828dc1640a06288429f769af84/npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:10315)
+    at resolveTsPathsSync (file:///private/var/folders/th/d_h2lncx1w35f_43_kxmqrmh0000gn/T/cursor-sandbox-cache/55a272828dc1640a06288429f769af84/npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:11547)
+    at resolve (file:///private/var/folders/th/d_h2lncx1w35f_43_kxmqrmh0000gn/T/cursor-sandbox-cache/55a272828dc1640a06288429f769af84/npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-zZ7SWseA.mjs:2:13365) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///Users/silveriobernal/Documents/Code/Development/spec-pilot/tools/validate-baseline.ts'
+}
+
+Node.js v24.18.0
+package.json
+15:    "quality-gates": "bash scripts/run-quality-gates.sh",

@@ -1,7 +1,7 @@
 {
   "project": "spec-pilot",
   "generated": "2026-07-29",
-  "fileCount": 284,
+  "fileCount": 293,
   "fileCountExcludesSelf": true,
   "semantics": {
     "fileCountExcludesSelf": true,
@@ -156,6 +156,51 @@
       "sha256": "d504fd6c4c581f8d4ae279a89ae307649f584b314e0df94e688f08325e7df650"
     },
     {
+      "path": "apps/api/src/app/deepseek/deepseek-envelope.ts",
+      "bytes": 5074,
+      "sha256": "86a0d89e8d1d85dc0074f6588ad9704da7e210d1c357e2e231d63fd066210293"
+    },
+    {
+      "path": "apps/api/src/app/deepseek/deepseek-gateway.port.ts",
+      "bytes": 1233,
+      "sha256": "6715ba1e774a60a249ef6a69f78dbd9451e65ba71242ecbd7393b0af0ee42ad9"
+    },
+    {
+      "path": "apps/api/src/app/deepseek/deepseek-http.adapter.ts",
+      "bytes": 6236,
+      "sha256": "a968d745c8e5fe463f4955dd1e2d55e36a7e5c3f127ea059f48d787d83aa765c"
+    },
+    {
+      "path": "apps/api/src/app/deepseek/deepseek-model-catalog.ts",
+      "bytes": 1577,
+      "sha256": "aa30a1ac355f46275880593c5b98531c8a8b658e52ffc5043ae04640e6d7a15e"
+    },
+    {
+      "path": "apps/api/src/app/deepseek/deepseek-probe.service.spec.ts",
+      "bytes": 2455,
+      "sha256": "13131dd8eae62b264b33aa6c97822d306cc76c54a0de4188a660cccde2101303"
+    },
+    {
+      "path": "apps/api/src/app/deepseek/deepseek-probe.service.ts",
+      "bytes": 4143,
+      "sha256": "5dfd8e451172491ebcbb593000a7bfd253469831ea09fa2311c35ecbb75b46c4"
+    },
+    {
+      "path": "apps/api/src/app/deepseek/deepseek.constants.ts",
+      "bytes": 621,
+      "sha256": "97986433e93b548f407584868be5f3ce45eba385efaa45d6d13536df054fcbdb"
+    },
+    {
+      "path": "apps/api/src/app/deepseek/deepseek.module.ts",
+      "bytes": 558,
+      "sha256": "e22cf35256262775f8acd3e401e0d30817135fc93c8eb84cd8e7eb149ea83473"
+    },
+    {
+      "path": "apps/api/src/app/deepseek/deepseek.spec.ts",
+      "bytes": 7570,
+      "sha256": "0bd79b16a83198d15bc01cd620853b0b879c5b67d16186f99271800457299ecc"
+    },
+    {
       "path": "apps/api/src/app/prisma.integration.spec.ts",
       "bytes": 3564,
       "sha256": "6b494e257a6c1c36a4454f98f983126ddf37389c315313af4662c706c6868622"
@@ -282,8 +327,8 @@
     },
     {
       "path": "apps/api/src/app/projects/project-errors.ts",
-      "bytes": 7668,
-      "sha256": "1106afe9c1452b9a413af258dff1777ec69cf40eb4786c98895f792fe073b715"
+      "bytes": 9319,
+      "sha256": "cc50509c7e19797b3f098f94e58c1e555467dac7d96724c3d7dc1e3c293fe936"
     },
     {
       "path": "apps/api/src/app/projects/project-yaml-reader.ts",
@@ -302,18 +347,18 @@
     },
     {
       "path": "apps/api/src/app/projects/projects.controller.ts",
-      "bytes": 4548,
-      "sha256": "34751d573a8a26fdc3e8d1255deafac7d9793a42caab76a4decb187ac615323d"
+      "bytes": 4955,
+      "sha256": "2dbc115347a01cd7506562d5c1e9544569c23a58fafa881bca7a0e5c229bc4a9"
     },
     {
       "path": "apps/api/src/app/projects/projects.integration.spec.ts",
-      "bytes": 44566,
-      "sha256": "562acd7301a26bdc0b316eacb86490aa9d44934d5fd82a75d9b9d072c03b1df8"
+      "bytes": 46184,
+      "sha256": "3dcbcc945886e2391ee24c32e625e3de3a01177e80f7601572d120a173559efc"
     },
     {
       "path": "apps/api/src/app/projects/projects.module.ts",
-      "bytes": 1234,
-      "sha256": "8257adc8a489b988efbb1d773204ea892b43c296b0b71378b2b96cd187c7350a"
+      "bytes": 1312,
+      "sha256": "f8d4101e418c675e5f3aa704fe85179b02644c220ab05f2f7668185ba52547e5"
     },
     {
       "path": "apps/api/src/app/projects/projects.service.ts",
@@ -427,18 +472,18 @@
     },
     {
       "path": "apps/web/src/app/app.html",
-      "bytes": 34473,
-      "sha256": "4c821a9548e2e649ca7df53938e19ed7ba6b653379fa2a98b7251cc8fefa8804"
+      "bytes": 38080,
+      "sha256": "e6c7554ea758dbf91cb4659e02ed69b2b43392f5b01e7fa1219fe44645accd2d"
     },
     {
       "path": "apps/web/src/app/app.spec.ts",
-      "bytes": 40131,
-      "sha256": "c2b9f798ff01f40c54adbbfc99d3aeaf18dea567784c1e27875bfcedb6953653"
+      "bytes": 44072,
+      "sha256": "294499ea01b85414473f56fe713842ed495e5fb7e23607663c7a3a418dcd605f"
     },
     {
       "path": "apps/web/src/app/app.ts",
-      "bytes": 34291,
-      "sha256": "a7ae72a92cbc0f4b4cb1a2d88bc631b5a5e7c7156c041f3069c3ae99a3be90c5"
+      "bytes": 36627,
+      "sha256": "f4a47c89bd365e4fe03f61e92209035fa14bcff3cc69a78c6e7a1b1af09b2137"
     },
     {
       "path": "apps/web/src/environments/environment.local.example.ts",
@@ -1172,13 +1217,13 @@
     },
     {
       "path": "docs/context/current-state.md",
-      "bytes": 2648,
-      "sha256": "3671a05e371560e15ba580942b46c4f99f8142b985aea656b9f02def40d98ba5"
+      "bytes": 1594,
+      "sha256": "70c16bce2e027994c7b1e825ae4664535f1e4d6da8e3c2b952fbb22fefbc272a"
     },
     {
       "path": "docs/context/file-index.md",
-      "bytes": 4219,
-      "sha256": "7127db4a6f2d2651677d7cb09e0e9db0dcc413cb8aa3a903b9f507c0841f6344"
+      "bytes": 4500,
+      "sha256": "57852de223f6e29087056ffacb3f27e716b50241bfca914943eb27173920db3e"
     },
     {
       "path": "docs/context/package-summary-semantics.md",
@@ -1402,18 +1447,18 @@
     },
     {
       "path": "packages/shared-contracts/dist/src/lib/shared-contracts.d.ts",
-      "bytes": 19860,
-      "sha256": "bb98729f9f56bf8b291b83b7c5c502b9115f5888d537e32e1af5d5ffba209adc"
+      "bytes": 22107,
+      "sha256": "e9ef51108d646c246ce903064a232dda52aee1e1ea47ef2ef65325dc83ec057f"
     },
     {
       "path": "packages/shared-contracts/dist/src/lib/shared-contracts.js",
-      "bytes": 38328,
-      "sha256": "26b27669024bc70729da0b9a31ee66f4c542617ede5ffd9ef54265fc1aece184"
+      "bytes": 42967,
+      "sha256": "98d3e7f6cb2a5eeb1b64bff8a9e9abc2403b4ef91e12f860753f65a5fb29d731"
     },
     {
       "path": "packages/shared-contracts/dist/src/lib/shared-contracts.js.map",
-      "bytes": 29988,
-      "sha256": "fff2de7e4c9685812fcae9d68dbd274268acc2e7fa24e2ba8afd4e8cdf583c57"
+      "bytes": 34147,
+      "sha256": "56fc3693e2827da06b939a8ce2aced3ac8c691ab3aba6e5015be0d53761f34cb"
     },
     {
       "path": "packages/shared-contracts/jest.config.cts",
@@ -1437,13 +1482,13 @@
     },
     {
       "path": "packages/shared-contracts/src/lib/shared-contracts.spec.ts",
-      "bytes": 23797,
-      "sha256": "862c0348496b5e932e010416c7cf5f72311b9fa781a17de108a5d71fbade2a72"
+      "bytes": 25910,
+      "sha256": "db645accf0b8877d922a134b6fc300d6197f527ca57a7b11d647cdfc8f2f49c5"
     },
     {
       "path": "packages/shared-contracts/src/lib/shared-contracts.ts",
-      "bytes": 45818,
-      "sha256": "1e57c511f80f8f6ccb833563d910255f31139b9981dbd3a39cada41a37546583"
+      "bytes": 51209,
+      "sha256": "bde44bc13865459e2f884ab35fcb9177554bd9bed1ccf59f1ddc9366b5a500fe"
     },
     {
       "path": "packages/shared-contracts/tsconfig.json",

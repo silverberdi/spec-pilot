@@ -1134,4 +1134,116 @@ describe('App shell and registration', () => {
     expect(fixture.nativeElement.textContent).toContain('DeepSeek');
     expect(fixture.nativeElement.textContent).toContain('15 minutos');
   });
+
+  it('probes DeepSeek with idle loading success and blocked states', async () => {
+    fixture = TestBed.createComponent(App);
+    fixture.componentRef.setInput('bootstrapMode', 'ok');
+    fixture.detectChanges();
+    await flushMicrotasks();
+    flushProjectsList([
+      {
+        id: '11111111-1111-1111-1111-111111111111',
+        slug: 'demo-repo',
+        displayName: 'demo-repo',
+        repositoryPath: '/tmp/demo-repo',
+        status: 'registered',
+        registeredAt: '2026-07-27T00:00:00.000Z',
+        lastInspectedAt: null,
+        configurationVersionId: '22222222-2222-2222-2222-222222222222',
+        discoveryHealth: neverInspectedHealth,
+      },
+    ]);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="deepseek-probe-idle"]'),
+    ).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain(
+      'No inicia una ejecución de revisión ni reserva presupuesto',
+    );
+
+    const stageSelect = fixture.nativeElement.querySelector(
+      '[data-testid="deepseek-probe-stage-select"]',
+    ) as HTMLSelectElement;
+    expect(fixture.componentInstance.deepseekProbeStage()).toBe('discovery');
+    const stageOptions = Array.from(stageSelect.options).map((o) => o.value);
+    expect(stageOptions).toEqual(['discovery', 'planning', 'applied', 'verify']);
+
+    fixture.componentInstance.probeDeepseek();
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="deepseek-probe-loading"]'),
+    ).toBeTruthy();
+
+    const probeReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/deepseek/probe`,
+    );
+    expect(probeReq.request.method).toBe('POST');
+    expect(probeReq.request.body).toEqual({ stage: 'discovery' });
+    probeReq.flush({
+      status: 'ok',
+      projectId: '11111111-1111-1111-1111-111111111111',
+      stage: 'discovery',
+      providerId: 'deepseek',
+      modelAlias: 'deepseek-flash',
+      resolvedModelId: 'deepseek-v4-flash',
+      schemaId: 'deepseek-gateway-probe-v1',
+      attemptCount: 1,
+      providerHttpStatus: 200,
+      latencyMs: 42,
+      usage: {
+        promptTokens: 10,
+        completionTokens: 5,
+        totalTokens: 15,
+      },
+      parsed: {
+        ok: true,
+        probe: 'deepseek-gateway-probe-v1',
+        message: 'probe-ok',
+      },
+    });
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="deepseek-probe-success"]'),
+    ).toBeTruthy();
+    const successText = fixture.nativeElement.querySelector(
+      '[data-testid="deepseek-probe-success"]',
+    )?.textContent;
+    expect(successText).toContain('deepseek-v4-flash');
+    expect(successText).toContain('deepseek-gateway-probe-v1');
+    expect(successText).toContain('intentos=1');
+    expect(successText).toContain('latenciaMs=42');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="deepseek-probe-usage"]')
+        ?.textContent,
+    ).toContain('total=15');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="deepseek-probe-message"]')
+        ?.textContent,
+    ).toContain('probe-ok');
+
+    fixture.componentInstance.probeDeepseek();
+    fixture.detectChanges();
+    const blockedReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/deepseek/probe`,
+    );
+    blockedReq.flush(
+      {
+        code: 'deepseek_not_configured',
+        message: 'DeepSeek no está configurado.',
+      },
+      { status: 422, statusText: 'Unprocessable Entity' },
+    );
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="deepseek-probe-blocked"]'),
+    ).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain(
+      'DeepSeek no está configurado.',
+    );
+    expect(fixture.nativeElement.textContent).toContain(
+      'Prueba DeepSeek bloqueada',
+    );
+  });
 });

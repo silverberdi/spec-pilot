@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
+import { DeepseekProbeService } from '../deepseek/deepseek-probe.service';
 import { ContextBundleService } from './context-bundle.service';
 import { ContextDisclosureService } from './context-disclosure.service';
 import { ContextSourceResolutionService } from './context-source-resolution.service';
@@ -16,6 +17,7 @@ export class ProjectsController {
     private readonly secretDetection: SecretDetectionService,
     private readonly contextBundles: ContextBundleService,
     private readonly contextDisclosure: ContextDisclosureService,
+    private readonly deepseekProbe: DeepseekProbeService,
   ) {}
 
   @Post()
@@ -150,6 +152,17 @@ export class ProjectsController {
     @Query() query: Record<string, unknown>,
   ) {
     return this.contextDisclosure.latest(id, query);
+  }
+
+  @Post(':id/deepseek/probe')
+  async probeDeepseek(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
+    const result = await this.deepseekProbe.probe(id, body);
+    reply.code(200);
+    return result;
   }
 
   @Get(':id')

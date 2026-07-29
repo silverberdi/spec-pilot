@@ -1,0 +1,12 @@
+sync-specs: PASS
+change: chg-w03-s01-deepseek-api-gateway
+Synced nine capability specs to canonical openspec/specs/:
+- deepseek-api-gateway: created; added 6 requirements
+- shared-libraries-baseline: updated; modified 1 requirement; added 1 requirement
+- nestjs-fastify-api-baseline: updated; modified 1 requirement; added 1 requirement
+- postgresql-prisma-persistence-baseline: updated; modified 1 requirement
+- project-yaml-configuration: updated; added 1 requirement
+- local-project-registration: updated; added 1 requirement
+- angular-web-console-baseline: updated; added 1 requirement
+- application-test-baseline: updated; modified 1 requirement; added 1 requirement
+- docker-compose-local-runtime: updated; modified 1 requirement; added 1 requirement

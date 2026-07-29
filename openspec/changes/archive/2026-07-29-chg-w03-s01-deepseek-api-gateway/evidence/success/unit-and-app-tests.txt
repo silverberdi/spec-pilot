@@ -1,0 +1,6 @@
+=== unit/app tests snapshot ===
+shared-contracts: 50 passed
+deepseek unit: 13 passed
+web: 15 passed
+api integration: covered under quality-gates (Testcontainers)
+QUALITY_GATES_OK

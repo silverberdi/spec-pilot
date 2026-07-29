@@ -1,0 +1,86 @@
+
+=== Runtime diagnosis ===
+axioma-db-dev snapshot: status=running started=2026-07-27T19:03:39.767345875Z finished=2026-07-27T19:03:39.418091875Z restarts=0
+NAME                 IMAGE                COMMAND                  SERVICE    CREATED          STATUS                PORTS
+specpilot-api        specpilot-api        "docker-entrypoint.s…"   api        14 minutes ago   Up 14 minutes         0.0.0.0:3000->3000/tcp
+specpilot-postgres   postgres:16-alpine   "docker-entrypoint.s…"   postgres   2 days ago       Up 2 days (healthy)   0.0.0.0:5441->5432/tcp
+specpilot-web        specpilot-web        "/docker-entrypoint.…"   web        2 hours ago      Up 2 hours            0.0.0.0:8081->80/tcp
+specpilot-api: status=running started=2026-07-29T21:19:54.545971762Z restarts=0
+DEEPSEEK_API_KEY presence: present
+DEEPSEEK_BASE_URL presence: absent_ok
+PASS: DEEPSEEK_API_KEY present in main api == present
+PASS: DEEPSEEK_BASE_URL absent in main api == absent_ok
+
+=== Wait health (main-api) http://localhost:3000/health ===
+PASS: main-api GET /health == 200 (attempt 1)
+
+=== Resolve project ===
+PASS: GET /projects HTTP == 200
+PASS: reusing existing registered project (id redacted length=36)
+
+=== Real DeepSeek probe ===
+PASS: probe HTTP == 200
+PASS: probe response schema + safety constraints
+probe.stage=discovery
+probe.modelAlias=deepseek-flash
+probe.resolvedModelId=deepseek-v4-flash
+probe.schemaId=deepseek-gateway-probe-v1
+probe.attemptCount=1
+probe.providerHttpStatus=200
+probe.latencyMs=983
+probe.usagePresent=True
+probe.providerRequestIdPresent=False
+probe.parsedMessageLength=16
+PASS: no provider-call tables == 0
+
+=== Blocked invalid probe requests ===
+PASS: block new HTTP == 422
+PASS: block new code + sanitized body
+PASS: block new: no outbound attemptCount>=1 log
+PASS: block unknown HTTP == 422
+PASS: block unknown code + sanitized body
+PASS: block unknown: no outbound attemptCount>=1 log
+PASS: block extra HTTP == 422
+PASS: block extra code + sanitized body
+PASS: block extra: no outbound attemptCount>=1 log
+
+=== Missing key via temporary SpecPilot-owned container ===
+
+=== Wait health (nokey-api) http://localhost:3001/health ===
+PASS: nokey-api GET /health == 200 (attempt 3)
+
+=== Wait health (main-api-during-nokey) http://localhost:3000/health ===
+PASS: main-api-during-nokey GET /health == 200 (attempt 1)
+PASS: main api key still present during nokey harness == present
+PASS: nokey container key absent == absent
+PASS: missing-key probe HTTP == 422
+PASS: missing-key code deepseek_not_configured
+PASS: missing-key zero outbound attempts (attemptCount=0 log)
+PASS: missing-key: no api.deepseek.com/Authorization markers in new logs
+PASS: nokey /health HTTP == 200
+PASS: main /health during nokey HTTP == 200
+Removed temporary container specpilot-api-nokey-hv
+
+=== Wait health (main-api-restored) http://localhost:3000/health ===
+PASS: main-api-restored GET /health == 200 (attempt 1)
+PASS: normal runtime restored (main api healthy; nokey harness removed)
+
+=== Secret-safety (tracked/staged + evidence; never read .env contents) ===
+PASS: .env is gitignored
+PASS: secret-safety: no forbidden patterns in tracked/staged files
+PASS: no DEEPSEEK_BASE_URL in compose/env baseline surfaces
+PASS: no provider-call Prisma model
+PASS: no provider-call migration
+PASS: deepseek module has no bundle/disclosure repository reads
+
+=== Summary ===
+PASS_COUNT=29
+FAIL_COUNT=0
+REPORT=/tmp/sp-w03-s01-operator-validation-20260729T163418.txt
+CREATED_PROJECT=0
+axioma_before=status=running started=2026-07-27T19:03:39.767345875Z finished=2026-07-27T19:03:39.418091875Z restarts=0
+OVERALL=PASS
+
+=== Cleanup ===
+PASS: main API /health still 200 after cleanup
+PASS: axioma-db-dev untouched (status=running started=2026-07-27T19:03:39.767345875Z finished=2026-07-27T19:03:39.418091875Z restarts=0)

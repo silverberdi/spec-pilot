@@ -2,6 +2,7 @@ import {
   APPROVAL_POLICY_ID,
   createHealthResponse,
   createReadyResponse,
+  DEEPSEEK_GATEWAY_PROBE_SCHEMA_ID,
   DISPLAY_NAME_MAX_LENGTH,
   isContextDisclosureApprovalLatestListDto,
   isContextDisclosureApprovalOkDto,
@@ -15,6 +16,7 @@ import {
   isContextBundleBlockedDto,
   isContextBundleLatestListDto,
   isContextBundleOkDto,
+  isDeepseekProbeOkDto,
   isHealthResponse,
   isProjectDiscoveryDto,
   isProjectDto,
@@ -27,6 +29,7 @@ import {
   parseContextSourceResolveRequest,
   parseContextBundleLatestQuery,
   parseContextBundleRequest,
+  parseDeepseekProbeRequest,
   parseDisclosureApprovalLatestQuery,
   parseDisclosureApprovalRequest,
   parseSecretScanRequest,
@@ -788,5 +791,73 @@ describe('shared-contracts context disclosure preview/approval', () => {
       parseDisclosureApprovalLatestQuery({ stage: 'planning', limit: '2' }).ok,
     ).toBe(false);
     expect(parseDisclosureApprovalLatestQuery({ limit: '1' }).ok).toBe(false);
+  });
+});
+
+describe('deepseek probe contracts', () => {
+  const okProbe = {
+    status: 'ok' as const,
+    projectId: '11111111-1111-4111-8111-111111111111',
+    stage: 'discovery' as const,
+    providerId: 'deepseek' as const,
+    modelAlias: 'deepseek-flash',
+    resolvedModelId: 'deepseek-v4-flash' as const,
+    schemaId: DEEPSEEK_GATEWAY_PROBE_SCHEMA_ID,
+    attemptCount: 1,
+    providerHttpStatus: 200 as const,
+    latencyMs: 12,
+    parsed: {
+      ok: true as const,
+      probe: DEEPSEEK_GATEWAY_PROBE_SCHEMA_ID,
+      message: 'probe-ok',
+    },
+  };
+
+  it('accepts a valid DeepSeek probe ok DTO', () => {
+    expect(isDeepseekProbeOkDto(okProbe)).toBe(true);
+  });
+
+  it('rejects probe ok missing attemptCount', () => {
+    const { attemptCount: _a, ...rest } = okProbe;
+    expect(isDeepseekProbeOkDto(rest)).toBe(false);
+  });
+
+  it('rejects probe ok with invalid parsed schema', () => {
+    expect(
+      isDeepseekProbeOkDto({
+        ...okProbe,
+        parsed: { ok: true, probe: 'other', message: 'x' },
+      }),
+    ).toBe(false);
+  });
+
+  it('defaults omitted stage to discovery and rejects new/extra fields', () => {
+    expect(parseDeepseekProbeRequest({})).toEqual({
+      ok: true,
+      stage: 'discovery',
+    });
+    expect(parseDeepseekProbeRequest(undefined)).toEqual({
+      ok: true,
+      stage: 'discovery',
+    });
+    expect(parseDeepseekProbeRequest({ stage: 'planning' })).toEqual({
+      ok: true,
+      stage: 'planning',
+    });
+    expect(parseDeepseekProbeRequest({ stage: 'new' })).toEqual({
+      ok: false,
+      code: 'invalid_deepseek_probe_request',
+    });
+    expect(parseDeepseekProbeRequest({ stage: 'discovery', extra: 1 })).toEqual(
+      {
+        ok: false,
+        code: 'invalid_deepseek_probe_request',
+      },
+    );
+  });
+
+  it('does not treat DeepSeek codes as context-bundle blocked members', () => {
+    expect(isContextBundleBlockedCode('deepseek_not_configured')).toBe(false);
+    expect(isSecretScanBlockedCode('deepseek_schema_invalid')).toBe(false);
   });
 });
