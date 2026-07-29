@@ -87,6 +87,32 @@ export const OPERATOR_MESSAGES: Record<ProjectErrorCode, string> = {
     'No se encontró el manifiesto de contexto solicitado.',
   invalid_context_bundle_query:
     'La consulta de manifiestos de contexto no es válida; use stage y limit=1.',
+  disclosure_preview_required:
+    'Se requiere una vista previa válida y vigente antes de aprobar la divulgación.',
+  disclosure_preview_expired:
+    'La vista previa expiró; genere una nueva antes de aprobar la divulgación.',
+  disclosure_preview_binding_mismatch:
+    'La vista previa no corresponde exactamente a este manifiesto de contexto.',
+  disclosure_manifest_mismatch:
+    'El manifestHash de la solicitud no coincide con el del manifiesto de contexto.',
+  disclosure_preview_policy_mismatch:
+    'La política de vista previa cambió; genere una nueva vista previa antes de aprobar.',
+  disclosure_preview_integrity_mismatch:
+    'El contenido en disco ya no coincide con la vista previa; no se puede aprobar la divulgación.',
+  disclosure_preview_entry_unreadable:
+    'No se pudo leer de forma segura una entrada del manifiesto durante la vista previa.',
+  disclosure_preview_limit_exceeded:
+    'Se superó el límite de bytes o de puntos de código durante la vista previa.',
+  disclosure_preview_timeout:
+    'La vista previa o la verificación de aprobación superó el tiempo máximo permitido.',
+  invalid_disclosure_approval:
+    'La solicitud de aprobación de divulgación no es válida.',
+  invalid_disclosure_approval_query:
+    'La consulta de aprobaciones de divulgación no es válida; use stage y limit=1.',
+  disclosure_preview_failed:
+    'Ocurrió un error interno al generar la vista previa de divulgación.',
+  disclosure_approval_failed:
+    'Ocurrió un error interno al registrar la aprobación de divulgación.',
   internal_error: 'Ocurrió un error interno al registrar el proyecto.',
 };
 
@@ -129,7 +155,9 @@ export function internal500(
     | 'discovery_refresh_failed'
     | 'context_resolve_failed'
     | 'secret_scan_failed'
-    | 'context_bundle_failed' = 'internal_error',
+    | 'context_bundle_failed'
+    | 'disclosure_preview_failed'
+    | 'disclosure_approval_failed' = 'internal_error',
 ): ProjectHttpError {
   return new ProjectHttpError(HttpStatus.INTERNAL_SERVER_ERROR, code);
 }

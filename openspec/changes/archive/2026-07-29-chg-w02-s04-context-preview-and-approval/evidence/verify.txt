@@ -1,0 +1,17 @@
+verify: PASS
+timestamp_utc: 2026-07-29T20:00:00Z
+change: chg-w02-s04-context-preview-and-approval
+operator_approval: continuous closure authorizing Verify through push (tasks 10.1/10.2 + 11.1)
+
+| Dimension | Result |
+|---|---|
+| Completeness | Tasks 1.1–10.2 and 11.1 complete; 11.2 is this Verify; 11.3–11.8 are post-Verify closure gates authorized in the same continuous pass |
+| Correctness | New `context-preview-and-approval` + six modified baselines covered by shared contracts/guards, Prisma preview-session + approval models + migration, ContextDisclosureService (canonical extract + integrity hash + coverage), preview/approve/status/latest API, Spanish disclosure console (20-excerpt cap, both policy ids), unit/integration/web tests, operator human validation PASS (freshness / clean bundle / status / preview / persistence / approval / post-status / latest / identical coverage / mutate-after-preview / missing-preview / foreign-session / invalid query / immutability / cleanup) |
+| Coherence | Design decisions reflected: mandatory preview→approval via metadata-only `ContextDisclosurePreviewSession` (15m TTL); approval body `{ previewSessionId, manifestHash, decision: approved }`; policies `bounded-selected-text-v1` / `explicit-disclosure-approval-v1`; canonical excerpt fidelity (CRLF preserved); `previewIntegrityHash`; separate append-only `ContextDisclosureApproval` with `contentTransmitted` literal false; `ContextBundle` immutable; closed error codes including integrity/binding/required/invalid-query |
+| Deterministic checks | `QUALITY_GATES_OK`; `BASELINE_OK`; openspec validate --all --strict; human validation PASS (operator script); secret scan clean |
+
+Notes:
+- Task 10.1: operator human validation recorded PASS in `evidence/human-validation.md`
+- Task 10.2: no deferred AC recorded PASS in `evidence/no-deferred-ac.md`
+- SpecPilot repo CI secret scanner unweakened; product fixtures use temp dirs; axioma-db-dev untouched
+- Exact result: PASS (not PASS WITH NOTES)

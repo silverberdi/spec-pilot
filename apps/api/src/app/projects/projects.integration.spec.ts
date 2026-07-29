@@ -1014,4 +1014,245 @@ describe('Project registration and configuration (Testcontainers)', () => {
     expect(badLimit.statusCode).toBe(422);
     expect(JSON.parse(badLimit.body).code).toBe('invalid_context_bundle_query');
   });
+
+  it('previews then approves disclosure with binding matrix fail-closed paths', async () => {
+    const prisma = app.get(PrismaService);
+    const repo = await makeEligibleRepo('disclosure-clean');
+    await writeFile(join(repo, 'AGENTS.md'), 'agents disclosure\n', 'utf8');
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    expect(register.statusCode).toBe(201);
+    const project = JSON.parse(register.body) as { id: string };
+
+    const create = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-bundles`,
+      payload: { stage: 'planning' },
+    });
+    expect(create.statusCode).toBe(201);
+    const bundle = JSON.parse(create.body) as {
+      id: string;
+      manifestHash: string;
+      entries: unknown[];
+    };
+
+    const missingSession = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-bundles/${bundle.id}/disclosure-approvals`,
+      payload: { manifestHash: bundle.manifestHash, decision: 'approved' },
+    });
+    expect(missingSession.statusCode).toBe(422);
+    expect(JSON.parse(missingSession.body).code).toBe(
+      'disclosure_preview_required',
+    );
+    expect(
+      await prisma.contextDisclosureApproval.count({
+        where: { projectId: project.id },
+      }),
+    ).toBe(0);
+
+    const preview = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-bundles/${bundle.id}/preview`,
+      payload: {},
+    });
+    expect(preview.statusCode).toBe(200);
+    const previewBody = JSON.parse(preview.body) as {
+      previewSessionId: string;
+      previewPolicyId: string;
+      approvalPolicyId: string;
+      previewIntegrityHash: string;
+      approvalRequired: boolean;
+      itemCount: number;
+      items: Array<{ path: string; excerpt: string }>;
+      contentTransmitted?: boolean;
+    };
+    expect(previewBody.previewPolicyId).toBe('bounded-selected-text-v1');
+    expect(previewBody.approvalPolicyId).toBe('explicit-disclosure-approval-v1');
+    expect(previewBody.approvalRequired).toBe(true);
+    expect(previewBody.itemCount).toBe(1);
+    expect(previewBody.items[0]?.excerpt).toBe('agents disclosure\n');
+    expect(previewBody).not.toHaveProperty('contentTransmitted');
+
+    const sessionRow = await prisma.contextDisclosurePreviewSession.findUnique({
+      where: { id: previewBody.previewSessionId },
+    });
+    expect(sessionRow).not.toBeNull();
+    expect(sessionRow).not.toHaveProperty('excerpt');
+    expect(JSON.stringify(sessionRow)).not.toContain('agents disclosure');
+
+    const statusBefore = await app.inject({
+      method: 'GET',
+      url: `/projects/${project.id}/context-bundles/${bundle.id}/disclosure-status`,
+    });
+    expect(statusBefore.statusCode).toBe(200);
+    expect(JSON.parse(statusBefore.body).approvalRequired).toBe(true);
+
+    await writeFile(join(repo, 'AGENTS.md'), 'agents mutated\n', 'utf8');
+    const mutateApprove = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-bundles/${bundle.id}/disclosure-approvals`,
+      payload: {
+        previewSessionId: previewBody.previewSessionId,
+        manifestHash: bundle.manifestHash,
+        decision: 'approved',
+      },
+    });
+    expect(mutateApprove.statusCode).toBe(422);
+    expect(JSON.parse(mutateApprove.body).code).toBe(
+      'disclosure_preview_integrity_mismatch',
+    );
+    expect(
+      await prisma.contextDisclosureApproval.count({
+        where: { projectId: project.id },
+      }),
+    ).toBe(0);
+
+    await writeFile(join(repo, 'AGENTS.md'), 'agents disclosure\n', 'utf8');
+    const approve = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-bundles/${bundle.id}/disclosure-approvals`,
+      payload: {
+        previewSessionId: previewBody.previewSessionId,
+        manifestHash: bundle.manifestHash,
+        decision: 'approved',
+      },
+    });
+    expect(approve.statusCode).toBe(201);
+    const approvalBody = JSON.parse(approve.body) as {
+      id: string;
+      contentTransmitted: boolean;
+      previewPolicyId: string;
+      approvalPolicyId: string;
+      approvalRequired: boolean;
+    };
+    expect(approvalBody.contentTransmitted).toBe(false);
+    expect(approvalBody.previewPolicyId).toBe('bounded-selected-text-v1');
+    expect(approvalBody.approvalPolicyId).toBe('explicit-disclosure-approval-v1');
+    expect(approvalBody.approvalRequired).toBe(false);
+
+    const bundleAfter = await prisma.contextBundle.findUnique({
+      where: { id: bundle.id },
+    });
+    expect(bundleAfter?.manifestHash).toBe(bundle.manifestHash);
+    expect(bundleAfter).not.toHaveProperty('contentTransmitted');
+
+    const statusAfter = await app.inject({
+      method: 'GET',
+      url: `/projects/${project.id}/context-bundles/${bundle.id}/disclosure-status`,
+    });
+    expect(JSON.parse(statusAfter.body).approvalRequired).toBe(false);
+
+    const latest = await app.inject({
+      method: 'GET',
+      url: `/projects/${project.id}/disclosure-approvals?stage=planning&limit=1`,
+    });
+    expect(latest.statusCode).toBe(200);
+    const latestBody = JSON.parse(latest.body) as {
+      items: Array<{ id: string; contentTransmitted: boolean }>;
+    };
+    expect(latestBody.items).toHaveLength(1);
+    expect(latestBody.items[0]?.id).toBe(approvalBody.id);
+    expect(latestBody.items[0]?.contentTransmitted).toBe(false);
+
+    const foreign = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-bundles/${bundle.id}/disclosure-approvals`,
+      payload: {
+        previewSessionId: '00000000-0000-4000-8000-000000000099',
+        manifestHash: bundle.manifestHash,
+        decision: 'approved',
+      },
+    });
+    expect(foreign.statusCode).toBe(422);
+    expect(JSON.parse(foreign.body).code).toBe('disclosure_preview_required');
+
+    const wrongHash = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-bundles/${bundle.id}/disclosure-approvals`,
+      payload: {
+        previewSessionId: previewBody.previewSessionId,
+        manifestHash: 'a'.repeat(64),
+        decision: 'approved',
+      },
+    });
+    expect(wrongHash.statusCode).toBe(422);
+    expect(JSON.parse(wrongHash.body).code).toBe('disclosure_manifest_mismatch');
+
+    await prisma.contextDisclosurePreviewSession.update({
+      where: { id: previewBody.previewSessionId },
+      data: { expiresAt: new Date(Date.now() - 1000) },
+    });
+    const expired = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-bundles/${bundle.id}/disclosure-approvals`,
+      payload: {
+        previewSessionId: previewBody.previewSessionId,
+        manifestHash: bundle.manifestHash,
+        decision: 'approved',
+      },
+    });
+    expect(expired.statusCode).toBe(422);
+    expect(JSON.parse(expired.body).code).toBe('disclosure_preview_expired');
+
+    await prisma.contextDisclosurePreviewSession.update({
+      where: { id: previewBody.previewSessionId },
+      data: {
+        expiresAt: new Date(Date.now() + 15 * 60 * 1000),
+        previewPolicyId: 'legacy-preview-policy',
+      },
+    });
+    const policyMismatch = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-bundles/${bundle.id}/disclosure-approvals`,
+      payload: {
+        previewSessionId: previewBody.previewSessionId,
+        manifestHash: bundle.manifestHash,
+        decision: 'approved',
+      },
+    });
+    expect(policyMismatch.statusCode).toBe(422);
+    expect(JSON.parse(policyMismatch.body).code).toBe(
+      'disclosure_preview_policy_mismatch',
+    );
+  });
+
+  it('creates no preview session when integrity fails', async () => {
+    const prisma = app.get(PrismaService);
+    const repo = await makeEligibleRepo('disclosure-fail');
+    await writeFile(join(repo, 'AGENTS.md'), 'before preview\n', 'utf8');
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    const project = JSON.parse(register.body) as { id: string };
+    const create = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-bundles`,
+      payload: { stage: 'new' },
+    });
+    const bundle = JSON.parse(create.body) as { id: string };
+    await writeFile(join(repo, 'AGENTS.md'), 'changed before preview\n', 'utf8');
+
+    const before = await prisma.contextDisclosurePreviewSession.count({
+      where: { projectId: project.id },
+    });
+    const preview = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-bundles/${bundle.id}/preview`,
+      payload: {},
+    });
+    expect(preview.statusCode).toBe(422);
+    expect(JSON.parse(preview.body).code).toBe(
+      'disclosure_preview_integrity_mismatch',
+    );
+    const after = await prisma.contextDisclosurePreviewSession.count({
+      where: { projectId: project.id },
+    });
+    expect(after).toBe(before);
+  });
 });

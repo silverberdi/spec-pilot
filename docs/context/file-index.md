@@ -32,8 +32,10 @@ Canonical context index for operator orientation. Formal integrity/generation ru
 | Prisma schema/migrations | `apps/api/prisma/**`, `apps/api/prisma.config.ts` |
 | Project registration (API) | `apps/api/src/app/projects/**` |
 | Context-source resolution (API) | `apps/api/src/app/projects/context-source-*.ts`, `POST /projects/:id/context-sources/resolve` |
-| Project registration / resolve (web) | `apps/web` operator surfaces in `apps/web/src/app/*` |
+| Context-bundle / disclosure (API) | `apps/api/src/app/projects/context-bundle*.ts`, `context-disclosure*.ts`, `POST .../context-bundles`, `POST .../preview`, `POST .../disclosure-approvals` |
+| Project registration / resolve / disclosure (web) | `apps/web` operator surfaces in `apps/web/src/app/*` |
 | Canonical capability: context-source-resolution | `openspec/specs/context-source-resolution/spec.md` |
+| Canonical capability: context-bundle-manifest | `openspec/specs/context-bundle-manifest/spec.md` |
 | Local Compose runtime | `compose.yaml`, `compose.override.example.yaml` (local `compose.override.yaml` gitignored), `apps/api/Dockerfile`, `apps/web/Dockerfile`, `.dockerignore`, `.env.example` |
 | Portable project contract (this repo) | `.specpilot/project.yaml` |
 | Quality-gate orchestrator | `scripts/run-quality-gates.sh` (`npm run quality-gates`) |
@@ -70,6 +72,6 @@ Refresh only with `openspec update`. Generated Codex and OpenCode inventories ar
 
 ## Active change
 
-- None (active OpenSpec change directory empty after archive of `chg-w02-s01-context-source-resolution`)
-- Latest archived: `openspec/changes/archive/2026-07-28-chg-w02-s01-context-source-resolution`
-- Prior archived: `openspec/changes/archive/2026-07-28-chg-w01-s04-project-dashboard`, `openspec/changes/archive/2026-07-28-chg-w01-s03-git-and-openspec-discovery`, `openspec/changes/archive/2026-07-28-chg-w01-s02-project-configuration`, `openspec/changes/archive/2026-07-27-chg-w01-s01-project-registration`, and Wave 0 archives under `openspec/changes/archive/`
+- Active: none
+- Latest archived: `openspec/changes/archive/2026-07-29-chg-w02-s04-context-preview-and-approval`
+- Prior archived: `openspec/changes/archive/2026-07-29-chg-w02-s03-context-bundle-manifest`, `openspec/changes/archive/2026-07-28-chg-w02-s02-secret-detection-and-exclusion`, `openspec/changes/archive/2026-07-28-chg-w02-s01-context-source-resolution`, Wave 1 and Wave 0 archives under `openspec/changes/archive/`

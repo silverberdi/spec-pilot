@@ -1,0 +1,12 @@
+sync-specs: PASS
+timestamp_utc: 2026-07-29T20:01:19Z
+change: chg-w02-s04-context-preview-and-approval
+
+Synced seven capability specs to canonical openspec/specs/:
+- CREATED context-preview-and-approval (new capability: 6 requirements for preview sessions, excerpt integrity, bounds, approval binding, coverage, and error mapping)
+- MODIFIED context-bundle-manifest (updated preview/approval non-goals; added disclosure-capability scenario)
+- MODIFIED postgresql-prisma-persistence-baseline (added ContextDisclosurePreviewSession/Approval models; updated schema scenario)
+- MODIFIED shared-libraries-baseline (added disclosure contracts, error codes, type guards, and 4 validation scenarios)
+- MODIFIED local-project-registration (added disclosure preview/approval/status endpoint requirement)
+- MODIFIED angular-web-console-baseline (extended shell/bundle requirements; added disclosure console outcomes requirement)
+- MODIFIED application-test-baseline (updated evidence change id to s04; added disclosure test coverage requirement)

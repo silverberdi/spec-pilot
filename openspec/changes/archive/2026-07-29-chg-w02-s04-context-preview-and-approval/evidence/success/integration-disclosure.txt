@@ -1,0 +1,52 @@
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+
+ NX   Running target test for project api and 1 task it depends on:
+
+
+
+> nx run shared-contracts:build
+
+(node:87617) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Compiling TypeScript files for project "shared-contracts"...
+Done compiling TypeScript files for project "shared-contracts".
+
+> nx run api:test --testPathPatterns=projects.integration
+
+> jest --passWithNoTests=true --testPathPatterns=projects.integration
+
+(node:87620) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ts-jest[ts-compiler] (WARN) Got a `.js` file to compile while `allowJs` option is not set to `true` (file: /Users/silveriobernal/Documents/Code/Development/spec-pilot/packages/shared-contracts/dist/src/index.js). To fix this:
+  - if you want TypeScript to process JS files, set `allowJs` to `true` in your TypeScript config (usually tsconfig.json)
+  - if you do not want TypeScript to process your `.js` files, in your Jest config change the `transform` key which value is `ts-jest` so that it does not match `.js` files anymore
+[1mTest Suites: [22m[1m[32m1 passed[39m[22m, 1 total
+[1mTests:       [22m[1m[32m28 passed[39m[22m, 28 total
+[1mSnapshots:   [22m0 total
+[1mTime:[22m        [1m[33m8.681 s[39m[22m
+[2mRan all test suites[22m[2m matching [22mprojects.integration[2m.[22m
+
+
+
+ NX   Successfully ran target test for project api and 1 task it depends on
+
+
+
+ NX   Nx detected a flaky task
+
+  api:test
+
+Flaky tasks can disrupt your CI pipeline. Automatically retry them with Nx Cloud. Learn more at https://nx.dev/ci/features/flaky-tasks
+
+Your AI agent configuration is outdated. Run "nx configure-ai-agents" to update.
+
+  Run duration:      9.9s
+  Cache:             Skipped (--skip-nx-cache)
+  Critical path:     9.9s (2 tasks)
+  Recoverable time:  <1ms
+
+  Recommendations:
+    - Cache: drop --skip-nx-cache to restore unchanged tasks instantly.
+    - Speed up or split the longest tasks on the critical path:
+        api:test                   9.1s
+        shared-contracts:build    779ms

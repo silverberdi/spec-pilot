@@ -1,0 +1,53 @@
+=== SpecPilot baseline validation ===
+root: /Users/silveriobernal/Documents/Code/Development/spec-pilot
+PASS  openspec --version => 1.6.0
+PASS  openspec schema validate spec-driven
+PASS  openspec validate --all
+PASS  openspec doctor
+PASS  cursor commands: 12
+PASS  cursor skills: 12
+PASS  codex skills: 12
+PASS  opencode commands: 12
+PASS  opencode skills: 12
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+PASS  delivery graph + machine IDs
+INFO  active OpenSpec change directories: 1
+PASS  product scaffolding present (apps/packages/package.json)
+fileCount=284 waves=12 slices=42 stories=126
+PASS  package-summary semantics
+no heuristic secrets found
+PASS  secret scan
+PASS  git branch: main
+=== summary ===
+BASELINE_OK
+no heuristic secrets found
+waves=12 slices=42 stories=126 changes=42 first_change=chg-w00-s01-repository-governance-and-openspec-foundation
+npm warn Unknown env config "devdir". This will stop working in the next major version of npm. See `npm help npmrc` for supported config options.
+- Validating...
+✓ spec/agent-operating-contracts
+✓ spec/angular-web-console-baseline
+✓ spec/application-test-baseline
+✓ spec/baseline-validation-and-secret-scanning
+✓ change/chg-w02-s04-context-preview-and-approval
+✓ spec/closure-evidence-and-process-gates
+✓ spec/context-and-package-integrity
+✓ spec/context-bundle-manifest
+✓ spec/context-source-resolution
+✓ spec/delivery-graph-and-id-validation
+✓ spec/deterministic-ci-pipeline
+✓ spec/docker-compose-local-runtime
+✓ spec/git-and-openspec-discovery
+✓ spec/immutable-openspec-integrations
+✓ spec/local-project-registration
+✓ spec/nestjs-fastify-api-baseline
+✓ spec/nx-dependency-boundaries
+✓ spec/nx-monorepo-baseline
+✓ spec/openspec-verified-lifecycle
+✓ spec/postgresql-prisma-persistence-baseline
+✓ spec/project-dashboard
+✓ spec/project-yaml-configuration
+✓ spec/repository-governance
+✓ spec/required-quality-gates
+✓ spec/secret-detection-and-exclusion
+✓ spec/shared-libraries-baseline
+Totals: 26 passed, 0 failed (26 items)

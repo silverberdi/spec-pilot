@@ -1,7 +1,12 @@
 import {
+  APPROVAL_POLICY_ID,
   createHealthResponse,
   createReadyResponse,
   DISPLAY_NAME_MAX_LENGTH,
+  isContextDisclosureApprovalLatestListDto,
+  isContextDisclosureApprovalOkDto,
+  isContextDisclosurePreviewOkDto,
+  isContextDisclosureStatusOkDto,
   isContextSourceResolveBlockedCode,
   isContextSourceResolveBlockedDto,
   isContextSourceResolveDto,
@@ -22,7 +27,10 @@ import {
   parseContextSourceResolveRequest,
   parseContextBundleLatestQuery,
   parseContextBundleRequest,
+  parseDisclosureApprovalLatestQuery,
+  parseDisclosureApprovalRequest,
   parseSecretScanRequest,
+  PREVIEW_POLICY_ID,
   validateRegisterProjectRequest,
 } from './shared-contracts';
 
@@ -595,5 +603,190 @@ describe('shared-contracts context-bundle', () => {
         items: [okBundle],
       }),
     ).toBe(true);
+  });
+});
+
+describe('shared-contracts context disclosure preview/approval', () => {
+  const okPreview = {
+    status: 'ok' as const,
+    previewSessionId: '44444444-4444-4444-4444-444444444444',
+    previewPolicyId: PREVIEW_POLICY_ID,
+    approvalPolicyId: APPROVAL_POLICY_ID,
+    previewIntegrityHash: 'd'.repeat(64),
+    createdAt: '2026-07-29T00:00:00.000Z',
+    expiresAt: '2026-07-29T00:15:00.000Z',
+    bundleId: '33333333-3333-3333-3333-333333333333',
+    projectId: '11111111-1111-1111-1111-111111111111',
+    stage: 'planning' as const,
+    manifestHash: 'b'.repeat(64),
+    selectionPolicyId: 'full-file-lines-v1' as const,
+    tokenEstimatorId: 'unicode-codepoints-div-4-v1' as const,
+    manifestSchemaVersion: 1 as const,
+    itemCount: 1,
+    previewedCodePointCount: 5,
+    totalTokenEstimate: 1,
+    approvalRequired: true,
+    items: [
+      {
+        path: 'AGENTS.md',
+        contentHash: 'c'.repeat(64),
+        lineRanges: [{ startLine: 1, endLine: 1 }],
+        tokenEstimate: 1,
+        excerpt: 'hello',
+      },
+    ],
+  };
+
+  const okApproval = {
+    status: 'ok' as const,
+    id: '55555555-5555-5555-5555-555555555555',
+    projectId: okPreview.projectId,
+    contextBundleId: okPreview.bundleId,
+    previewSessionId: okPreview.previewSessionId,
+    stage: 'planning' as const,
+    configurationVersionId: '22222222-2222-2222-2222-222222222222',
+    sourceHash: 'a'.repeat(64),
+    manifestSchemaVersion: 1 as const,
+    selectionPolicyId: 'full-file-lines-v1' as const,
+    tokenEstimatorId: 'unicode-codepoints-div-4-v1' as const,
+    manifestHash: okPreview.manifestHash,
+    previewPolicyId: PREVIEW_POLICY_ID,
+    approvalPolicyId: APPROVAL_POLICY_ID,
+    previewIntegrityHash: okPreview.previewIntegrityHash,
+    decision: 'approved' as const,
+    contentTransmitted: false as const,
+    createdAt: '2026-07-29T00:01:00.000Z',
+    approvalRequired: false as const,
+  };
+
+  it('accepts a well-formed preview ok DTO', () => {
+    expect(isContextDisclosurePreviewOkDto(okPreview)).toBe(true);
+  });
+
+  it('rejects contentTransmitted anywhere on the preview ok DTO', () => {
+    expect(
+      isContextDisclosurePreviewOkDto({ ...okPreview, contentTransmitted: false }),
+    ).toBe(false);
+  });
+
+  it('rejects a preview ok DTO with a mismatched policy id', () => {
+    expect(
+      isContextDisclosurePreviewOkDto({
+        ...okPreview,
+        previewPolicyId: 'other-policy',
+      }),
+    ).toBe(false);
+  });
+
+  it('accepts a well-formed approval ok DTO requiring contentTransmitted === false', () => {
+    expect(isContextDisclosureApprovalOkDto(okApproval)).toBe(true);
+  });
+
+  it('rejects an approval ok DTO with contentTransmitted true or missing', () => {
+    expect(
+      isContextDisclosureApprovalOkDto({ ...okApproval, contentTransmitted: true }),
+    ).toBe(false);
+    const { contentTransmitted: _omit, ...withoutFlag } = okApproval;
+    expect(isContextDisclosureApprovalOkDto(withoutFlag)).toBe(false);
+  });
+
+  it('rejects an approval ok DTO with approvalRequired true or decision not approved', () => {
+    expect(
+      isContextDisclosureApprovalOkDto({ ...okApproval, approvalRequired: true }),
+    ).toBe(false);
+    expect(
+      isContextDisclosureApprovalOkDto({ ...okApproval, decision: 'rejected' }),
+    ).toBe(false);
+  });
+
+  it('accepts a well-formed disclosure status ok DTO', () => {
+    expect(
+      isContextDisclosureStatusOkDto({
+        status: 'ok',
+        projectId: okPreview.projectId,
+        contextBundleId: okPreview.bundleId,
+        stage: 'planning',
+        manifestHash: okPreview.manifestHash,
+        previewPolicyId: PREVIEW_POLICY_ID,
+        approvalPolicyId: APPROVAL_POLICY_ID,
+        approvalRequired: false,
+        coveringApprovalId: okApproval.id,
+        contentTransmitted: false,
+      }),
+    ).toBe(true);
+  });
+
+  it('rejects a disclosure status DTO implying transmission', () => {
+    expect(
+      isContextDisclosureStatusOkDto({
+        status: 'ok',
+        projectId: okPreview.projectId,
+        contextBundleId: okPreview.bundleId,
+        stage: 'planning',
+        manifestHash: okPreview.manifestHash,
+        previewPolicyId: PREVIEW_POLICY_ID,
+        approvalPolicyId: APPROVAL_POLICY_ID,
+        approvalRequired: false,
+        coveringApprovalId: null,
+        contentTransmitted: true,
+      }),
+    ).toBe(false);
+  });
+
+  it('accepts the latest approval list wrapper', () => {
+    expect(
+      isContextDisclosureApprovalLatestListDto({
+        status: 'ok',
+        items: [okApproval],
+      }),
+    ).toBe(true);
+    expect(
+      isContextDisclosureApprovalLatestListDto({ status: 'ok', items: [] }),
+    ).toBe(true);
+  });
+
+  it('rejects a latest approval list containing an invalid item', () => {
+    expect(
+      isContextDisclosureApprovalLatestListDto({
+        status: 'ok',
+        items: [{ ...okApproval, contentTransmitted: true }],
+      }),
+    ).toBe(false);
+  });
+
+  it('parses a well-formed approval request exactly', () => {
+    const parsed = parseDisclosureApprovalRequest({
+      previewSessionId: okPreview.previewSessionId,
+      manifestHash: okPreview.manifestHash,
+      decision: 'approved',
+    });
+    expect(parsed.ok).toBe(true);
+  });
+
+  it('rejects an approval request missing previewSessionId as disclosure_preview_required', () => {
+    const parsed = parseDisclosureApprovalRequest({
+      manifestHash: okPreview.manifestHash,
+      decision: 'approved',
+    });
+    expect(parsed).toEqual({ ok: false, code: 'disclosure_preview_required' });
+  });
+
+  it('rejects an approval request with a bad decision as invalid_disclosure_approval', () => {
+    const parsed = parseDisclosureApprovalRequest({
+      previewSessionId: okPreview.previewSessionId,
+      manifestHash: okPreview.manifestHash,
+      decision: 'rejected',
+    });
+    expect(parsed).toEqual({ ok: false, code: 'invalid_disclosure_approval' });
+  });
+
+  it('parses the latest approval query and rejects invalid shapes', () => {
+    expect(
+      parseDisclosureApprovalLatestQuery({ stage: 'planning', limit: '1' }).ok,
+    ).toBe(true);
+    expect(
+      parseDisclosureApprovalLatestQuery({ stage: 'planning', limit: '2' }).ok,
+    ).toBe(false);
+    expect(parseDisclosureApprovalLatestQuery({ limit: '1' }).ok).toBe(false);
   });
 });

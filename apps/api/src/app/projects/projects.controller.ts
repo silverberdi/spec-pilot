@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { ContextBundleService } from './context-bundle.service';
+import { ContextDisclosureService } from './context-disclosure.service';
 import { ContextSourceResolutionService } from './context-source-resolution.service';
 import { DiscoveryService } from './discovery.service';
 import { ProjectsService } from './projects.service';
@@ -14,6 +15,7 @@ export class ProjectsController {
     private readonly contextSources: ContextSourceResolutionService,
     private readonly secretDetection: SecretDetectionService,
     private readonly contextBundles: ContextBundleService,
+    private readonly contextDisclosure: ContextDisclosureService,
   ) {}
 
   @Post()
@@ -108,6 +110,46 @@ export class ProjectsController {
     @Query() query: Record<string, unknown>,
   ) {
     return this.contextBundles.latest(id, query);
+  }
+
+  @Post(':id/context-bundles/:bundleId/preview')
+  async previewContextBundle(
+    @Param('id') id: string,
+    @Param('bundleId') bundleId: string,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
+    const result = await this.contextDisclosure.preview(id, bundleId, body);
+    reply.code(200);
+    return result;
+  }
+
+  @Post(':id/context-bundles/:bundleId/disclosure-approvals')
+  async approveContextBundleDisclosure(
+    @Param('id') id: string,
+    @Param('bundleId') bundleId: string,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
+    const result = await this.contextDisclosure.approve(id, bundleId, body);
+    reply.code(201);
+    return result;
+  }
+
+  @Get(':id/context-bundles/:bundleId/disclosure-status')
+  async getContextBundleDisclosureStatus(
+    @Param('id') id: string,
+    @Param('bundleId') bundleId: string,
+  ) {
+    return this.contextDisclosure.status(id, bundleId);
+  }
+
+  @Get(':id/disclosure-approvals')
+  async listDisclosureApprovals(
+    @Param('id') id: string,
+    @Query() query: Record<string, unknown>,
+  ) {
+    return this.contextDisclosure.latest(id, query);
   }
 
   @Get(':id')

@@ -571,6 +571,290 @@
                 </section>
               }
             </section>
+
+            <section class="shell__refresh" data-testid="disclosure">
+              <p class="shell__tagline">{{ copy().disclosureHint }}</p>
+
+              @if (!lastContextBundle()) {
+                <p class="shell__empty" data-testid="disclosure-need-bundle">
+                  {{ copy().disclosureNeedBundleHint }}
+                </p>
+              }
+
+              <p-button
+                [label]="copy().disclosurePreviewLabel"
+                (onClick)="previewDisclosure()"
+                [loading]="disclosurePreviewState() === 'loading'"
+                [disabled]="
+                  disclosurePreviewState() === 'loading' ||
+                  !selectedProjectId() ||
+                  !lastContextBundle()
+                "
+              />
+              <p-button
+                [label]="copy().disclosureApproveLabel"
+                (onClick)="approveDisclosure()"
+                [loading]="disclosureApprovalState() === 'loading'"
+                [disabled]="
+                  disclosureApprovalState() === 'loading' ||
+                  !lastDisclosurePreview()
+                "
+              />
+              <p-button
+                [label]="copy().disclosureStatusLabel"
+                (onClick)="refreshDisclosureStatus()"
+                [loading]="disclosureStatusState() === 'loading'"
+                [disabled]="
+                  disclosureStatusState() === 'loading' ||
+                  !selectedProjectId() ||
+                  !lastContextBundle()
+                "
+              />
+              <p-button
+                [label]="copy().disclosureLatestLabel"
+                (onClick)="loadLatestDisclosureApproval()"
+                [loading]="disclosureLatestState() === 'loading'"
+                [disabled]="
+                  disclosureLatestState() === 'loading' || !selectedProjectId()
+                "
+              />
+
+              @if (
+                disclosurePreviewState() === 'idle' && !lastDisclosurePreview()
+              ) {
+                <p data-testid="disclosure-preview-idle">{{
+                  copy().disclosurePreviewIdle
+                }}</p>
+              }
+
+              @if (disclosurePreviewState() === 'loading') {
+                <p data-testid="disclosure-preview-loading">{{
+                  copy().loading
+                }}</p>
+              }
+
+              @if (
+                disclosurePreviewState() === 'success' && lastDisclosurePreview();
+                as preview
+              ) {
+                <section data-testid="disclosure-preview-success">
+                  <p-message severity="success">{{
+                    preview.itemCount === 0
+                      ? copy().disclosurePreviewEmptyTitle
+                      : copy().disclosurePreviewSuccessTitle
+                  }}</p-message>
+                  <p>
+                    etapa={{ preview.stage }} sesión={{
+                      preview.previewSessionId.slice(0, 12)
+                    }}… manifiesto={{ preview.manifestHash.slice(0, 12) }}…
+                    integridad={{ preview.previewIntegrityHash.slice(0, 12) }}…
+                  </p>
+                  <p>
+                    {{ copy().disclosureExpiresLabel }}: {{ preview.expiresAt }}
+                    aprobaciónRequerida={{
+                      preview.approvalRequired ? copy().disclosureYes : copy().disclosureNo
+                    }}
+                  </p>
+                  <p>
+                    previewPolicyId={{ preview.previewPolicyId }}
+                    approvalPolicyId={{ preview.approvalPolicyId }}
+                    entradas={{ preview.itemCount }}
+                  </p>
+                  @if (disclosureItemsCapCopy(); as cap) {
+                    <p data-testid="disclosure-preview-cap">{{ cap }}</p>
+                  }
+                  <ul data-testid="disclosure-preview-items">
+                    @for (item of displayedDisclosureItems(); track item.path) {
+                      <li>
+                        <p class="shell__path">
+                          {{ item.path }}
+                          @if (item.lineRanges.length > 0) {
+                            · líneas={{ formatDisclosureLineRanges(item) }}
+                          }
+                        </p>
+                        <pre class="shell__excerpt">{{ item.excerpt }}</pre>
+                      </li>
+                    }
+                  </ul>
+                </section>
+              }
+
+              @if (
+                (disclosurePreviewState() === 'blocked' ||
+                  disclosurePreviewState() === 'error') &&
+                disclosurePreviewMessage()
+              ) {
+                <section data-testid="disclosure-preview-blocked">
+                  <p-message
+                    [severity]="
+                      disclosurePreviewState() === 'blocked' ? 'warn' : 'error'
+                    "
+                    >{{
+                      disclosurePreviewState() === 'blocked'
+                        ? copy().disclosurePreviewBlockedTitle
+                        : copy().disclosurePreviewErrorTitle
+                    }}</p-message
+                  >
+                  <p>{{ disclosurePreviewMessage() }}</p>
+                </section>
+              }
+
+              @if (
+                disclosureApprovalState() === 'idle' && !lastDisclosureApproval()
+              ) {
+                <p data-testid="disclosure-approval-idle">{{
+                  lastDisclosurePreview()
+                    ? copy().disclosureApprovalIdle
+                    : copy().disclosureNeedPreviewHint
+                }}</p>
+              }
+
+              @if (disclosureApprovalState() === 'loading') {
+                <p data-testid="disclosure-approval-loading">{{
+                  copy().loading
+                }}</p>
+              }
+
+              @if (
+                disclosureApprovalState() === 'success' && lastDisclosureApproval();
+                as approval
+              ) {
+                <section data-testid="disclosure-approval-success">
+                  <p-message severity="success">{{
+                    copy().disclosureApprovalSuccessTitle
+                  }}</p-message>
+                  <p>
+                    aprobación={{ approval.id.slice(0, 12) }}…
+                    previewPolicyId={{ approval.previewPolicyId }}
+                    approvalPolicyId={{ approval.approvalPolicyId }}
+                  </p>
+                  <p>
+                    contentTransmitted={{ copy().disclosureNo }}
+                    aprobaciónRequerida={{ copy().disclosureNo }}
+                  </p>
+                </section>
+              }
+
+              @if (
+                (disclosureApprovalState() === 'blocked' ||
+                  disclosureApprovalState() === 'error') &&
+                disclosureApprovalMessage()
+              ) {
+                <section data-testid="disclosure-approval-blocked">
+                  <p-message
+                    [severity]="
+                      disclosureApprovalState() === 'blocked' ? 'warn' : 'error'
+                    "
+                    >{{
+                      disclosureApprovalState() === 'blocked'
+                        ? copy().disclosureApprovalBlockedTitle
+                        : copy().disclosureApprovalErrorTitle
+                    }}</p-message
+                  >
+                  <p>{{ disclosureApprovalMessage() }}</p>
+                </section>
+              }
+
+              @if (
+                disclosureStatusState() === 'idle' && !lastDisclosureStatus()
+              ) {
+                <p data-testid="disclosure-status-idle">{{
+                  copy().disclosureStatusIdle
+                }}</p>
+              }
+
+              @if (disclosureStatusState() === 'loading') {
+                <p data-testid="disclosure-status-loading">{{
+                  copy().loading
+                }}</p>
+              }
+
+              @if (
+                disclosureStatusState() === 'success' && lastDisclosureStatus();
+                as status
+              ) {
+                <section data-testid="disclosure-status-success">
+                  <p-message severity="success">{{
+                    copy().disclosureStatusSuccessTitle
+                  }}</p-message>
+                  <p>
+                    previewPolicyId={{ status.previewPolicyId }}
+                    approvalPolicyId={{ status.approvalPolicyId }}
+                    aprobaciónRequerida={{
+                      status.approvalRequired ? copy().disclosureYes : copy().disclosureNo
+                    }}
+                  </p>
+                </section>
+              }
+
+              @if (
+                (disclosureStatusState() === 'blocked' ||
+                  disclosureStatusState() === 'error') &&
+                disclosureStatusMessage()
+              ) {
+                <section data-testid="disclosure-status-blocked">
+                  <p-message
+                    [severity]="
+                      disclosureStatusState() === 'blocked' ? 'warn' : 'error'
+                    "
+                    >{{ copy().disclosureStatusBlockedTitle }}</p-message
+                  >
+                  <p>{{ disclosureStatusMessage() }}</p>
+                </section>
+              }
+
+              @if (
+                disclosureLatestState() === 'idle' &&
+                !lastDisclosureLatestApproval() &&
+                disclosureLatestMessage()
+              ) {
+                <p data-testid="disclosure-latest-idle">{{
+                  disclosureLatestMessage()
+                }}</p>
+              }
+
+              @if (disclosureLatestState() === 'loading') {
+                <p data-testid="disclosure-latest-loading">{{
+                  copy().loading
+                }}</p>
+              }
+
+              @if (
+                disclosureLatestState() === 'success' &&
+                lastDisclosureLatestApproval();
+                as latest
+              ) {
+                <section data-testid="disclosure-latest-success">
+                  <p-message severity="success">{{
+                    copy().disclosureLatestSuccessTitle
+                  }}</p-message>
+                  <p>
+                    aprobación={{ latest.id.slice(0, 12) }}…
+                    previewPolicyId={{ latest.previewPolicyId }}
+                    approvalPolicyId={{ latest.approvalPolicyId }}
+                    contentTransmitted={{ copy().disclosureNo }}
+                  </p>
+                </section>
+              }
+
+              @if (
+                (disclosureLatestState() === 'blocked' ||
+                  disclosureLatestState() === 'error') &&
+                disclosureLatestMessage() &&
+                lastDisclosureLatestApproval() === null &&
+                disclosureLatestState() !== 'idle'
+              ) {
+                <section data-testid="disclosure-latest-blocked">
+                  <p-message
+                    [severity]="
+                      disclosureLatestState() === 'blocked' ? 'warn' : 'error'
+                    "
+                    >{{ copy().disclosureLatestBlockedTitle }}</p-message
+                  >
+                  <p>{{ disclosureLatestMessage() }}</p>
+                </section>
+              }
+            </section>
           </section>
         }
       </p-card>

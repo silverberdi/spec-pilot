@@ -830,4 +830,308 @@ describe('App shell and registration', () => {
       'Conjunto de contexto no seguro',
     );
   });
+
+  it('previews and approves disclosure with idle loading success empty and blocked states, a 20-item cap, and both policy ids visible', async () => {
+    fixture = TestBed.createComponent(App);
+    fixture.componentRef.setInput('bootstrapMode', 'ok');
+    fixture.detectChanges();
+    await flushMicrotasks();
+    flushProjectsList([
+      {
+        id: '11111111-1111-1111-1111-111111111111',
+        slug: 'demo-repo',
+        displayName: 'demo-repo',
+        repositoryPath: '/tmp/demo-repo',
+        status: 'registered',
+        registeredAt: '2026-07-27T00:00:00.000Z',
+        lastInspectedAt: null,
+        configurationVersionId: '22222222-2222-2222-2222-222222222222',
+        discoveryHealth: neverInspectedHealth,
+      },
+    ]);
+    fixture.detectChanges();
+
+    // No context bundle selected yet: preview/status are disabled and hinted.
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="disclosure-need-bundle"]'),
+    ).toBeTruthy();
+
+    fixture.componentInstance.createContextBundle();
+    fixture.detectChanges();
+    const bundleReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/context-bundles`,
+    );
+    bundleReq.flush({
+      status: 'ok',
+      id: '33333333-3333-3333-3333-333333333333',
+      projectId: '11111111-1111-1111-1111-111111111111',
+      stage: 'planning',
+      configurationVersionId: '22222222-2222-2222-2222-222222222222',
+      sourceHash: 'a'.repeat(64),
+      createdAt: '2026-07-29T00:00:00.000Z',
+      manifestSchemaVersion: 1,
+      selectionPolicyId: 'full-file-lines-v1',
+      tokenEstimatorId: 'unicode-codepoints-div-4-v1',
+      manifestHash: 'b'.repeat(64),
+      entryCount: 1,
+      totalTokenEstimate: 2,
+      candidatePathCount: 1,
+      eligiblePathCount: 1,
+      excludedPathCount: 0,
+      findingCount: 0,
+      unscannableCount: 0,
+      entries: [
+        {
+          path: 'clean.md',
+          contentHash: 'c'.repeat(64),
+          lineRanges: [{ startLine: 1, endLine: 1 }],
+          tokenEstimate: 2,
+        },
+      ],
+      exclusions: [],
+    });
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="disclosure-need-bundle"]'),
+    ).toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="disclosure-preview-idle"]'),
+    ).toBeTruthy();
+
+    fixture.componentInstance.previewDisclosure();
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="disclosure-preview-loading"]'),
+    ).toBeTruthy();
+
+    const previewItems = Array.from({ length: 21 }, (_, i) => ({
+      path: `file-${i}.md`,
+      contentHash: 'c'.repeat(64),
+      lineRanges: [{ startLine: 1, endLine: 3 }],
+      tokenEstimate: 4,
+      excerpt: `contenido de ejemplo ${i}`,
+    }));
+    const previewReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/context-bundles/33333333-3333-3333-3333-333333333333/preview`,
+    );
+    expect(previewReq.request.method).toBe('POST');
+    previewReq.flush({
+      status: 'ok',
+      previewSessionId: '44444444-4444-4444-4444-444444444444',
+      previewPolicyId: 'bounded-selected-text-v1',
+      approvalPolicyId: 'explicit-disclosure-approval-v1',
+      previewIntegrityHash: 'd'.repeat(64),
+      createdAt: '2026-07-29T00:00:00.000Z',
+      expiresAt: '2026-07-29T00:15:00.000Z',
+      bundleId: '33333333-3333-3333-3333-333333333333',
+      projectId: '11111111-1111-1111-1111-111111111111',
+      stage: 'planning',
+      manifestHash: 'b'.repeat(64),
+      selectionPolicyId: 'full-file-lines-v1',
+      tokenEstimatorId: 'unicode-codepoints-div-4-v1',
+      manifestSchemaVersion: 1,
+      itemCount: 21,
+      previewedCodePointCount: 100,
+      totalTokenEstimate: 84,
+      approvalRequired: true,
+      items: previewItems,
+    });
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="disclosure-preview-success"]'),
+    ).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain(
+      'Vista previa de divulgación generada',
+    );
+    expect(fixture.nativeElement.textContent).toContain('bounded-selected-text-v1');
+    expect(fixture.nativeElement.textContent).toContain(
+      'explicit-disclosure-approval-v1',
+    );
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="disclosure-preview-cap"]')
+        ?.textContent,
+    ).toContain('Mostrando 20 de 21 entradas');
+    const previewListItems = fixture.nativeElement.querySelectorAll(
+      '[data-testid="disclosure-preview-items"] li',
+    );
+    expect(previewListItems.length).toBe(20);
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="disclosure-preview-items"]')
+        ?.textContent,
+    ).toContain('contenido de ejemplo 0');
+
+    // Preview exists but not yet approved: approval idle hint is shown.
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="disclosure-approval-idle"]'),
+    ).toBeTruthy();
+
+    fixture.componentInstance.approveDisclosure();
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="disclosure-approval-loading"]'),
+    ).toBeTruthy();
+
+    const approveReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/context-bundles/33333333-3333-3333-3333-333333333333/disclosure-approvals`,
+    );
+    expect(approveReq.request.method).toBe('POST');
+    expect(approveReq.request.body).toEqual({
+      previewSessionId: '44444444-4444-4444-4444-444444444444',
+      manifestHash: 'b'.repeat(64),
+      decision: 'approved',
+    });
+    approveReq.flush({
+      status: 'ok',
+      id: '55555555-5555-5555-5555-555555555555',
+      projectId: '11111111-1111-1111-1111-111111111111',
+      contextBundleId: '33333333-3333-3333-3333-333333333333',
+      previewSessionId: '44444444-4444-4444-4444-444444444444',
+      stage: 'planning',
+      configurationVersionId: '22222222-2222-2222-2222-222222222222',
+      sourceHash: 'a'.repeat(64),
+      manifestSchemaVersion: 1,
+      selectionPolicyId: 'full-file-lines-v1',
+      tokenEstimatorId: 'unicode-codepoints-div-4-v1',
+      manifestHash: 'b'.repeat(64),
+      previewPolicyId: 'bounded-selected-text-v1',
+      approvalPolicyId: 'explicit-disclosure-approval-v1',
+      previewIntegrityHash: 'd'.repeat(64),
+      decision: 'approved',
+      contentTransmitted: false,
+      createdAt: '2026-07-29T00:05:00.000Z',
+      approvalRequired: false,
+    });
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="disclosure-approval-success"]'),
+    ).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('Divulgación aprobada');
+    const approvalSuccessText = fixture.nativeElement.querySelector(
+      '[data-testid="disclosure-approval-success"]',
+    )?.textContent;
+    expect(approvalSuccessText).toContain('bounded-selected-text-v1');
+    expect(approvalSuccessText).toContain('explicit-disclosure-approval-v1');
+    expect(approvalSuccessText).toContain('contentTransmitted=no');
+    expect(approvalSuccessText).toContain('aprobaciónRequerida=no');
+
+    // Re-run preview with an explicit empty result.
+    fixture.componentInstance.previewDisclosure();
+    fixture.detectChanges();
+    const emptyPreviewReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/context-bundles/33333333-3333-3333-3333-333333333333/preview`,
+    );
+    emptyPreviewReq.flush({
+      status: 'ok',
+      previewSessionId: '66666666-6666-6666-6666-666666666666',
+      previewPolicyId: 'bounded-selected-text-v1',
+      approvalPolicyId: 'explicit-disclosure-approval-v1',
+      previewIntegrityHash: 'e'.repeat(64),
+      createdAt: '2026-07-29T00:10:00.000Z',
+      expiresAt: '2026-07-29T00:25:00.000Z',
+      bundleId: '33333333-3333-3333-3333-333333333333',
+      projectId: '11111111-1111-1111-1111-111111111111',
+      stage: 'planning',
+      manifestHash: 'b'.repeat(64),
+      selectionPolicyId: 'full-file-lines-v1',
+      tokenEstimatorId: 'unicode-codepoints-div-4-v1',
+      manifestSchemaVersion: 1,
+      itemCount: 0,
+      previewedCodePointCount: 0,
+      totalTokenEstimate: 0,
+      approvalRequired: false,
+      items: [],
+    });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Vista previa sin entradas');
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="disclosure-preview-cap"]'),
+    ).toBeNull();
+    expect(
+      fixture.nativeElement.querySelectorAll(
+        '[data-testid="disclosure-preview-items"] li',
+      ).length,
+    ).toBe(0);
+
+    // Blocked preview.
+    fixture.componentInstance.previewDisclosure();
+    fixture.detectChanges();
+    const blockedPreviewReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/context-bundles/33333333-3333-3333-3333-333333333333/preview`,
+    );
+    blockedPreviewReq.flush(
+      {
+        code: 'disclosure_preview_integrity_mismatch',
+        message: 'El contenido cambió desde la última verificación.',
+      },
+      { status: 422, statusText: 'Unprocessable Entity' },
+    );
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="disclosure-preview-blocked"]'),
+    ).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain(
+      'El contenido cambió desde la última verificación.',
+    );
+
+    // Blocked approval (e.g. expired preview session) requires a preview to be set first.
+    fixture.componentInstance.previewDisclosure();
+    fixture.detectChanges();
+    const rePreviewReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/context-bundles/33333333-3333-3333-3333-333333333333/preview`,
+    );
+    rePreviewReq.flush({
+      status: 'ok',
+      previewSessionId: '77777777-7777-7777-7777-777777777777',
+      previewPolicyId: 'bounded-selected-text-v1',
+      approvalPolicyId: 'explicit-disclosure-approval-v1',
+      previewIntegrityHash: 'f'.repeat(64),
+      createdAt: '2026-07-29T00:20:00.000Z',
+      expiresAt: '2026-07-29T00:35:00.000Z',
+      bundleId: '33333333-3333-3333-3333-333333333333',
+      projectId: '11111111-1111-1111-1111-111111111111',
+      stage: 'planning',
+      manifestHash: 'b'.repeat(64),
+      selectionPolicyId: 'full-file-lines-v1',
+      tokenEstimatorId: 'unicode-codepoints-div-4-v1',
+      manifestSchemaVersion: 1,
+      itemCount: 1,
+      previewedCodePointCount: 10,
+      totalTokenEstimate: 4,
+      approvalRequired: true,
+      items: [
+        {
+          path: 'clean.md',
+          contentHash: 'c'.repeat(64),
+          lineRanges: [{ startLine: 1, endLine: 1 }],
+          tokenEstimate: 4,
+          excerpt: 'contenido limpio',
+        },
+      ],
+    });
+    fixture.detectChanges();
+
+    fixture.componentInstance.approveDisclosure();
+    fixture.detectChanges();
+    const blockedApproveReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/context-bundles/33333333-3333-3333-3333-333333333333/disclosure-approvals`,
+    );
+    blockedApproveReq.flush(
+      {
+        code: 'disclosure_preview_expired',
+        message: 'La vista previa expiró.',
+      },
+      { status: 422, statusText: 'Unprocessable Entity' },
+    );
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="disclosure-approval-blocked"]'),
+    ).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('La vista previa expiró.');
+    // Copy states approval never transmits to DeepSeek and preview TTL is 15 minutes.
+    expect(fixture.nativeElement.textContent).toContain('DeepSeek');
+    expect(fixture.nativeElement.textContent).toContain('15 minutos');
+  });
 });

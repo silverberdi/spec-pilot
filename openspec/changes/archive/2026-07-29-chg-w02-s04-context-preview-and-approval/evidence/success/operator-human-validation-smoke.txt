@@ -1,0 +1,121 @@
+
+=== w02-s04 operator human validation ===
+API_BASE=http://localhost:3000
+HOST_REPOS_ROOT=/Users/silveriobernal/Documents/Code/Development
+REPORT=/tmp/sp-w02-s04-operator-validation-20260729T145003.txt
+Started: 2026-07-29T19:50:03Z
+
+=== 1. Runtime freshness ===
+PASS: GET /health HTTP == 200
+PASS: preview route is live (project_not_found)
+PASS: disclosure-status route is live (project_not_found)
+PASS: disclosure-approvals route is live (project_not_found)
+PASS: table context_disclosure_preview_sessions exists == 1
+PASS: table context_disclosure_approvals exists == 1
+PASS: ContextBundle has no approval/decision/preview/transmission columns == 0
+INFO: projects count before disposable work=1
+
+=== 2. Clean bundle setup ===
+PASS: register w02-s04-clean-fixture HTTP == 201
+clean project id=371cf582-0d97-4897-a26d-34714089b802
+PASS: bundle create HTTP == 201
+PASS: clean bundle create contract
+PASS: clean bundle created (id=c1fc1d00-9908-43da-a734-5efbed5b35cc)
+
+=== 3. Initial disclosure status ===
+PASS: initial status HTTP == 200
+PASS: initial disclosure-status first-run
+
+=== 4. Preview success ===
+PASS: preview HTTP == 200
+PASS: preview success + independent integrity checks
+PASS: preview session created (id=5d5e1476-4abb-48b2-a445-cfdf4c3ae90d)
+
+=== 5. Preview session persistence safety ===
+PASS: preview session metadata-only persistence
+PASS: preview created exactly one session delta == 1
+
+=== 6. Approval success ===
+PASS: approval HTTP == 201
+PASS: approval success contract
+PASS: approval created (id=610c1b16-7c4b-4c72-9cb9-d044efc11676)
+PASS: approval created exactly one row delta == 1
+
+=== 7. Status after approval ===
+PASS: post-approval status HTTP == 200
+PASS: post-approval disclosure-status
+
+=== 8. Latest approval ===
+PASS: latest HTTP == 200
+PASS: latest approval
+
+=== 9. Identical material coverage ===
+PASS: second bundle HTTP == 201
+PASS: second bundle created (id=baf7fc65-aa6d-405a-9de0-847b97f2fed6)
+PASS: second bundle status HTTP == 200
+PASS: identical material covered without new approval
+PASS: no auto preview session on identical recreate == 1
+PASS: no auto approval on identical recreate == 1
+
+=== 10. Mutate-after-preview blocked path ===
+PASS: register w02-s04-mutate-fixture HTTP == 201
+PASS: mutate project bundle HTTP == 201
+PASS: mutate-path preview HTTP == 200
+PASS: mutate-after-preview approval HTTP == 422
+PASS: mutate-after-preview blocked with disclosure_preview_integrity_mismatch
+PASS: no approval row after mutate block == 0
+PASS: stale-bundle re-preview HTTP == 422
+PASS: re-preview against stale bundle blocked
+PASS: failed re-preview created no new session == 1
+
+=== 11. Additional binding blocks ===
+PASS: missing previewSessionId HTTP == 422
+PASS: missing previewSessionId => disclosure_preview_required
+PASS: no approval after missing session == 1
+PASS: foreign session HTTP == 422
+PASS: foreign session blocked with disclosure_preview_required
+PASS: no approval after foreign session == 1
+
+=== 12. Invalid latest query ===
+PASS: invalid latest HTTP == 422
+PASS: invalid latest query
+PASS: invalid query did not create bundles == 2
+PASS: invalid query did not create sessions == 1
+PASS: invalid query did not create approvals == 1
+
+=== 13. Persistence and immutability ===
+PASS: ContextBundle row unchanged after preview/approval == 674a103b75c38eade630ee522889fb04
+PASS: no approval with content_transmitted true == 0
+PASS: all disposable approvals have content_transmitted false == 1
+PASS: still no forbidden ContextBundle columns == 0
+PASS: mutate project approvals remain zero == 0
+PASS: persistence and immutability checks
+
+=== Summary ===
+PASS_COUNT=45
+FAIL_COUNT=0
+Finished body: 2026-07-29T19:50:10Z
+REPORT=/tmp/sp-w02-s04-operator-validation-20260729T145003.txt
+RESULT=PASS
+/tmp/sp-w02-s04-operator-validation-20260729T145003.txt
+Copied sanitized report to clipboard via pbcopy
+
+=== Cleanup (exact commands) ===
+docker compose exec -T postgres psql -U specpilot -d specpilot -v ON_ERROR_STOP=1 -c "DELETE FROM projects WHERE id = '371cf582-0d97-4897-a26d-34714089b802';"
+docker compose exec -T postgres psql -U specpilot -d specpilot -v ON_ERROR_STOP=1 -c "DELETE FROM projects WHERE id = 'ea1bdfb9-d59a-4bcf-b7e4-14d57baa4d0e';"
+rm -rf -- /Users/silveriobernal/Documents/Code/Development/sp-w02-s04-clean-20260729T145004-20840
+rm -rf -- /Users/silveriobernal/Documents/Code/Development/sp-w02-s04-mutate-20260729T145004-20840
+DELETE 1
+Executed DB delete for project id=371cf582-0d97-4897-a26d-34714089b802
+DELETE 1
+Executed DB delete for project id=ea1bdfb9-d59a-4bcf-b7e4-14d57baa4d0e
+Executed rm -rf for disposable directory /Users/silveriobernal/Documents/Code/Development/sp-w02-s04-clean-20260729T145004-20840
+Executed rm -rf for disposable directory /Users/silveriobernal/Documents/Code/Development/sp-w02-s04-mutate-20260729T145004-20840
+PASS: disposable project GET returns 404 after cleanup (371cf582-0d97-4897-a26d-34714089b802)
+PASS: no bundles/sessions/approvals remain for project 371cf582-0d97-4897-a26d-34714089b802
+PASS: disposable project GET returns 404 after cleanup (ea1bdfb9-d59a-4bcf-b7e4-14d57baa4d0e)
+PASS: no bundles/sessions/approvals remain for project ea1bdfb9-d59a-4bcf-b7e4-14d57baa4d0e
+PASS: disposable directory no longer exists (/Users/silveriobernal/Documents/Code/Development/sp-w02-s04-clean-20260729T145004-20840)
+PASS: disposable directory no longer exists (/Users/silveriobernal/Documents/Code/Development/sp-w02-s04-mutate-20260729T145004-20840)
+PASS: project count restored (1)
+Cleanup finished (no volume reset; axioma-db-dev untouched).

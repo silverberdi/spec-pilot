@@ -16,6 +16,11 @@ import type {
   ReviewStage,
   ContextBundleBlockedDto,
   ContextBundleOkDto,
+  ContextDisclosureApprovalLatestListDto,
+  ContextDisclosureApprovalOkDto,
+  ContextDisclosurePreviewItemDto,
+  ContextDisclosurePreviewOkDto,
+  ContextDisclosureStatusOkDto,
   SecretScanBlockedDto,
   SecretScanOkDto,
 } from '@specpilot/shared-contracts';
@@ -23,6 +28,10 @@ import {
   isContextBundleBlockedDto,
   isContextBundleLatestListDto,
   isContextBundleOkDto,
+  isContextDisclosureApprovalLatestListDto,
+  isContextDisclosureApprovalOkDto,
+  isContextDisclosurePreviewOkDto,
+  isContextDisclosureStatusOkDto,
   isContextSourceResolveOkDto,
   isProjectDto,
   isProjectErrorResponse,
@@ -64,6 +73,30 @@ export type SecretScanUiState =
   | 'blocked'
   | 'error';
 export type ContextBundleUiState =
+  | 'idle'
+  | 'loading'
+  | 'success'
+  | 'blocked'
+  | 'error';
+export type DisclosurePreviewUiState =
+  | 'idle'
+  | 'loading'
+  | 'success'
+  | 'blocked'
+  | 'error';
+export type DisclosureApprovalUiState =
+  | 'idle'
+  | 'loading'
+  | 'success'
+  | 'blocked'
+  | 'error';
+export type DisclosureStatusUiState =
+  | 'idle'
+  | 'loading'
+  | 'success'
+  | 'blocked'
+  | 'error';
+export type DisclosureLatestUiState =
   | 'idle'
   | 'loading'
   | 'success'
@@ -139,6 +172,38 @@ export const shellCopy = {
     contextBundleUnsafeTitle: 'Conjunto de contexto no seguro',
     contextBundleEntriesCap: 'Mostrando 200 de',
     contextBundleEntriesCapSuffix: 'entradas',
+    disclosureHint:
+      'Vista previa acotada de la divulgación y aprobación explícita antes de un envío. La aprobación no envía contenido a DeepSeek; la vista previa expira en 15 minutos.',
+    disclosureNeedBundleHint:
+      'Cree o cargue un manifiesto de contexto para habilitar la vista previa de divulgación.',
+    disclosurePreviewLabel: 'Vista previa',
+    disclosureApproveLabel: 'Aprobar divulgación',
+    disclosureStatusLabel: 'Consultar estado de divulgación',
+    disclosureLatestLabel: 'Cargar última aprobación',
+    disclosurePreviewIdle:
+      'Aún no se ha generado una vista previa de divulgación para este manifiesto.',
+    disclosurePreviewSuccessTitle: 'Vista previa de divulgación generada',
+    disclosurePreviewEmptyTitle: 'Vista previa sin entradas',
+    disclosurePreviewBlockedTitle: 'Vista previa de divulgación bloqueada',
+    disclosurePreviewErrorTitle: 'Error al generar la vista previa de divulgación',
+    disclosureItemsCap: 'Mostrando 20 de',
+    disclosureItemsCapSuffix: 'entradas',
+    disclosureExpiresLabel: 'Expira',
+    disclosureNeedPreviewHint:
+      'Genere una vista previa vigente antes de aprobar la divulgación.',
+    disclosureApprovalIdle:
+      'Aún no se ha aprobado la divulgación de la vista previa actual.',
+    disclosureApprovalSuccessTitle: 'Divulgación aprobada (no transmitida)',
+    disclosureApprovalBlockedTitle: 'Aprobación de divulgación bloqueada',
+    disclosureApprovalErrorTitle: 'Error al aprobar la divulgación',
+    disclosureStatusIdle: 'Aún no se ha consultado el estado de divulgación.',
+    disclosureStatusSuccessTitle: 'Estado de divulgación',
+    disclosureStatusBlockedTitle: 'No se pudo determinar el estado de divulgación',
+    disclosureLatestIdle: 'Aún no hay una aprobación registrada para esta etapa.',
+    disclosureLatestSuccessTitle: 'Última aprobación de divulgación',
+    disclosureLatestBlockedTitle: 'No se pudo cargar la última aprobación',
+    disclosureYes: 'sí',
+    disclosureNo: 'no',
     dashboardTitle: 'Proyectos',
     dashboardHint:
       'Estado de descubrimiento según la última inspección persistida (sin re-probar al cargar).',
@@ -212,6 +277,24 @@ export class App implements OnInit {
   readonly lastContextBundleBlocked = signal<ContextBundleBlockedDto | null>(
     null,
   );
+  readonly disclosurePreviewState = signal<DisclosurePreviewUiState>('idle');
+  readonly disclosurePreviewMessage = signal<string | null>(null);
+  readonly lastDisclosurePreview =
+    signal<ContextDisclosurePreviewOkDto | null>(null);
+  readonly disclosureApprovalState =
+    signal<DisclosureApprovalUiState>('idle');
+  readonly disclosureApprovalMessage = signal<string | null>(null);
+  readonly lastDisclosureApproval =
+    signal<ContextDisclosureApprovalOkDto | null>(null);
+  readonly disclosureStatusState = signal<DisclosureStatusUiState>('idle');
+  readonly disclosureStatusMessage = signal<string | null>(null);
+  readonly lastDisclosureStatus = signal<ContextDisclosureStatusOkDto | null>(
+    null,
+  );
+  readonly disclosureLatestState = signal<DisclosureLatestUiState>('idle');
+  readonly disclosureLatestMessage = signal<string | null>(null);
+  readonly lastDisclosureLatestApproval =
+    signal<ContextDisclosureApprovalOkDto | null>(null);
 
   readonly displayedContextPaths = computed(() => {
     const result = this.lastContextResolve();
@@ -281,6 +364,23 @@ export class App implements OnInit {
     return `${copy.contextBundleEntriesCap} ${result.entryCount} ${copy.contextBundleEntriesCapSuffix}`;
   });
 
+  readonly displayedDisclosureItems = computed(() => {
+    const preview = this.lastDisclosurePreview();
+    if (!preview) {
+      return [] as ContextDisclosurePreviewItemDto[];
+    }
+    return preview.items.slice(0, 20);
+  });
+
+  readonly disclosureItemsCapCopy = computed(() => {
+    const preview = this.lastDisclosurePreview();
+    if (!preview || preview.itemCount <= 20) {
+      return null;
+    }
+    const copy = this.copy();
+    return `${copy.disclosureItemsCap} ${preview.itemCount} ${copy.disclosureItemsCapSuffix}`;
+  });
+
   ngOnInit(): void {
     queueMicrotask(() => this.completeBootstrap());
   }
@@ -292,6 +392,12 @@ export class App implements OnInit {
     }
     this.state.set('success');
     queueMicrotask(() => this.refreshProjects());
+  }
+
+  formatDisclosureLineRanges(item: ContextDisclosurePreviewItemDto): string {
+    return item.lineRanges
+      .map((range) => `${range.startLine}-${range.endLine}`)
+      .join(', ');
   }
 
   discoveryHealthLabel(
@@ -667,6 +773,189 @@ export class App implements OnInit {
     this.contextBundleState.set(
       status === 422 || status === 404 ? 'blocked' : 'error',
     );
+  }
+
+  previewDisclosure(): void {
+    const id = this.selectedProjectId();
+    const bundle = this.lastContextBundle();
+    if (!id || !bundle) {
+      return;
+    }
+    this.disclosurePreviewState.set('loading');
+    this.disclosurePreviewMessage.set(null);
+    this.lastDisclosurePreview.set(null);
+    // A fresh preview invalidates any approval bound to a prior session.
+    this.disclosureApprovalState.set('idle');
+    this.disclosureApprovalMessage.set(null);
+    this.lastDisclosureApproval.set(null);
+
+    this.http
+      .post<unknown>(
+        `${environment.apiBaseUrl}/projects/${id}/context-bundles/${bundle.id}/preview`,
+        {},
+      )
+      .subscribe({
+        next: (payload) => {
+          if (!isContextDisclosurePreviewOkDto(payload)) {
+            this.disclosurePreviewState.set('error');
+            this.disclosurePreviewMessage.set(
+              'La respuesta de la vista previa de divulgación no es válida.',
+            );
+            return;
+          }
+          this.lastDisclosurePreview.set(payload);
+          this.disclosurePreviewState.set('success');
+        },
+        error: (err: unknown) => {
+          const payload = this.extractError(err);
+          this.disclosurePreviewMessage.set(
+            payload?.message ??
+              'No se pudo generar la vista previa de divulgación.',
+          );
+          this.disclosurePreviewState.set(
+            this.blockedOrError(this.extractStatus(err)),
+          );
+        },
+      });
+  }
+
+  approveDisclosure(): void {
+    const id = this.selectedProjectId();
+    const bundle = this.lastContextBundle();
+    const preview = this.lastDisclosurePreview();
+    if (!id || !bundle || !preview) {
+      return;
+    }
+    this.disclosureApprovalState.set('loading');
+    this.disclosureApprovalMessage.set(null);
+    this.lastDisclosureApproval.set(null);
+
+    this.http
+      .post<unknown>(
+        `${environment.apiBaseUrl}/projects/${id}/context-bundles/${bundle.id}/disclosure-approvals`,
+        {
+          previewSessionId: preview.previewSessionId,
+          manifestHash: preview.manifestHash,
+          decision: 'approved',
+        },
+      )
+      .subscribe({
+        next: (payload) => {
+          if (!isContextDisclosureApprovalOkDto(payload)) {
+            this.disclosureApprovalState.set('error');
+            this.disclosureApprovalMessage.set(
+              'La respuesta de la aprobación de divulgación no es válida.',
+            );
+            return;
+          }
+          this.lastDisclosureApproval.set(payload);
+          this.disclosureApprovalState.set('success');
+        },
+        error: (err: unknown) => {
+          const payload = this.extractError(err);
+          this.disclosureApprovalMessage.set(
+            payload?.message ?? 'No se pudo aprobar la divulgación.',
+          );
+          this.disclosureApprovalState.set(
+            this.blockedOrError(this.extractStatus(err)),
+          );
+        },
+      });
+  }
+
+  refreshDisclosureStatus(): void {
+    const id = this.selectedProjectId();
+    const bundle = this.lastContextBundle();
+    if (!id || !bundle) {
+      return;
+    }
+    this.disclosureStatusState.set('loading');
+    this.disclosureStatusMessage.set(null);
+
+    this.http
+      .get<unknown>(
+        `${environment.apiBaseUrl}/projects/${id}/context-bundles/${bundle.id}/disclosure-status`,
+      )
+      .subscribe({
+        next: (payload) => {
+          if (!isContextDisclosureStatusOkDto(payload)) {
+            this.disclosureStatusState.set('error');
+            this.disclosureStatusMessage.set(
+              'La respuesta del estado de divulgación no es válida.',
+            );
+            return;
+          }
+          this.lastDisclosureStatus.set(payload);
+          this.disclosureStatusState.set('success');
+        },
+        error: (err: unknown) => {
+          const payload = this.extractError(err);
+          this.disclosureStatusMessage.set(
+            payload?.message ??
+              'No se pudo consultar el estado de divulgación.',
+          );
+          this.disclosureStatusState.set(
+            this.blockedOrError(this.extractStatus(err)),
+          );
+        },
+      });
+  }
+
+  loadLatestDisclosureApproval(): void {
+    const id = this.selectedProjectId();
+    if (!id) {
+      return;
+    }
+    this.disclosureLatestState.set('loading');
+    this.disclosureLatestMessage.set(null);
+    this.lastDisclosureLatestApproval.set(null);
+
+    this.http
+      .get<unknown>(`${environment.apiBaseUrl}/projects/${id}/disclosure-approvals`, {
+        params: {
+          stage: this.selectedReviewStage(),
+          limit: '1',
+        },
+      })
+      .subscribe({
+        next: (payload) => {
+          if (!isContextDisclosureApprovalLatestListDto(payload)) {
+            this.disclosureLatestState.set('error');
+            this.disclosureLatestMessage.set(
+              'La respuesta de la última aprobación no es válida.',
+            );
+            return;
+          }
+          const item = payload.items[0] ?? null;
+          this.lastDisclosureLatestApproval.set(item);
+          this.disclosureLatestState.set(item ? 'success' : 'idle');
+          if (!item) {
+            this.disclosureLatestMessage.set(this.copy().disclosureLatestIdle);
+          }
+        },
+        error: (err: unknown) => {
+          const payload = this.extractError(err);
+          this.disclosureLatestMessage.set(
+            payload?.message ?? 'No se pudo cargar la última aprobación.',
+          );
+          this.disclosureLatestState.set(
+            this.blockedOrError(this.extractStatus(err)),
+          );
+        },
+      });
+  }
+
+  private extractStatus(err: unknown): number {
+    return typeof err === 'object' &&
+      err !== null &&
+      'status' in err &&
+      typeof (err as { status: unknown }).status === 'number'
+      ? (err as { status: number }).status
+      : 0;
+  }
+
+  private blockedOrError(status: number): 'blocked' | 'error' {
+    return status === 422 || status === 404 ? 'blocked' : 'error';
   }
 
   private extractError(err: unknown): ProjectErrorResponse | null {

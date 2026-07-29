@@ -1,0 +1,5 @@
+=== unit-and-app-tests 2026-07-29T18:11Z ===
+shared-contracts: 45 passed
+api context-disclosure unit: 21 passed
+web: 14 passed
+api projects.integration: 28 passed (includes disclosure matrix)

@@ -185,6 +185,19 @@ export const PROJECT_ERROR_CODES = [
   'context_bundle_failed',
   'context_bundle_not_found',
   'invalid_context_bundle_query',
+  'disclosure_preview_required',
+  'disclosure_preview_expired',
+  'disclosure_preview_binding_mismatch',
+  'disclosure_manifest_mismatch',
+  'disclosure_preview_policy_mismatch',
+  'disclosure_preview_integrity_mismatch',
+  'disclosure_preview_entry_unreadable',
+  'disclosure_preview_limit_exceeded',
+  'disclosure_preview_timeout',
+  'invalid_disclosure_approval',
+  'invalid_disclosure_approval_query',
+  'disclosure_preview_failed',
+  'disclosure_approval_failed',
   'internal_error',
 ] as const;
 
@@ -1236,6 +1249,293 @@ export function parseContextBundleLatestQuery(
   }
   if (record['limit'] !== '1' && record['limit'] !== 1) {
     return { ok: false, code: 'invalid_context_bundle_query' };
+  }
+  return { ok: true, stage: record['stage'], limit: 1 };
+}
+
+/**
+ * w02-s04: disclosure preview + approval contracts. Binding policy ids per
+ * design D0; changing either constant invalidates prior coverage (D3).
+ */
+export const PREVIEW_POLICY_ID = 'bounded-selected-text-v1' as const;
+export const APPROVAL_POLICY_ID = 'explicit-disclosure-approval-v1' as const;
+
+/** Binding preview/approval bounds (design D8); no silent truncation. */
+export const DISCLOSURE_PREVIEW_MAX_FILE_BYTES = 1048576;
+export const DISCLOSURE_PREVIEW_MAX_TOTAL_BYTES = 52428800;
+export const DISCLOSURE_PREVIEW_TIMEOUT_MS = 30000;
+export const DISCLOSURE_PREVIEW_MAX_TOTAL_CODE_POINTS = 200000;
+export const DISCLOSURE_PREVIEW_MAX_ENTRY_CODE_POINTS = 50000;
+
+/** Binding preview-session TTL (design D1): exactly fifteen minutes. */
+export const DISCLOSURE_PREVIEW_SESSION_TTL_MS = 15 * 60 * 1000;
+
+export type ContextDisclosurePreviewItemDto = {
+  path: string;
+  contentHash: string;
+  lineRanges: ContextBundleLineRangeDto[];
+  tokenEstimate: number;
+  excerpt: string;
+};
+
+export type ContextDisclosurePreviewOkDto = {
+  status: 'ok';
+  previewSessionId: string;
+  previewPolicyId: typeof PREVIEW_POLICY_ID;
+  approvalPolicyId: typeof APPROVAL_POLICY_ID;
+  previewIntegrityHash: string;
+  createdAt: string;
+  expiresAt: string;
+  bundleId: string;
+  projectId: string;
+  stage: ReviewStage;
+  manifestHash: string;
+  selectionPolicyId: typeof CONTEXT_BUNDLE_SELECTION_POLICY_ID;
+  tokenEstimatorId: typeof CONTEXT_BUNDLE_TOKEN_ESTIMATOR_ID;
+  manifestSchemaVersion: typeof CONTEXT_BUNDLE_MANIFEST_SCHEMA_VERSION;
+  itemCount: number;
+  previewedCodePointCount: number;
+  totalTokenEstimate: number;
+  approvalRequired: boolean;
+  items: ContextDisclosurePreviewItemDto[];
+};
+
+export type ContextDisclosureApprovalRequest = {
+  previewSessionId: string;
+  manifestHash: string;
+  decision: 'approved';
+};
+
+export type ContextDisclosureApprovalOkDto = {
+  status: 'ok';
+  id: string;
+  projectId: string;
+  contextBundleId: string;
+  previewSessionId: string;
+  stage: ReviewStage;
+  configurationVersionId: string;
+  sourceHash: string;
+  manifestSchemaVersion: typeof CONTEXT_BUNDLE_MANIFEST_SCHEMA_VERSION;
+  selectionPolicyId: typeof CONTEXT_BUNDLE_SELECTION_POLICY_ID;
+  tokenEstimatorId: typeof CONTEXT_BUNDLE_TOKEN_ESTIMATOR_ID;
+  manifestHash: string;
+  previewPolicyId: typeof PREVIEW_POLICY_ID;
+  approvalPolicyId: typeof APPROVAL_POLICY_ID;
+  previewIntegrityHash: string;
+  decision: 'approved';
+  contentTransmitted: false;
+  createdAt: string;
+  approvalRequired: false;
+};
+
+export type ContextDisclosureStatusOkDto = {
+  status: 'ok';
+  projectId: string;
+  contextBundleId: string;
+  stage: ReviewStage;
+  manifestHash: string;
+  previewPolicyId: typeof PREVIEW_POLICY_ID;
+  approvalPolicyId: typeof APPROVAL_POLICY_ID;
+  approvalRequired: boolean;
+  coveringApprovalId: string | null;
+  contentTransmitted: false;
+};
+
+export type ContextDisclosureApprovalLatestListDto = {
+  status: 'ok';
+  items: ContextDisclosureApprovalOkDto[];
+};
+
+function isContextDisclosurePreviewItemDto(
+  value: unknown,
+): value is ContextDisclosurePreviewItemDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  const lineRanges = record['lineRanges'];
+  if (!Array.isArray(lineRanges) || !lineRanges.every(isContextBundleLineRangeDto)) {
+    return false;
+  }
+  return (
+    typeof record['path'] === 'string' &&
+    typeof record['contentHash'] === 'string' &&
+    /^[a-f0-9]{64}$/.test(record['contentHash']) &&
+    typeof record['tokenEstimate'] === 'number' &&
+    Number.isFinite(record['tokenEstimate']) &&
+    typeof record['excerpt'] === 'string'
+  );
+}
+
+export function isContextDisclosurePreviewOkDto(
+  value: unknown,
+): value is ContextDisclosurePreviewOkDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (record['status'] !== 'ok') {
+    return false;
+  }
+  if ('contentTransmitted' in record) {
+    return false;
+  }
+  const items = record['items'];
+  if (!Array.isArray(items) || !items.every(isContextDisclosurePreviewItemDto)) {
+    return false;
+  }
+  return (
+    typeof record['previewSessionId'] === 'string' &&
+    record['previewPolicyId'] === PREVIEW_POLICY_ID &&
+    record['approvalPolicyId'] === APPROVAL_POLICY_ID &&
+    typeof record['previewIntegrityHash'] === 'string' &&
+    /^[a-f0-9]{64}$/.test(record['previewIntegrityHash']) &&
+    typeof record['createdAt'] === 'string' &&
+    typeof record['expiresAt'] === 'string' &&
+    typeof record['bundleId'] === 'string' &&
+    typeof record['projectId'] === 'string' &&
+    isReviewStage(record['stage']) &&
+    typeof record['manifestHash'] === 'string' &&
+    record['selectionPolicyId'] === CONTEXT_BUNDLE_SELECTION_POLICY_ID &&
+    record['tokenEstimatorId'] === CONTEXT_BUNDLE_TOKEN_ESTIMATOR_ID &&
+    record['manifestSchemaVersion'] === CONTEXT_BUNDLE_MANIFEST_SCHEMA_VERSION &&
+    typeof record['itemCount'] === 'number' &&
+    Number.isFinite(record['itemCount']) &&
+    record['itemCount'] === items.length &&
+    typeof record['previewedCodePointCount'] === 'number' &&
+    Number.isFinite(record['previewedCodePointCount']) &&
+    typeof record['totalTokenEstimate'] === 'number' &&
+    Number.isFinite(record['totalTokenEstimate']) &&
+    typeof record['approvalRequired'] === 'boolean'
+  );
+}
+
+export function isContextDisclosureApprovalOkDto(
+  value: unknown,
+): value is ContextDisclosureApprovalOkDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (record['status'] !== 'ok') {
+    return false;
+  }
+  if (record['contentTransmitted'] !== false) {
+    return false;
+  }
+  if (record['decision'] !== 'approved') {
+    return false;
+  }
+  if (record['approvalRequired'] !== false) {
+    return false;
+  }
+  return (
+    typeof record['id'] === 'string' &&
+    typeof record['projectId'] === 'string' &&
+    typeof record['contextBundleId'] === 'string' &&
+    typeof record['previewSessionId'] === 'string' &&
+    isReviewStage(record['stage']) &&
+    typeof record['configurationVersionId'] === 'string' &&
+    typeof record['sourceHash'] === 'string' &&
+    record['manifestSchemaVersion'] === CONTEXT_BUNDLE_MANIFEST_SCHEMA_VERSION &&
+    record['selectionPolicyId'] === CONTEXT_BUNDLE_SELECTION_POLICY_ID &&
+    record['tokenEstimatorId'] === CONTEXT_BUNDLE_TOKEN_ESTIMATOR_ID &&
+    typeof record['manifestHash'] === 'string' &&
+    record['previewPolicyId'] === PREVIEW_POLICY_ID &&
+    record['approvalPolicyId'] === APPROVAL_POLICY_ID &&
+    typeof record['previewIntegrityHash'] === 'string' &&
+    typeof record['createdAt'] === 'string'
+  );
+}
+
+export function isContextDisclosureStatusOkDto(
+  value: unknown,
+): value is ContextDisclosureStatusOkDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (record['status'] !== 'ok') {
+    return false;
+  }
+  if (record['contentTransmitted'] !== false) {
+    return false;
+  }
+  const coveringApprovalId = record['coveringApprovalId'];
+  return (
+    typeof record['projectId'] === 'string' &&
+    typeof record['contextBundleId'] === 'string' &&
+    isReviewStage(record['stage']) &&
+    typeof record['manifestHash'] === 'string' &&
+    record['previewPolicyId'] === PREVIEW_POLICY_ID &&
+    record['approvalPolicyId'] === APPROVAL_POLICY_ID &&
+    typeof record['approvalRequired'] === 'boolean' &&
+    (coveringApprovalId === null || typeof coveringApprovalId === 'string')
+  );
+}
+
+export function isContextDisclosureApprovalLatestListDto(
+  value: unknown,
+): value is ContextDisclosureApprovalLatestListDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (record['status'] !== 'ok') {
+    return false;
+  }
+  const items = record['items'];
+  return Array.isArray(items) && items.every(isContextDisclosureApprovalOkDto);
+}
+
+/**
+ * Approval request MUST be exactly `{ previewSessionId, manifestHash, decision: 'approved' }`.
+ * A shape/decision problem other than a missing `previewSessionId` maps to
+ * `invalid_disclosure_approval`; a missing/invalid `previewSessionId` maps to
+ * `disclosure_preview_required` per design D9.
+ */
+export function parseDisclosureApprovalRequest(
+  value: unknown,
+):
+  | { ok: true; request: ContextDisclosureApprovalRequest }
+  | { ok: false; code: 'disclosure_preview_required' | 'invalid_disclosure_approval' } {
+  if (typeof value !== 'object' || value === null) {
+    return { ok: false, code: 'disclosure_preview_required' };
+  }
+  const record = value as Record<string, unknown>;
+  const previewSessionId = record['previewSessionId'];
+  if (typeof previewSessionId !== 'string' || previewSessionId.trim().length === 0) {
+    return { ok: false, code: 'disclosure_preview_required' };
+  }
+  const manifestHash = record['manifestHash'];
+  const decision = record['decision'];
+  if (
+    typeof manifestHash !== 'string' ||
+    manifestHash.trim().length === 0 ||
+    decision !== 'approved'
+  ) {
+    return { ok: false, code: 'invalid_disclosure_approval' };
+  }
+  return {
+    ok: true,
+    request: { previewSessionId, manifestHash, decision: 'approved' },
+  };
+}
+
+export function parseDisclosureApprovalLatestQuery(
+  value: unknown,
+):
+  | { ok: true; stage: ReviewStage; limit: 1 }
+  | { ok: false; code: 'invalid_disclosure_approval_query' } {
+  if (typeof value !== 'object' || value === null) {
+    return { ok: false, code: 'invalid_disclosure_approval_query' };
+  }
+  const record = value as Record<string, unknown>;
+  if (!isReviewStage(record['stage'])) {
+    return { ok: false, code: 'invalid_disclosure_approval_query' };
+  }
+  if (record['limit'] !== '1' && record['limit'] !== 1) {
+    return { ok: false, code: 'invalid_disclosure_approval_query' };
   }
   return { ok: true, stage: record['stage'], limit: 1 };
 }

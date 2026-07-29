@@ -1,0 +1,5 @@
+archive: PASS
+timestamp_utc: 2026-07-29T20:02:48Z
+change: chg-w02-s04-context-preview-and-approval
+archived_to: openspec/changes/archive/2026-07-29-chg-w02-s04-context-preview-and-approval
+active_changes: 0
