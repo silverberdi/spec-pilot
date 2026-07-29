@@ -372,6 +372,101 @@
                 </section>
               }
             </section>
+
+            <section class="shell__refresh" data-testid="secret-scan">
+              <p class="shell__tagline">{{ copy().secretScanHint }}</p>
+              <p-button
+                [label]="copy().secretScanLabel"
+                (onClick)="runSecretScan()"
+                [loading]="secretScanState() === 'loading'"
+                [disabled]="
+                  secretScanState() === 'loading' || !selectedProjectId()
+                "
+              />
+
+              @if (secretScanState() === 'idle' && !lastSecretScan()) {
+                <p data-testid="secret-scan-idle">{{ copy().secretScanIdle }}</p>
+              }
+
+              @if (secretScanState() === 'loading') {
+                <p data-testid="secret-scan-loading">{{ copy().loading }}</p>
+              }
+
+              @if (secretScanState() === 'success' && lastSecretScan(); as scanned) {
+                <section data-testid="secret-scan-success">
+                  <p-message severity="success">{{
+                    scanned.candidatePathCount === 0
+                      ? copy().secretScanEmptyTitle
+                      : scanned.findings.length > 0 ||
+                          scanned.unscannable.length > 0
+                        ? copy().secretScanExclusionsTitle
+                        : copy().secretScanSuccessTitle
+                  }}</p-message>
+                  <p>
+                    etapa={{ scanned.stage }} candidatos={{
+                      scanned.candidatePathCount
+                    }}
+                    elegibles={{ scanned.eligiblePathCount }} hallazgos={{
+                      scanned.findings.length
+                    }}
+                    no-escaneables={{ scanned.unscannable.length }} hash={{
+                      scanned.sourceHash.slice(0, 12)
+                    }}…
+                  </p>
+                  @if (eligiblePathCapCopy(); as cap) {
+                    <p data-testid="secret-scan-path-cap">{{ cap }}</p>
+                  }
+                  <ul data-testid="secret-scan-eligible-paths">
+                    @for (path of displayedEligiblePaths(); track path) {
+                      <li>{{ path }}</li>
+                    }
+                  </ul>
+                  @if (findingsCapCopy(); as fcap) {
+                    <p data-testid="secret-scan-findings-cap">{{ fcap }}</p>
+                  }
+                  <ul data-testid="secret-scan-findings">
+                    @for (finding of displayedFindings(); track finding.path + finding.detectorId) {
+                      <li>{{ finding.path }} · {{ finding.detectorId }}</li>
+                    }
+                  </ul>
+                </section>
+              }
+
+              @if (
+                (secretScanState() === 'blocked' ||
+                  secretScanState() === 'error') &&
+                secretScanMessage()
+              ) {
+                <section data-testid="secret-scan-blocked">
+                  <p-message
+                    [severity]="
+                      secretScanState() === 'blocked' ? 'warn' : 'error'
+                    "
+                    >{{
+                      lastSecretScanBlocked()?.code === 'unsafe_context_bundle'
+                        ? copy().secretScanUnsafeTitle
+                        : secretScanState() === 'blocked'
+                          ? copy().secretScanBlockedTitle
+                          : copy().secretScanErrorTitle
+                    }}</p-message
+                  >
+                  <p>{{ secretScanMessage() }}</p>
+                  @if (
+                    lastSecretScanBlocked();
+                    as blocked
+                  ) {
+                    @if (blocked.code === 'unsafe_context_bundle') {
+                      <p data-testid="secret-scan-unsafe-counts">
+                        candidatos={{ blocked.candidatePathCount }} hallazgos={{
+                          blocked.findingCount
+                        }}
+                        no-escaneables={{ blocked.unscannableCount }}
+                      </p>
+                    }
+                  }
+                </section>
+              }
+            </section>
           </section>
         }
       </p-card>

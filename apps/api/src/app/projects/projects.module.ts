@@ -8,6 +8,7 @@ import { NodeFilesystemAdapter } from './node-filesystem.adapter';
 import { ProjectYamlReader } from './project-yaml-reader';
 import { ProjectsController } from './projects.controller';
 import { ProjectsService } from './projects.service';
+import { SecretDetectionService } from './secret-detection.service';
 
 @Module({
   imports: [PrismaModule],
@@ -17,6 +18,7 @@ import { ProjectsService } from './projects.service';
     ConfigurationService,
     DiscoveryService,
     ContextSourceResolutionService,
+    SecretDetectionService,
     ProjectYamlReader,
     NodeFilesystemAdapter,
     { provide: FILESYSTEM_PORT, useExisting: NodeFilesystemAdapter },

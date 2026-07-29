@@ -14,11 +14,15 @@ import type {
   ProjectErrorResponse,
   RegisterProjectResponse,
   ReviewStage,
+  SecretScanBlockedDto,
+  SecretScanOkDto,
 } from '@specpilot/shared-contracts';
 import {
   isContextSourceResolveOkDto,
   isProjectDto,
   isProjectErrorResponse,
+  isSecretScanBlockedDto,
+  isSecretScanOkDto,
   REVIEW_STAGES,
 } from '@specpilot/shared-contracts';
 import { environment } from '../environments/environment.local';
@@ -43,6 +47,12 @@ export type DiscoveryUiState =
   | 'blocked'
   | 'error';
 export type ContextResolveUiState =
+  | 'idle'
+  | 'loading'
+  | 'success'
+  | 'blocked'
+  | 'error';
+export type SecretScanUiState =
   | 'idle'
   | 'loading'
   | 'success'
@@ -94,6 +104,18 @@ export const shellCopy = {
     contextResolveErrorTitle: 'Error al resolver fuentes de contexto',
     contextShowingCap: 'Mostrando 200 de',
     contextShowingCapSuffix: 'rutas',
+    secretScanHint:
+      'Análisis local de secretos en las rutas candidatas (sin vista previa, sin aprobación y sin envío a DeepSeek).',
+    secretScanLabel: 'Analizar secretos en fuentes',
+    secretScanIdle: 'Aún no se ha analizado secretos para este proyecto.',
+    secretScanSuccessTitle: 'Análisis de secretos completado',
+    secretScanEmptyTitle: 'Sin candidatos que analizar',
+    secretScanExclusionsTitle: 'Análisis con exclusiones',
+    secretScanBlockedTitle: 'Análisis de secretos bloqueado',
+    secretScanErrorTitle: 'Error al analizar secretos',
+    secretScanUnsafeTitle: 'Conjunto de contexto no seguro',
+    secretFindingsCap: 'Mostrando 50 de',
+    secretFindingsCapSuffix: 'hallazgos',
     dashboardTitle: 'Proyectos',
     dashboardHint:
       'Estado de descubrimiento según la última inspección persistida (sin re-probar al cargar).',
@@ -157,6 +179,10 @@ export class App implements OnInit {
   readonly contextResolveState = signal<ContextResolveUiState>('idle');
   readonly contextResolveMessage = signal<string | null>(null);
   readonly lastContextResolve = signal<ContextSourceResolveOkDto | null>(null);
+  readonly secretScanState = signal<SecretScanUiState>('idle');
+  readonly secretScanMessage = signal<string | null>(null);
+  readonly lastSecretScan = signal<SecretScanOkDto | null>(null);
+  readonly lastSecretScanBlocked = signal<SecretScanBlockedDto | null>(null);
 
   readonly displayedContextPaths = computed(() => {
     const result = this.lastContextResolve();
@@ -173,6 +199,40 @@ export class App implements OnInit {
     }
     const copy = this.copy();
     return `${copy.contextShowingCap} ${result.pathCount} ${copy.contextShowingCapSuffix}`;
+  });
+
+  readonly displayedEligiblePaths = computed(() => {
+    const result = this.lastSecretScan();
+    if (!result) {
+      return [] as string[];
+    }
+    return result.eligiblePaths.slice(0, 200);
+  });
+
+  readonly eligiblePathCapCopy = computed(() => {
+    const result = this.lastSecretScan();
+    if (!result || result.eligiblePathCount <= 200) {
+      return null;
+    }
+    const copy = this.copy();
+    return `${copy.contextShowingCap} ${result.eligiblePathCount} ${copy.contextShowingCapSuffix}`;
+  });
+
+  readonly displayedFindings = computed(() => {
+    const result = this.lastSecretScan();
+    if (!result) {
+      return [] as SecretScanOkDto['findings'];
+    }
+    return result.findings.slice(0, 50);
+  });
+
+  readonly findingsCapCopy = computed(() => {
+    const result = this.lastSecretScan();
+    if (!result || result.findings.length <= 50) {
+      return null;
+    }
+    const copy = this.copy();
+    return `${copy.secretFindingsCap} ${result.findings.length} ${copy.secretFindingsCapSuffix}`;
   });
 
   ngOnInit(): void {
@@ -399,6 +459,63 @@ export class App implements OnInit {
               ? (err as { status: number }).status
               : 0;
           this.contextResolveState.set(
+            status === 422 || status === 404 ? 'blocked' : 'error',
+          );
+        },
+      });
+  }
+
+  runSecretScan(): void {
+    const id = this.selectedProjectId();
+    if (!id) {
+      return;
+    }
+    this.secretScanState.set('loading');
+    this.secretScanMessage.set(null);
+    this.lastSecretScan.set(null);
+    this.lastSecretScanBlocked.set(null);
+
+    this.http
+      .post<unknown>(
+        `${environment.apiBaseUrl}/projects/${id}/context-sources/secret-scan`,
+        { stage: this.selectedReviewStage() },
+      )
+      .subscribe({
+        next: (payload) => {
+          if (!isSecretScanOkDto(payload)) {
+            this.secretScanState.set('error');
+            this.secretScanMessage.set(
+              'La respuesta del análisis de secretos no es válida.',
+            );
+            return;
+          }
+          this.lastSecretScan.set(payload);
+          this.secretScanState.set('success');
+        },
+        error: (err: unknown) => {
+          const body =
+            typeof err === 'object' &&
+            err !== null &&
+            'error' in err
+              ? (err as { error: unknown }).error
+              : null;
+          if (isSecretScanBlockedDto(body)) {
+            this.lastSecretScanBlocked.set(body);
+            this.secretScanMessage.set(body.message);
+          } else {
+            const payload = this.extractError(err);
+            this.secretScanMessage.set(
+              payload?.message ?? 'No se pudo analizar secretos en las fuentes.',
+            );
+          }
+          const status =
+            typeof err === 'object' &&
+            err !== null &&
+            'status' in err &&
+            typeof (err as { status: unknown }).status === 'number'
+              ? (err as { status: number }).status
+              : 0;
+          this.secretScanState.set(
             status === 422 || status === 404 ? 'blocked' : 'error',
           );
         },

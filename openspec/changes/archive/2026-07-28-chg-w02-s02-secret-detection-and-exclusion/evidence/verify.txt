@@ -1,0 +1,16 @@
+verify: PASS
+timestamp_utc: 2026-07-29T02:50:00Z
+change: chg-w02-s02-secret-detection-and-exclusion
+operator_approval: continuous closure authorizing Verify through push (tasks 8.1 + 9.1)
+
+| Dimension | Result |
+|---|---|
+| Completeness | Tasks 1.1–8.2 and 9.1 complete; 9.2 is this Verify; 9.3–9.8 are post-Verify closure gates authorized in the same continuous pass |
+| Correctness | New `secret-detection-and-exclusion` + five modified baselines covered by shared secret-scan DTOs/guards (conditional unsafe counts), detectors + TOCTOU reader, `POST /projects/:id/context-sources/secret-scan`, Spanish scan console, unit/integration/web tests, operator human validation PASS (clean / partial exclusion / unsafe_context_bundle / unscannable) |
+| Coherence | Design D1–D13 binding (ephemeral scan, internal resolve, path-level exclusion, unsafe empty-after-exclude counts-only, O_RDONLY\|O_NOFOLLOW + same-fd stat/read, executable regexes, no secret values in DTOs/logs, no DB persistence of scan results) reflected in API/web/contracts |
+| Deterministic checks | `QUALITY_GATES_OK`; `BASELINE_OK`; openspec validate --all --strict; human validation PASS (operator script) |
+
+Notes:
+- Task 8.1: operator human validation recorded PASS in `evidence/human-validation.md`
+- Task 8.2: no deferred AC recorded PASS in `evidence/no-deferred-ac.md`
+- SpecPilot repo CI secret scanner unweakened; product fixtures use temp dirs / runtime-built fragments; axioma-db-dev untouched

@@ -71,6 +71,16 @@ export const OPERATOR_MESSAGES: Record<ProjectErrorCode, string> = {
     'La resolución de fuentes de contexto superó el tiempo máximo permitido.',
   context_resolve_failed:
     'Ocurrió un error interno al resolver las fuentes de contexto.',
+  unsafe_context_bundle:
+    'El conjunto de contexto no es seguro: todos los candidatos fueron excluidos por secretos o contenido no escaneable.',
+  secret_scan_limit_exceeded:
+    'Se superó el límite de bytes leídos durante el análisis de secretos.',
+  secret_scan_timeout:
+    'El análisis de secretos superó el tiempo máximo permitido.',
+  secret_scan_entry_unreadable:
+    'No se pudo leer un archivo candidato de forma segura durante el análisis de secretos.',
+  secret_scan_failed:
+    'Ocurrió un error interno al analizar secretos en las fuentes de contexto.',
   internal_error: 'Ocurrió un error interno al registrar el proyecto.',
 };
 
@@ -110,7 +120,8 @@ export function internal500(
     | 'internal_error'
     | 'configuration_refresh_failed'
     | 'discovery_refresh_failed'
-    | 'context_resolve_failed' = 'internal_error',
+    | 'context_resolve_failed'
+    | 'secret_scan_failed' = 'internal_error',
 ): ProjectHttpError {
   return new ProjectHttpError(HttpStatus.INTERNAL_SERVER_ERROR, code);
 }

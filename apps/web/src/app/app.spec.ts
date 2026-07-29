@@ -586,4 +586,110 @@ describe('App shell and registration', () => {
       'Sin configuración activa',
     );
   });
+
+  it('secret-scans with idle loading success exclusions unsafe and blocked', async () => {
+    fixture = TestBed.createComponent(App);
+    fixture.componentRef.setInput('bootstrapMode', 'ok');
+    fixture.detectChanges();
+    await flushMicrotasks();
+    flushProjectsList([
+      {
+        id: '11111111-1111-1111-1111-111111111111',
+        slug: 'demo-repo',
+        displayName: 'demo-repo',
+        repositoryPath: '/tmp/demo-repo',
+        status: 'registered',
+        registeredAt: '2026-07-27T00:00:00.000Z',
+        lastInspectedAt: null,
+        configurationVersionId: '22222222-2222-2222-2222-222222222222',
+        discoveryHealth: neverInspectedHealth,
+      },
+    ]);
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="secret-scan-idle"]'),
+    ).toBeTruthy();
+
+    fixture.componentInstance.runSecretScan();
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="secret-scan-loading"]'),
+    ).toBeTruthy();
+
+    const req = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/context-sources/secret-scan`,
+    );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ stage: 'planning' });
+    req.flush({
+      status: 'ok',
+      projectId: '11111111-1111-1111-1111-111111111111',
+      stage: 'planning',
+      configurationVersionId: '22222222-2222-2222-2222-222222222222',
+      sourceHash: 'a'.repeat(64),
+      scannedAt: '2026-07-28T00:00:00.000Z',
+      candidatePathCount: 2,
+      eligiblePathCount: 1,
+      eligiblePaths: ['clean.md'],
+      findings: [{ path: 'dirty.md', detectorId: 'github_pat' }],
+      unscannable: [],
+    });
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="secret-scan-success"]'),
+    ).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('Análisis con exclusiones');
+    expect(fixture.nativeElement.textContent).toContain('dirty.md · github_pat');
+
+    fixture.componentInstance.runSecretScan();
+    fixture.detectChanges();
+    const emptyReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/context-sources/secret-scan`,
+    );
+    emptyReq.flush({
+      status: 'ok',
+      projectId: '11111111-1111-1111-1111-111111111111',
+      stage: 'planning',
+      configurationVersionId: '22222222-2222-2222-2222-222222222222',
+      sourceHash: 'a'.repeat(64),
+      scannedAt: '2026-07-28T00:00:00.000Z',
+      candidatePathCount: 0,
+      eligiblePathCount: 0,
+      eligiblePaths: [],
+      findings: [],
+      unscannable: [],
+    });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain(
+      'Sin candidatos que analizar',
+    );
+
+    fixture.componentInstance.runSecretScan();
+    fixture.detectChanges();
+    const unsafeReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/context-sources/secret-scan`,
+    );
+    unsafeReq.flush(
+      {
+        status: 'blocked',
+        projectId: '11111111-1111-1111-1111-111111111111',
+        stage: 'planning',
+        code: 'unsafe_context_bundle',
+        message: 'Conjunto no seguro',
+        candidatePathCount: 1,
+        findingCount: 1,
+        unscannableCount: 0,
+      },
+      { status: 422, statusText: 'Unprocessable Entity' },
+    );
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="secret-scan-unsafe-counts"]',
+      )?.textContent,
+    ).toContain('candidatos=1');
+    expect(fixture.nativeElement.textContent).toContain(
+      'Conjunto de contexto no seguro',
+    );
+  });
 });

@@ -1,0 +1,64 @@
+
+=== w02-s02 operator human validation ===
+API_BASE=http://localhost:3000
+HOST_REPOS_ROOT=/Users/silveriobernal/Documents/Code/Development
+REPORT=/tmp/sp-w02-s02-operator-validation-20260728T213505.txt
+Started: 2026-07-29T02:35:05Z
+
+=== Runtime freshness ===
+PASS: GET /health HTTP == 200
+PASS: secret-scan route is live (project_not_found)
+
+=== Scenario 1: clean success (disposable project) ===
+Created disposable clean repo (path omitted from log body for brevity)
+PASS: register w02-s02-clean-fixture HTTP == 201
+clean project id=8746eef7-18f9-439c-95ea-11a3c719c373
+PASS: scenario1 HTTP == 200
+PASS: scenario1 clean success contract
+INFO: candidatePathCount=2 eligiblePathCount=2
+
+=== Scenario 2: partial exclusion success ===
+PASS: scenario2 HTTP == 200
+PASS: scenario2 partial exclusion success
+INFO: eligiblePathCount=2 findingCount=2
+
+=== Scenario 3: unsafe_context_bundle (disposable project) ===
+PASS: register w02-s02-unsafe-fixture HTTP == 201
+unsafe project id=8ac85b15-251a-41c3-a3fb-c87bdaa1b4df
+PASS: scenario3 HTTP == 422
+PASS: scenario3 unsafe_context_bundle counts-only body
+INFO: counts candidate=1 finding=2 unscannable=0
+
+=== Scenario 4: unscannable_content with remaining eligible path ===
+PASS: register w02-s02-unscan-fixture HTTP == 201
+unscan project id=23bae6be-5799-4530-9f28-c9dc6af56a20
+PASS: scenario4 HTTP == 200
+PASS: scenario4 unscannable exclusion with remaining eligible
+
+=== Summary before cleanup trap ===
+PASS_COUNT=9 (shell asserts; Python asserts logged above)
+FAIL_COUNT=0
+RESULT=PASS (scenarios complete; cleanup follows via trap)
+Sanitized report copied to clipboard via pbcopy
+Report path: /tmp/sp-w02-s02-operator-validation-20260728T213505.txt
+
+=== Cleanup (exact commands) ===
+docker compose -f /Users/silveriobernal/Documents/Code/Development/spec-pilot/compose.yaml exec -T postgres psql -U specpilot -d specpilot -v ON_ERROR_STOP=1 -c "DELETE FROM projects WHERE id = '8746eef7-18f9-439c-95ea-11a3c719c373';"
+docker compose -f /Users/silveriobernal/Documents/Code/Development/spec-pilot/compose.yaml exec -T postgres psql -U specpilot -d specpilot -v ON_ERROR_STOP=1 -c "DELETE FROM projects WHERE id = '8ac85b15-251a-41c3-a3fb-c87bdaa1b4df';"
+docker compose -f /Users/silveriobernal/Documents/Code/Development/spec-pilot/compose.yaml exec -T postgres psql -U specpilot -d specpilot -v ON_ERROR_STOP=1 -c "DELETE FROM projects WHERE id = '23bae6be-5799-4530-9f28-c9dc6af56a20';"
+rm -rf -- /Users/silveriobernal/Documents/Code/Development/sp-w02-s02-clean-20260728T213505-24407
+rm -rf -- /Users/silveriobernal/Documents/Code/Development/sp-w02-s02-unsafe-20260728T213505-24407
+rm -rf -- /Users/silveriobernal/Documents/Code/Development/sp-w02-s02-unscan-20260728T213505-24407
+Executed DB delete for project id=8746eef7-18f9-439c-95ea-11a3c719c373
+Executed DB delete for project id=8ac85b15-251a-41c3-a3fb-c87bdaa1b4df
+Executed DB delete for project id=23bae6be-5799-4530-9f28-c9dc6af56a20
+Executed rm -rf for disposable directory /Users/silveriobernal/Documents/Code/Development/sp-w02-s02-clean-20260728T213505-24407
+Executed rm -rf for disposable directory /Users/silveriobernal/Documents/Code/Development/sp-w02-s02-unsafe-20260728T213505-24407
+Executed rm -rf for disposable directory /Users/silveriobernal/Documents/Code/Development/sp-w02-s02-unscan-20260728T213505-24407
+PASS: disposable project GET returns 404 after cleanup (8746eef7-18f9-439c-95ea-11a3c719c373)
+PASS: disposable project GET returns 404 after cleanup (8ac85b15-251a-41c3-a3fb-c87bdaa1b4df)
+PASS: disposable project GET returns 404 after cleanup (23bae6be-5799-4530-9f28-c9dc6af56a20)
+PASS: disposable directory no longer exists (/Users/silveriobernal/Documents/Code/Development/sp-w02-s02-clean-20260728T213505-24407)
+PASS: disposable directory no longer exists (/Users/silveriobernal/Documents/Code/Development/sp-w02-s02-unsafe-20260728T213505-24407)
+PASS: disposable directory no longer exists (/Users/silveriobernal/Documents/Code/Development/sp-w02-s02-unscan-20260728T213505-24407)
+Cleanup finished (no volume reset; axioma-db-dev untouched).

@@ -3,6 +3,7 @@ import type { FastifyReply } from 'fastify';
 import { ContextSourceResolutionService } from './context-source-resolution.service';
 import { DiscoveryService } from './discovery.service';
 import { ProjectsService } from './projects.service';
+import { SecretDetectionService } from './secret-detection.service';
 
 @Controller('projects')
 export class ProjectsController {
@@ -10,6 +11,7 @@ export class ProjectsController {
     private readonly projects: ProjectsService,
     private readonly discovery: DiscoveryService,
     private readonly contextSources: ContextSourceResolutionService,
+    private readonly secretDetection: SecretDetectionService,
   ) {}
 
   @Post()
@@ -64,6 +66,17 @@ export class ProjectsController {
     @Res({ passthrough: true }) reply: FastifyReply,
   ) {
     const result = await this.contextSources.resolve(id, body);
+    reply.code(200);
+    return result;
+  }
+
+  @Post(':id/context-sources/secret-scan')
+  async secretScanContextSources(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
+    const result = await this.secretDetection.scan(id, body);
     reply.code(200);
     return result;
   }

@@ -1,0 +1,16 @@
+=== archive chg-w02-s02-secret-detection-and-exclusion ===
+timestamp_utc: 2026-07-29T03:05:37Z
+archived_to: openspec/changes/archive/2026-07-28-chg-w02-s02-secret-detection-and-exclusion
+specs_synced: yes (task 9.3)
+verify: PASS
+post_sync: PASS
+
+=== openspec list (expect empty active changes) ===
+{
+  "changes": [],
+  "root": {
+    "path": "/Users/silveriobernal/Documents/Code/Development/spec-pilot",
+    "source": "nearest"
+  }
+}
+ARCHIVE_OK

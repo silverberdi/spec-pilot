@@ -1,0 +1,28 @@
+OpenSpec spec sync for chg-w02-s02-secret-detection-and-exclusion
+Date: 2026-07-28
+Verify prerequisite: evidence/verify.txt = PASS
+
+Created:
+- openspec/specs/secret-detection-and-exclusion/spec.md (NEW capability; 8 requirements from ADDED delta)
+
+Modified:
+- openspec/specs/context-source-resolution/spec.md (1 MODIFIED + 1 ADDED requirement)
+  - Keep Wave 2 later-slice behaviors out of resolve
+  - Resolved candidate sets are consumable by secret detection
+- openspec/specs/shared-libraries-baseline/spec.md (2 MODIFIED requirements)
+  - Domain packages and shared UI kit are excluded
+  - Project registration contracts and validators are exported
+- openspec/specs/local-project-registration/spec.md (1 ADDED requirement)
+  - Project-scoped secret-scan endpoint is exposed under projects
+- openspec/specs/angular-web-console-baseline/spec.md (1 MODIFIED + 1 ADDED requirement)
+  - Spanish-first i18n-ready baseline shell
+  - Minimal Spanish-first secret-scan console outcomes
+- openspec/specs/application-test-baseline/spec.md (1 MODIFIED + 1 ADDED requirement)
+  - Evidence is captured under the change directory (updated to chg-w02-s02-secret-detection-and-exclusion)
+  - Secret detection success, exclusion, and blocked paths are covered by automated tests
+
+Validation:
+Command: ./node_modules/.bin/openspec validate --all --strict
+Result: PASS
+Totals: 25 passed, 0 failed (25 items)
+Change 'chg-w02-s02-secret-detection-and-exclusion' is valid

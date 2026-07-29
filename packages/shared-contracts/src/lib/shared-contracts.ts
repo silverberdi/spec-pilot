@@ -177,6 +177,11 @@ export const PROJECT_ERROR_CODES = [
   'context_resolution_limit_exceeded',
   'context_resolution_timeout',
   'context_resolve_failed',
+  'unsafe_context_bundle',
+  'secret_scan_limit_exceeded',
+  'secret_scan_timeout',
+  'secret_scan_entry_unreadable',
+  'secret_scan_failed',
   'internal_error',
 ] as const;
 
@@ -238,6 +243,79 @@ export const CONTEXT_SOURCE_MAX_VISITED_ENTRIES = 100000;
 export const CONTEXT_SOURCE_MAX_MATCHED_FILES = 20000;
 export const CONTEXT_SOURCE_MAX_PATH_BYTES = 4194304;
 export const CONTEXT_SOURCE_RESOLVE_TIMEOUT_MS = 15000;
+
+export type SecretScanRequest = {
+  stage: ReviewStage;
+};
+
+export const SECRET_DETECTOR_IDS = [
+  'aws_access_key',
+  'generic_api_key_assignment',
+  'private_key_block',
+  'github_pat',
+  'slack_token',
+  'high_entropy_token',
+] as const;
+
+export type SecretDetectorId = (typeof SECRET_DETECTOR_IDS)[number];
+
+export type SecretFindingDto = {
+  path: string;
+  detectorId: SecretDetectorId;
+};
+
+export type UnscannablePathDto = {
+  path: string;
+  reason: 'unscannable_content';
+};
+
+export type SecretScanOkDto = {
+  status: 'ok';
+  projectId: string;
+  stage: ReviewStage;
+  configurationVersionId: string;
+  sourceHash: string;
+  scannedAt: string;
+  candidatePathCount: number;
+  eligiblePathCount: number;
+  eligiblePaths: string[];
+  findings: SecretFindingDto[];
+  unscannable: UnscannablePathDto[];
+};
+
+export const SECRET_SCAN_SPECIFIC_BLOCKED_CODES = [
+  'unsafe_context_bundle',
+  'secret_scan_limit_exceeded',
+  'secret_scan_timeout',
+  'secret_scan_entry_unreadable',
+] as const;
+
+export type SecretScanSpecificBlockedCode =
+  (typeof SECRET_SCAN_SPECIFIC_BLOCKED_CODES)[number];
+
+export type SecretScanBlockedCode =
+  | SecretScanSpecificBlockedCode
+  | ContextSourceResolveBlockedCode;
+
+export type SecretScanBlockedDto = {
+  status: 'blocked';
+  projectId: string;
+  stage: ReviewStage | null;
+  code: SecretScanBlockedCode;
+  message: string;
+  candidatePathCount?: number;
+  findingCount?: number;
+  unscannableCount?: number;
+};
+
+export type SecretScanDto = SecretScanOkDto | SecretScanBlockedDto;
+
+export const SECRET_SCAN_MAX_FILE_BYTES = 1048576;
+export const SECRET_SCAN_MAX_TOTAL_BYTES = 52428800;
+export const SECRET_SCAN_TIMEOUT_MS = 30000;
+export const SECRET_SCAN_ENTROPY_MIN_LENGTH = 32;
+export const SECRET_SCAN_ENTROPY_THRESHOLD = 4.5;
+export const SECRET_SCAN_ENTROPY_MAX_POSITIVES_PER_FILE = 20;
 
 export const MANDATORY_CONTEXT_EXCLUDES = [
   '**/.env',
@@ -684,6 +762,167 @@ export function parseContextSourceResolveRequest(
   value: unknown,
 ):
   | { ok: true; request: ContextSourceResolveRequest }
+  | { ok: false; code: 'invalid_review_stage' } {
+  if (typeof value !== 'object' || value === null) {
+    return { ok: false, code: 'invalid_review_stage' };
+  }
+  const record = value as Record<string, unknown>;
+  if (!isReviewStage(record['stage'])) {
+    return { ok: false, code: 'invalid_review_stage' };
+  }
+  return { ok: true, request: { stage: record['stage'] } };
+}
+
+export function isSecretDetectorId(value: unknown): value is SecretDetectorId {
+  return (
+    typeof value === 'string' &&
+    (SECRET_DETECTOR_IDS as readonly string[]).includes(value)
+  );
+}
+
+export function isSecretScanBlockedCode(
+  value: unknown,
+): value is SecretScanBlockedCode {
+  return (
+    typeof value === 'string' &&
+    ((SECRET_SCAN_SPECIFIC_BLOCKED_CODES as readonly string[]).includes(value) ||
+      (CONTEXT_SOURCE_RESOLVE_BLOCKED_CODES as readonly string[]).includes(value))
+  );
+}
+
+const FORBIDDEN_FINDING_FIELDS = [
+  'matchedValue',
+  'snippet',
+  'offset',
+  'offsets',
+  'line',
+  'lineNumber',
+  'lineNumbers',
+  'context',
+  'surroundingContext',
+] as const;
+
+export function isSecretFindingDto(value: unknown): value is SecretFindingDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  for (const field of FORBIDDEN_FINDING_FIELDS) {
+    if (field in record) {
+      return false;
+    }
+  }
+  return (
+    typeof record['path'] === 'string' && isSecretDetectorId(record['detectorId'])
+  );
+}
+
+export function isUnscannablePathDto(
+  value: unknown,
+): value is UnscannablePathDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record['path'] === 'string' &&
+    record['reason'] === 'unscannable_content'
+  );
+}
+
+export function isSecretScanOkDto(value: unknown): value is SecretScanOkDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (record['status'] !== 'ok') {
+    return false;
+  }
+  if ('code' in record) {
+    return false;
+  }
+  const findings = record['findings'];
+  const unscannable = record['unscannable'];
+  if (!Array.isArray(findings) || !findings.every(isSecretFindingDto)) {
+    return false;
+  }
+  if (!Array.isArray(unscannable) || !unscannable.every(isUnscannablePathDto)) {
+    return false;
+  }
+  return (
+    typeof record['projectId'] === 'string' &&
+    isReviewStage(record['stage']) &&
+    typeof record['configurationVersionId'] === 'string' &&
+    typeof record['sourceHash'] === 'string' &&
+    typeof record['scannedAt'] === 'string' &&
+    typeof record['candidatePathCount'] === 'number' &&
+    Number.isFinite(record['candidatePathCount']) &&
+    typeof record['eligiblePathCount'] === 'number' &&
+    Number.isFinite(record['eligiblePathCount']) &&
+    isStringArray(record['eligiblePaths']) &&
+    record['eligiblePathCount'] ===
+      (record['eligiblePaths'] as string[]).length
+  );
+}
+
+export function isSecretScanBlockedDto(
+  value: unknown,
+): value is SecretScanBlockedDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (record['status'] !== 'blocked') {
+    return false;
+  }
+  if (
+    'eligiblePaths' in record ||
+    'findings' in record ||
+    'unscannable' in record ||
+    'eligiblePathCount' in record
+  ) {
+    return false;
+  }
+  const stage = record['stage'];
+  const stageOk = stage === null || isReviewStage(stage);
+  if (
+    !(
+      typeof record['projectId'] === 'string' &&
+      stageOk &&
+      isSecretScanBlockedCode(record['code']) &&
+      typeof record['message'] === 'string'
+    )
+  ) {
+    return false;
+  }
+  const code = record['code'] as SecretScanBlockedCode;
+  const hasCandidate = 'candidatePathCount' in record;
+  const hasFinding = 'findingCount' in record;
+  const hasUnscannable = 'unscannableCount' in record;
+  if (code === 'unsafe_context_bundle') {
+    return (
+      hasCandidate &&
+      hasFinding &&
+      hasUnscannable &&
+      typeof record['candidatePathCount'] === 'number' &&
+      Number.isFinite(record['candidatePathCount']) &&
+      typeof record['findingCount'] === 'number' &&
+      Number.isFinite(record['findingCount']) &&
+      typeof record['unscannableCount'] === 'number' &&
+      Number.isFinite(record['unscannableCount'])
+    );
+  }
+  return !hasCandidate && !hasFinding && !hasUnscannable;
+}
+
+export function isSecretScanDto(value: unknown): value is SecretScanDto {
+  return isSecretScanOkDto(value) || isSecretScanBlockedDto(value);
+}
+
+export function parseSecretScanRequest(
+  value: unknown,
+):
+  | { ok: true; request: SecretScanRequest }
   | { ok: false; code: 'invalid_review_stage' } {
   if (typeof value !== 'object' || value === null) {
     return { ok: false, code: 'invalid_review_stage' };

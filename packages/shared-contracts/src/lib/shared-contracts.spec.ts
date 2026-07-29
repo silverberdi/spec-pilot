@@ -12,7 +12,11 @@ import {
   isProjectErrorResponse,
   isReadyResponse,
   isRegisterProjectResponse,
+  isSecretScanBlockedCode,
+  isSecretScanBlockedDto,
+  isSecretScanOkDto,
   parseContextSourceResolveRequest,
+  parseSecretScanRequest,
   validateRegisterProjectRequest,
 } from './shared-contracts';
 
@@ -369,5 +373,89 @@ describe('shared-contracts context-source resolution', () => {
         paths: [],
       }),
     ).toBe(false);
+  });
+});
+
+describe('shared-contracts secret-scan', () => {
+  const okScan = {
+    status: 'ok' as const,
+    projectId: '11111111-1111-1111-1111-111111111111',
+    stage: 'planning' as const,
+    configurationVersionId: '22222222-2222-2222-2222-222222222222',
+    sourceHash: 'a'.repeat(64),
+    scannedAt: '2026-07-28T00:00:00.000Z',
+    candidatePathCount: 1,
+    eligiblePathCount: 1,
+    eligiblePaths: ['AGENTS.md'],
+    findings: [] as Array<{ path: string; detectorId: string }>,
+    unscannable: [] as Array<{ path: string; reason: string }>,
+  };
+
+  it('accepts a well-formed SecretScanOkDto', () => {
+    expect(isSecretScanOkDto(okScan)).toBe(true);
+  });
+
+  it('requires unsafe counts and rejects them on other blocked codes', () => {
+    expect(
+      isSecretScanBlockedDto({
+        status: 'blocked',
+        projectId: okScan.projectId,
+        stage: 'planning',
+        code: 'unsafe_context_bundle',
+        message: 'unsafe',
+        candidatePathCount: 2,
+        findingCount: 1,
+        unscannableCount: 1,
+      }),
+    ).toBe(true);
+    expect(
+      isSecretScanBlockedDto({
+        status: 'blocked',
+        projectId: okScan.projectId,
+        stage: 'planning',
+        code: 'unsafe_context_bundle',
+        message: 'unsafe',
+      }),
+    ).toBe(false);
+    expect(
+      isSecretScanBlockedDto({
+        status: 'blocked',
+        projectId: okScan.projectId,
+        stage: 'planning',
+        code: 'secret_scan_timeout',
+        message: 'timeout',
+        candidatePathCount: 1,
+      }),
+    ).toBe(false);
+  });
+
+  it('rejects findings with snippet fields and secret_scan_failed in 422 union', () => {
+    expect(
+      isSecretScanOkDto({
+        ...okScan,
+        findings: [
+          {
+            path: 'a.ts',
+            detectorId: 'github_pat',
+            snippet: 'ghp_xxx',
+          },
+        ],
+      }),
+    ).toBe(false);
+    expect(isSecretScanBlockedCode('secret_scan_failed')).toBe(false);
+    expect(
+      isSecretScanBlockedDto({
+        status: 'blocked',
+        projectId: okScan.projectId,
+        stage: 'planning',
+        code: 'secret_scan_failed',
+        message: 'nope',
+      }),
+    ).toBe(false);
+  });
+
+  it('rejects unknown stages on secret-scan request', () => {
+    expect(parseSecretScanRequest({ stage: 'deploy' }).ok).toBe(false);
+    expect(parseSecretScanRequest({ stage: 'planning' }).ok).toBe(true);
   });
 });

@@ -1,7 +1,7 @@
 {
   "project": "spec-pilot",
   "generated": "2026-07-28",
-  "fileCount": 269,
+  "fileCount": 274,
   "fileCountExcludesSelf": true,
   "semantics": {
     "fileCountExcludesSelf": true,
@@ -232,8 +232,8 @@
     },
     {
       "path": "apps/api/src/app/projects/project-errors.ts",
-      "bytes": 5076,
-      "sha256": "4c2f4013cfeffec25bb2f704a2af023b09f95195852dc75c88345e04dcb95b73"
+      "bytes": 5683,
+      "sha256": "e8fd0802e1c873fe1c7b3444759c9b11c33cd07941f381f21cf27fe13cd4dcf3"
     },
     {
       "path": "apps/api/src/app/projects/project-yaml-reader.ts",
@@ -252,23 +252,48 @@
     },
     {
       "path": "apps/api/src/app/projects/projects.controller.ts",
-      "bytes": 1995,
-      "sha256": "a005cab471098ee808f626e06666c2a1600a5c061ef3c7aa9e9471f6a5bf14f3"
+      "bytes": 2425,
+      "sha256": "bde7dbeadaa76f1e47d37371fe22be0b36bce2e0e0b7d67c2132723697127dd7"
     },
     {
       "path": "apps/api/src/app/projects/projects.integration.spec.ts",
-      "bytes": 22450,
-      "sha256": "cd4a58e6c84e8f1486b713cbe2496b136e8e0e9b5d333cffb7e5555c0e8e8a21"
+      "bytes": 26780,
+      "sha256": "8a7d875c210469096e93731f45022dd75243253e8b95dc8d1b390b6132b75628"
     },
     {
       "path": "apps/api/src/app/projects/projects.module.ts",
-      "bytes": 943,
-      "sha256": "3f39be1347ef3c41e0bd14fc69cdbc33c89e8d3361f3cd611e1e4b47da165c1f"
+      "bytes": 1040,
+      "sha256": "57dbf39b119ee243ccd88153f411b120b9b83fe4a2b34b4acbed6b9754291950"
     },
     {
       "path": "apps/api/src/app/projects/projects.service.ts",
       "bytes": 6428,
       "sha256": "abe16767eec0d293881012eac76879692e2e561f2b16ab6d0e563777db04afb9"
+    },
+    {
+      "path": "apps/api/src/app/projects/secret-detection.service.ts",
+      "bytes": 6357,
+      "sha256": "343074e01467ce40c95862036f85e70c702f4a4f3da3f992160e37edbbe8c2c0"
+    },
+    {
+      "path": "apps/api/src/app/projects/secret-detectors.spec.ts",
+      "bytes": 2861,
+      "sha256": "a6ea87c9f34f252613b387dd21aa730edfa14fe2c4eb355bc1711bbc26632e4c"
+    },
+    {
+      "path": "apps/api/src/app/projects/secret-detectors.ts",
+      "bytes": 2853,
+      "sha256": "6933a6d7840a44c66bb4e76b3335ad6661b859ed1a7930493d92c6ebd8031b24"
+    },
+    {
+      "path": "apps/api/src/app/projects/secret-scan-reader.spec.ts",
+      "bytes": 4659,
+      "sha256": "9435a68ae2f7d1a232a411865e6d0ed906c87e4205eedc9d660d3e1271e42438"
+    },
+    {
+      "path": "apps/api/src/app/projects/secret-scan-reader.ts",
+      "bytes": 4636,
+      "sha256": "65520363eca5ba46b491702046b71e1cbabd19e96aa2d3ca08de9e5f5440bd61"
     },
     {
       "path": "apps/api/src/app/projects/slug.ts",
@@ -352,18 +377,18 @@
     },
     {
       "path": "apps/web/src/app/app.html",
-      "bytes": 14573,
-      "sha256": "fea80c712dcb6c5b1098dea435f16a7ebc8c11af1c6f5431e3ecbbcf423a700c"
+      "bytes": 18691,
+      "sha256": "f7f2688aedc9d5c116fdec65b317ad83728a606367248ffcc5c5b36c08b4b85a"
     },
     {
       "path": "apps/web/src/app/app.spec.ts",
-      "bytes": 19875,
-      "sha256": "5c4b8d525a61b9e05d944821773d232239b594707bfcb6c2bcb305b15ad2442b"
+      "bytes": 23605,
+      "sha256": "28fab6adee25c95e170f8e5cc91944e692ea548fabc447638846ee43eaf770c5"
     },
     {
       "path": "apps/web/src/app/app.ts",
-      "bytes": 14913,
-      "sha256": "6127f0ae86b98cfd9727d2e53439e775ca9e0464d73d67eb1f6f19ac5f7f8548"
+      "bytes": 18934,
+      "sha256": "2be17560db1b049b72b076d8bbf278b8b825056556fa32960d10ede0d1cf77a3"
     },
     {
       "path": "apps/web/src/environments/environment.local.example.ts",
@@ -1097,8 +1122,8 @@
     },
     {
       "path": "docs/context/current-state.md",
-      "bytes": 1497,
-      "sha256": "5d09610fe4c95714b93ae54654382231aa45242430c272e9841260381f6b5577"
+      "bytes": 1895,
+      "sha256": "bfb1df2abb07de88eb02e4eb5e00b1b7565526ced5a1c578122356e01c3d4686"
     },
     {
       "path": "docs/context/file-index.md",
@@ -1327,18 +1352,18 @@
     },
     {
       "path": "packages/shared-contracts/dist/src/lib/shared-contracts.d.ts",
-      "bytes": 9449,
-      "sha256": "d4e0e5343f0796959fdba333eeac72d1402a1f32f9a13bbf226c76560ac1fe8c"
+      "bytes": 12269,
+      "sha256": "fceb3c48b673b991aac33da501fa4fa95b651aa6b7b00c58cc0af13bb1d6fbfb"
     },
     {
       "path": "packages/shared-contracts/dist/src/lib/shared-contracts.js",
-      "bytes": 15968,
-      "sha256": "66aee936f0cbd22fb765afe6ae8f000227ef497762c765a34f701efdc1175862"
+      "bytes": 21775,
+      "sha256": "cf03f7d2945519fc69bf0695e55dac4caa7b53807a62a561e5efde8e3035eade"
     },
     {
       "path": "packages/shared-contracts/dist/src/lib/shared-contracts.js.map",
-      "bytes": 12358,
-      "sha256": "22d4ab895b997a1c22dff05daf2b25a38555c54031d71adbc85ad6fa6e90ab46"
+      "bytes": 16977,
+      "sha256": "f540337d39e0750078cd1be6e5a1d609cdffeaafc8901bf7a66118f1a1c9d726"
     },
     {
       "path": "packages/shared-contracts/jest.config.cts",
@@ -1362,13 +1387,13 @@
     },
     {
       "path": "packages/shared-contracts/src/lib/shared-contracts.spec.ts",
-      "bytes": 10722,
-      "sha256": "b98d1bae541ed2b02f4839a7e46aeb1cde07caadc32e3622f15de39f93a7c8fb"
+      "bytes": 13214,
+      "sha256": "5eea2ffaf8e0fe0cc16a9ba2190306e0d146cc0f87005eda2e33eb626fd28474"
     },
     {
       "path": "packages/shared-contracts/src/lib/shared-contracts.ts",
-      "bytes": 19225,
-      "sha256": "07f11ed1f83f144a9f11fe1695378f43e07530f2c2a24b97c771588859bef269"
+      "bytes": 25921,
+      "sha256": "8db961a7c3a45d5d002ec003089cd33ac05d6b9b5c348f6c2944e1120b5336dd"
     },
     {
       "path": "packages/shared-contracts/tsconfig.json",

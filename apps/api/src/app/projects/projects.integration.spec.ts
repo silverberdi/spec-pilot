@@ -648,4 +648,127 @@ describe('Project registration and configuration (Testcontainers)', () => {
         .exclude,
     ).toEqual([]);
   });
+
+  it('secret-scans clean candidates and blocks planted secrets', async () => {
+    const repo = await makeEligibleRepo('secret-ok');
+    await writeFile(join(repo, 'AGENTS.md'), 'agents clean\n', 'utf8');
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    expect(register.statusCode).toBe(201);
+    const project = JSON.parse(register.body) as { id: string };
+
+    const clean = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-sources/secret-scan`,
+      payload: { stage: 'planning' },
+    });
+    expect(clean.statusCode).toBe(200);
+    const cleanBody = JSON.parse(clean.body) as {
+      status: string;
+      eligiblePaths: string[];
+      findings: unknown[];
+      candidatePathCount: number;
+      eligiblePathCount: number;
+    };
+    expect(cleanBody.status).toBe('ok');
+    expect(cleanBody.eligiblePaths).toEqual(['AGENTS.md']);
+    expect(cleanBody.findings).toEqual([]);
+    expect(cleanBody.eligiblePathCount).toBe(cleanBody.eligiblePaths.length);
+
+    await writeFile(
+      join(repo, 'AGENTS.md'),
+      `token ghp_${'abcdefghijklmnopqrstuvwxyz0123456789'}\n`,
+      'utf8',
+    );
+    const dirty = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-sources/secret-scan`,
+      payload: { stage: 'planning' },
+    });
+    expect(dirty.statusCode).toBe(422);
+    const dirtyBody = JSON.parse(dirty.body) as {
+      status: string;
+      code: string;
+      candidatePathCount: number;
+      findingCount: number;
+      unscannableCount: number;
+      findings?: unknown;
+      eligiblePaths?: unknown;
+    };
+    expect(dirtyBody.status).toBe('blocked');
+    expect(dirtyBody.code).toBe('unsafe_context_bundle');
+    expect(dirtyBody.candidatePathCount).toBe(1);
+    expect(dirtyBody.findingCount).toBeGreaterThanOrEqual(1);
+    expect(dirtyBody.unscannableCount).toBe(0);
+    expect(dirtyBody.findings).toBeUndefined();
+    expect(dirtyBody.eligiblePaths).toBeUndefined();
+  });
+
+  it('blocks secret-scan without configuration and for invalid stage', async () => {
+    const repo = await makeEligibleRepo(
+      'secret-blocked-cfg',
+      'schemaVersion: not-yaml\n',
+    );
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    const project = JSON.parse(register.body) as { id: string };
+
+    const missingCfg = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-sources/secret-scan`,
+      payload: { stage: 'planning' },
+    });
+    expect(missingCfg.statusCode).toBe(422);
+    expect(JSON.parse(missingCfg.body).code).toBe('configuration_not_found');
+
+    const badStage = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-sources/secret-scan`,
+      payload: { stage: 'deploy' },
+    });
+    expect(badStage.statusCode).toBe(422);
+    expect(JSON.parse(badStage.body).code).toBe('invalid_review_stage');
+
+    const missing = await app.inject({
+      method: 'POST',
+      url: '/projects/00000000-0000-0000-0000-000000000000/context-sources/secret-scan',
+      payload: { stage: 'planning' },
+    });
+    expect(missing.statusCode).toBe(404);
+  });
+
+  it('secret-scan empty candidates returns ok without reading', async () => {
+    const yaml = validProjectYaml({
+      projectId: 'secret-empty',
+      exclude: ['AGENTS.md'],
+    });
+    const repo = await makeEligibleRepo('secret-empty', yaml);
+    await writeFile(join(repo, 'AGENTS.md'), 'agents', 'utf8');
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    const project = JSON.parse(register.body) as { id: string };
+    const scan = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-sources/secret-scan`,
+      payload: { stage: 'new' },
+    });
+    expect(scan.statusCode).toBe(200);
+    const body = JSON.parse(scan.body) as {
+      candidatePathCount: number;
+      eligiblePaths: string[];
+      findings: unknown[];
+    };
+    expect(body.candidatePathCount).toBe(0);
+    expect(body.eligiblePaths).toEqual([]);
+    expect(body.findings).toEqual([]);
+  });
 });

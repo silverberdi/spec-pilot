@@ -1,0 +1,16 @@
+exclusions-check: PASS
+
+Verified against proposal/design/tasks for chg-w02-s02-secret-detection-and-exclusion:
+
+- No Prisma/DB migration
+- No project.yaml schemaVersion / portable contract expansion
+- No immutable manifests, content hashes, or token estimates (w02-s03)
+- No context preview or approval gates (w02-s04)
+- No DeepSeek product API calls
+- No delivery / Git-write / OpenSpec apply-verify-sync-archive controls from SpecPilot
+- No auth/multiuser
+- No client-supplied paths[] scan input
+- No MIME detection or extension allowlists for binary classification
+- No redacted file bodies in API/UI responses
+- SpecPilot repository CI secret scanner (scripts/scan-secrets.py / baseline-validation-and-secret-scanning) not weakened
+- No later-wave (w03+) review engine scope
