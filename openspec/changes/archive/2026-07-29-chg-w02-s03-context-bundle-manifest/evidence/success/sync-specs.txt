@@ -1,0 +1,16 @@
+sync-specs: PASS
+timestamp_utc: 2026-07-29T14:30:00Z
+change: chg-w02-s03-context-bundle-manifest
+
+Synced eight capability specs to canonical openspec/specs/:
+
+- CREATED context-bundle-manifest (Purpose + 7 requirements)
+- MODIFIED secret-detection-and-exclusion (same-bytes engine; oversize preservation)
+- MODIFIED context-source-resolution (resolve enumerator; path-set consumption)
+- MODIFIED postgresql-prisma-persistence-baseline (ContextBundle model + cascade)
+- MODIFIED shared-libraries-baseline (DTOs, guards, error codes)
+- ADDED/MODIFIED local-project-registration (project-scoped context-bundle routes)
+- MODIFIED/ADDED angular-web-console-baseline (Spanish context-bundle console)
+- MODIFIED/ADDED application-test-baseline (context-bundle automated coverage)
+
+Change remains active pending archive.

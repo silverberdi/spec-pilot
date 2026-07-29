@@ -14,10 +14,15 @@ import type {
   ProjectErrorResponse,
   RegisterProjectResponse,
   ReviewStage,
+  ContextBundleBlockedDto,
+  ContextBundleOkDto,
   SecretScanBlockedDto,
   SecretScanOkDto,
 } from '@specpilot/shared-contracts';
 import {
+  isContextBundleBlockedDto,
+  isContextBundleLatestListDto,
+  isContextBundleOkDto,
   isContextSourceResolveOkDto,
   isProjectDto,
   isProjectErrorResponse,
@@ -53,6 +58,12 @@ export type ContextResolveUiState =
   | 'blocked'
   | 'error';
 export type SecretScanUiState =
+  | 'idle'
+  | 'loading'
+  | 'success'
+  | 'blocked'
+  | 'error';
+export type ContextBundleUiState =
   | 'idle'
   | 'loading'
   | 'success'
@@ -116,6 +127,18 @@ export const shellCopy = {
     secretScanUnsafeTitle: 'Conjunto de contexto no seguro',
     secretFindingsCap: 'Mostrando 50 de',
     secretFindingsCapSuffix: 'hallazgos',
+    contextBundleHint:
+      'Manifiesto inmutable local con hashes y estimación de tokens (sin vista previa, sin aprobación y sin envío a DeepSeek).',
+    contextBundleCreateLabel: 'Crear manifiesto de contexto',
+    contextBundleLatestLabel: 'Cargar último manifiesto',
+    contextBundleIdle: 'Aún no se ha creado un manifiesto de contexto para este proyecto.',
+    contextBundleSuccessTitle: 'Manifiesto de contexto creado',
+    contextBundleEmptyTitle: 'Manifiesto vacío',
+    contextBundleBlockedTitle: 'Creación de manifiesto bloqueada',
+    contextBundleErrorTitle: 'Error al crear el manifiesto de contexto',
+    contextBundleUnsafeTitle: 'Conjunto de contexto no seguro',
+    contextBundleEntriesCap: 'Mostrando 200 de',
+    contextBundleEntriesCapSuffix: 'entradas',
     dashboardTitle: 'Proyectos',
     dashboardHint:
       'Estado de descubrimiento según la última inspección persistida (sin re-probar al cargar).',
@@ -183,6 +206,12 @@ export class App implements OnInit {
   readonly secretScanMessage = signal<string | null>(null);
   readonly lastSecretScan = signal<SecretScanOkDto | null>(null);
   readonly lastSecretScanBlocked = signal<SecretScanBlockedDto | null>(null);
+  readonly contextBundleState = signal<ContextBundleUiState>('idle');
+  readonly contextBundleMessage = signal<string | null>(null);
+  readonly lastContextBundle = signal<ContextBundleOkDto | null>(null);
+  readonly lastContextBundleBlocked = signal<ContextBundleBlockedDto | null>(
+    null,
+  );
 
   readonly displayedContextPaths = computed(() => {
     const result = this.lastContextResolve();
@@ -233,6 +262,23 @@ export class App implements OnInit {
     }
     const copy = this.copy();
     return `${copy.secretFindingsCap} ${result.findings.length} ${copy.secretFindingsCapSuffix}`;
+  });
+
+  readonly displayedBundleEntries = computed(() => {
+    const result = this.lastContextBundle();
+    if (!result) {
+      return [] as ContextBundleOkDto['entries'];
+    }
+    return result.entries.slice(0, 200);
+  });
+
+  readonly bundleEntryCapCopy = computed(() => {
+    const result = this.lastContextBundle();
+    if (!result || result.entryCount <= 200) {
+      return null;
+    }
+    const copy = this.copy();
+    return `${copy.contextBundleEntriesCap} ${result.entryCount} ${copy.contextBundleEntriesCapSuffix}`;
   });
 
   ngOnInit(): void {
@@ -520,6 +566,107 @@ export class App implements OnInit {
           );
         },
       });
+  }
+
+  createContextBundle(): void {
+    const id = this.selectedProjectId();
+    if (!id) {
+      return;
+    }
+    this.contextBundleState.set('loading');
+    this.contextBundleMessage.set(null);
+    this.lastContextBundle.set(null);
+    this.lastContextBundleBlocked.set(null);
+
+    this.http
+      .post<unknown>(
+        `${environment.apiBaseUrl}/projects/${id}/context-bundles`,
+        { stage: this.selectedReviewStage() },
+      )
+      .subscribe({
+        next: (payload) => {
+          if (!isContextBundleOkDto(payload)) {
+            this.contextBundleState.set('error');
+            this.contextBundleMessage.set(
+              'La respuesta del manifiesto de contexto no es válida.',
+            );
+            return;
+          }
+          this.lastContextBundle.set(payload);
+          this.contextBundleState.set('success');
+        },
+        error: (err: unknown) => {
+          this.handleContextBundleError(err);
+        },
+      });
+  }
+
+  loadLatestContextBundle(): void {
+    const id = this.selectedProjectId();
+    if (!id) {
+      return;
+    }
+    this.contextBundleState.set('loading');
+    this.contextBundleMessage.set(null);
+    this.lastContextBundle.set(null);
+    this.lastContextBundleBlocked.set(null);
+
+    this.http
+      .get<unknown>(
+        `${environment.apiBaseUrl}/projects/${id}/context-bundles`,
+        {
+          params: {
+            stage: this.selectedReviewStage(),
+            limit: '1',
+          },
+        },
+      )
+      .subscribe({
+        next: (payload) => {
+          if (!isContextBundleLatestListDto(payload)) {
+            this.contextBundleState.set('error');
+            this.contextBundleMessage.set(
+              'La respuesta del último manifiesto no es válida.',
+            );
+            return;
+          }
+          const item = payload.items[0] ?? null;
+          this.lastContextBundle.set(item);
+          this.contextBundleState.set(item ? 'success' : 'idle');
+          if (!item) {
+            this.contextBundleMessage.set(this.copy().contextBundleIdle);
+          }
+        },
+        error: (err: unknown) => {
+          this.handleContextBundleError(err);
+        },
+      });
+  }
+
+  private handleContextBundleError(err: unknown): void {
+    const body =
+      typeof err === 'object' && err !== null && 'error' in err
+        ? (err as { error: unknown }).error
+        : null;
+    if (isContextBundleBlockedDto(body)) {
+      this.lastContextBundleBlocked.set(body);
+      this.contextBundleMessage.set(body.message);
+    } else {
+      const payload = this.extractError(err);
+      this.contextBundleMessage.set(
+        payload?.message ?? 'No se pudo crear o cargar el manifiesto de contexto.',
+      );
+    }
+    const status =
+      typeof err === 'object' &&
+      err !== null &&
+      'status' in err &&
+      typeof (err as { status: unknown }).status === 'number'
+        ? (err as { status: number }).status
+        : 0;
+    this.contextBundleState.set(
+      status === 422 || status === 404 ? 'blocked' : 'error',
+    );
   }
 
   private extractError(err: unknown): ProjectErrorResponse | null {

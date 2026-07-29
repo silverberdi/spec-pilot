@@ -182,6 +182,9 @@ export const PROJECT_ERROR_CODES = [
   'secret_scan_timeout',
   'secret_scan_entry_unreadable',
   'secret_scan_failed',
+  'context_bundle_failed',
+  'context_bundle_not_found',
+  'invalid_context_bundle_query',
   'internal_error',
 ] as const;
 
@@ -932,4 +935,307 @@ export function parseSecretScanRequest(
     return { ok: false, code: 'invalid_review_stage' };
   }
   return { ok: true, request: { stage: record['stage'] } };
+}
+
+export const CONTEXT_BUNDLE_MANIFEST_SCHEMA_VERSION = 1 as const;
+export const CONTEXT_BUNDLE_SELECTION_POLICY_ID =
+  'full-file-lines-v1' as const;
+export const CONTEXT_BUNDLE_TOKEN_ESTIMATOR_ID =
+  'unicode-codepoints-div-4-v1' as const;
+
+export type ContextBundleRequest = {
+  stage: ReviewStage;
+};
+
+export type ContextBundleLineRangeDto = {
+  startLine: number;
+  endLine: number;
+};
+
+export type ContextBundleEntryDto = {
+  path: string;
+  contentHash: string;
+  lineRanges: ContextBundleLineRangeDto[];
+  tokenEstimate: number;
+};
+
+export type ContextBundleExclusionDto = {
+  path: string;
+  reason: 'secret_finding' | 'unscannable_content';
+};
+
+export type ContextBundleOkDto = {
+  status: 'ok';
+  id: string;
+  projectId: string;
+  stage: ReviewStage;
+  configurationVersionId: string;
+  sourceHash: string;
+  createdAt: string;
+  manifestSchemaVersion: typeof CONTEXT_BUNDLE_MANIFEST_SCHEMA_VERSION;
+  selectionPolicyId: typeof CONTEXT_BUNDLE_SELECTION_POLICY_ID;
+  tokenEstimatorId: typeof CONTEXT_BUNDLE_TOKEN_ESTIMATOR_ID;
+  manifestHash: string;
+  entryCount: number;
+  totalTokenEstimate: number;
+  candidatePathCount: number;
+  eligiblePathCount: number;
+  excludedPathCount: number;
+  findingCount: number;
+  unscannableCount: number;
+  entries: ContextBundleEntryDto[];
+  exclusions: ContextBundleExclusionDto[];
+};
+
+export type ContextBundleBlockedCode = SecretScanBlockedCode;
+
+export type ContextBundleBlockedDto = {
+  status: 'blocked';
+  projectId: string;
+  stage: ReviewStage | null;
+  code: ContextBundleBlockedCode;
+  message: string;
+  candidatePathCount?: number;
+  findingCount?: number;
+  unscannableCount?: number;
+};
+
+export type ContextBundleDto = ContextBundleOkDto | ContextBundleBlockedDto;
+
+export type ContextBundleLatestListDto = {
+  status: 'ok';
+  items: ContextBundleOkDto[];
+};
+
+const REMOVED_CONTEXT_BUNDLE_BLOCKED_CODES = [
+  'context_bundle_limit_exceeded',
+  'context_bundle_timeout',
+  'context_bundle_entry_unreadable',
+  'context_bundle_failed',
+  'invalid_context_bundle_query',
+] as const;
+
+function isContextBundleLineRangeDto(
+  value: unknown,
+): value is ContextBundleLineRangeDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record['startLine'] === 'number' &&
+    Number.isFinite(record['startLine']) &&
+    record['startLine'] >= 1 &&
+    typeof record['endLine'] === 'number' &&
+    Number.isFinite(record['endLine']) &&
+    record['endLine'] >= record['startLine']
+  );
+}
+
+function isContextBundleEntryDto(
+  value: unknown,
+): value is ContextBundleEntryDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  const lineRanges = record['lineRanges'];
+  if (!Array.isArray(lineRanges) || !lineRanges.every(isContextBundleLineRangeDto)) {
+    return false;
+  }
+  return (
+    typeof record['path'] === 'string' &&
+    typeof record['contentHash'] === 'string' &&
+    /^[a-f0-9]{64}$/.test(record['contentHash']) &&
+    typeof record['tokenEstimate'] === 'number' &&
+    Number.isFinite(record['tokenEstimate']) &&
+    record['tokenEstimate'] >= 0 &&
+    Number.isInteger(record['tokenEstimate'])
+  );
+}
+
+function isContextBundleExclusionDto(
+  value: unknown,
+): value is ContextBundleExclusionDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record['path'] === 'string' &&
+    (record['reason'] === 'secret_finding' ||
+      record['reason'] === 'unscannable_content')
+  );
+}
+
+export function isContextBundleBlockedCode(
+  value: unknown,
+): value is ContextBundleBlockedCode {
+  if (
+    typeof value === 'string' &&
+    (REMOVED_CONTEXT_BUNDLE_BLOCKED_CODES as readonly string[]).includes(value)
+  ) {
+    return false;
+  }
+  return isSecretScanBlockedCode(value);
+}
+
+export function isContextBundleOkDto(
+  value: unknown,
+): value is ContextBundleOkDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (record['status'] !== 'ok') {
+    return false;
+  }
+  if ('code' in record || 'contentTransmitted' in record) {
+    return false;
+  }
+  const entries = record['entries'];
+  const exclusions = record['exclusions'];
+  if (!Array.isArray(entries) || !entries.every(isContextBundleEntryDto)) {
+    return false;
+  }
+  if (
+    !Array.isArray(exclusions) ||
+    !exclusions.every(isContextBundleExclusionDto)
+  ) {
+    return false;
+  }
+  const entryCount = record['entryCount'];
+  const eligiblePathCount = record['eligiblePathCount'];
+  const excludedPathCount = record['excludedPathCount'];
+  return (
+    typeof record['id'] === 'string' &&
+    typeof record['projectId'] === 'string' &&
+    isReviewStage(record['stage']) &&
+    typeof record['configurationVersionId'] === 'string' &&
+    typeof record['sourceHash'] === 'string' &&
+    typeof record['createdAt'] === 'string' &&
+    record['manifestSchemaVersion'] === CONTEXT_BUNDLE_MANIFEST_SCHEMA_VERSION &&
+    record['selectionPolicyId'] === CONTEXT_BUNDLE_SELECTION_POLICY_ID &&
+    record['tokenEstimatorId'] === CONTEXT_BUNDLE_TOKEN_ESTIMATOR_ID &&
+    typeof record['manifestHash'] === 'string' &&
+    /^[a-f0-9]{64}$/.test(record['manifestHash']) &&
+    typeof entryCount === 'number' &&
+    Number.isFinite(entryCount) &&
+    entryCount === (entries as ContextBundleEntryDto[]).length &&
+    typeof record['totalTokenEstimate'] === 'number' &&
+    Number.isFinite(record['totalTokenEstimate']) &&
+    typeof record['candidatePathCount'] === 'number' &&
+    Number.isFinite(record['candidatePathCount']) &&
+    typeof eligiblePathCount === 'number' &&
+    Number.isFinite(eligiblePathCount) &&
+    eligiblePathCount === entryCount &&
+    typeof excludedPathCount === 'number' &&
+    Number.isFinite(excludedPathCount) &&
+    excludedPathCount === (exclusions as ContextBundleExclusionDto[]).length &&
+    typeof record['findingCount'] === 'number' &&
+    Number.isFinite(record['findingCount']) &&
+    typeof record['unscannableCount'] === 'number' &&
+    Number.isFinite(record['unscannableCount'])
+  );
+}
+
+export function isContextBundleBlockedDto(
+  value: unknown,
+): value is ContextBundleBlockedDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (record['status'] !== 'blocked') {
+    return false;
+  }
+  if (
+    'entries' in record ||
+    'exclusions' in record ||
+    'manifestHash' in record ||
+    'contentTransmitted' in record
+  ) {
+    return false;
+  }
+  const stage = record['stage'];
+  const stageOk = stage === null || isReviewStage(stage);
+  if (
+    !(
+      typeof record['projectId'] === 'string' &&
+      stageOk &&
+      isContextBundleBlockedCode(record['code']) &&
+      typeof record['message'] === 'string'
+    )
+  ) {
+    return false;
+  }
+  const code = record['code'] as ContextBundleBlockedCode;
+  const hasCandidate = 'candidatePathCount' in record;
+  const hasFinding = 'findingCount' in record;
+  const hasUnscannable = 'unscannableCount' in record;
+  if (code === 'unsafe_context_bundle') {
+    return (
+      hasCandidate &&
+      hasFinding &&
+      hasUnscannable &&
+      typeof record['candidatePathCount'] === 'number' &&
+      Number.isFinite(record['candidatePathCount']) &&
+      typeof record['findingCount'] === 'number' &&
+      Number.isFinite(record['findingCount']) &&
+      typeof record['unscannableCount'] === 'number' &&
+      Number.isFinite(record['unscannableCount'])
+    );
+  }
+  return !hasCandidate && !hasFinding && !hasUnscannable;
+}
+
+export function isContextBundleDto(value: unknown): value is ContextBundleDto {
+  return isContextBundleOkDto(value) || isContextBundleBlockedDto(value);
+}
+
+export function isContextBundleLatestListDto(
+  value: unknown,
+): value is ContextBundleLatestListDto {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (record['status'] !== 'ok') {
+    return false;
+  }
+  const items = record['items'];
+  return Array.isArray(items) && items.every(isContextBundleOkDto);
+}
+
+export function parseContextBundleRequest(
+  value: unknown,
+):
+  | { ok: true; request: ContextBundleRequest }
+  | { ok: false; code: 'invalid_review_stage' } {
+  if (typeof value !== 'object' || value === null) {
+    return { ok: false, code: 'invalid_review_stage' };
+  }
+  const record = value as Record<string, unknown>;
+  if (!isReviewStage(record['stage'])) {
+    return { ok: false, code: 'invalid_review_stage' };
+  }
+  return { ok: true, request: { stage: record['stage'] } };
+}
+
+export function parseContextBundleLatestQuery(
+  value: unknown,
+):
+  | { ok: true; stage: ReviewStage; limit: 1 }
+  | { ok: false; code: 'invalid_context_bundle_query' } {
+  if (typeof value !== 'object' || value === null) {
+    return { ok: false, code: 'invalid_context_bundle_query' };
+  }
+  const record = value as Record<string, unknown>;
+  if (!isReviewStage(record['stage'])) {
+    return { ok: false, code: 'invalid_context_bundle_query' };
+  }
+  if (record['limit'] !== '1' && record['limit'] !== 1) {
+    return { ok: false, code: 'invalid_context_bundle_query' };
+  }
+  return { ok: true, stage: record['stage'], limit: 1 };
 }

@@ -692,4 +692,142 @@ describe('App shell and registration', () => {
       'Conjunto de contexto no seguro',
     );
   });
+
+  it('creates context bundles with idle loading success empty and unsafe blocked', async () => {
+    fixture = TestBed.createComponent(App);
+    fixture.componentRef.setInput('bootstrapMode', 'ok');
+    fixture.detectChanges();
+    await flushMicrotasks();
+    flushProjectsList([
+      {
+        id: '11111111-1111-1111-1111-111111111111',
+        slug: 'demo-repo',
+        displayName: 'demo-repo',
+        repositoryPath: '/tmp/demo-repo',
+        status: 'registered',
+        registeredAt: '2026-07-27T00:00:00.000Z',
+        lastInspectedAt: null,
+        configurationVersionId: '22222222-2222-2222-2222-222222222222',
+        discoveryHealth: neverInspectedHealth,
+      },
+    ]);
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="context-bundle-idle"]'),
+    ).toBeTruthy();
+
+    fixture.componentInstance.createContextBundle();
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="context-bundle-loading"]',
+      ),
+    ).toBeTruthy();
+
+    const req = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/context-bundles`,
+    );
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ stage: 'planning' });
+    req.flush({
+      status: 'ok',
+      id: '33333333-3333-3333-3333-333333333333',
+      projectId: '11111111-1111-1111-1111-111111111111',
+      stage: 'planning',
+      configurationVersionId: '22222222-2222-2222-2222-222222222222',
+      sourceHash: 'a'.repeat(64),
+      createdAt: '2026-07-29T00:00:00.000Z',
+      manifestSchemaVersion: 1,
+      selectionPolicyId: 'full-file-lines-v1',
+      tokenEstimatorId: 'unicode-codepoints-div-4-v1',
+      manifestHash: 'b'.repeat(64),
+      entryCount: 1,
+      totalTokenEstimate: 2,
+      candidatePathCount: 1,
+      eligiblePathCount: 1,
+      excludedPathCount: 0,
+      findingCount: 0,
+      unscannableCount: 0,
+      entries: [
+        {
+          path: 'clean.md',
+          contentHash: 'c'.repeat(64),
+          lineRanges: [{ startLine: 1, endLine: 1 }],
+          tokenEstimate: 2,
+        },
+      ],
+      exclusions: [],
+    });
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="context-bundle-success"]',
+      ),
+    ).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain(
+      'Manifiesto de contexto creado',
+    );
+    expect(fixture.nativeElement.textContent).toContain('full-file-lines-v1');
+    expect(fixture.nativeElement.textContent).not.toContain(
+      'contentTransmitted',
+    );
+
+    fixture.componentInstance.createContextBundle();
+    fixture.detectChanges();
+    const emptyReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/context-bundles`,
+    );
+    emptyReq.flush({
+      status: 'ok',
+      id: '44444444-4444-4444-4444-444444444444',
+      projectId: '11111111-1111-1111-1111-111111111111',
+      stage: 'planning',
+      configurationVersionId: '22222222-2222-2222-2222-222222222222',
+      sourceHash: 'a'.repeat(64),
+      createdAt: '2026-07-29T00:00:00.000Z',
+      manifestSchemaVersion: 1,
+      selectionPolicyId: 'full-file-lines-v1',
+      tokenEstimatorId: 'unicode-codepoints-div-4-v1',
+      manifestHash: 'd'.repeat(64),
+      entryCount: 0,
+      totalTokenEstimate: 0,
+      candidatePathCount: 0,
+      eligiblePathCount: 0,
+      excludedPathCount: 0,
+      findingCount: 0,
+      unscannableCount: 0,
+      entries: [],
+      exclusions: [],
+    });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Manifiesto vacío');
+
+    fixture.componentInstance.createContextBundle();
+    fixture.detectChanges();
+    const unsafeReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/context-bundles`,
+    );
+    unsafeReq.flush(
+      {
+        status: 'blocked',
+        projectId: '11111111-1111-1111-1111-111111111111',
+        stage: 'planning',
+        code: 'unsafe_context_bundle',
+        message: 'Conjunto inseguro',
+        candidatePathCount: 1,
+        findingCount: 0,
+        unscannableCount: 1,
+      },
+      { status: 422, statusText: 'Unprocessable Entity' },
+    );
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="context-bundle-unsafe-counts"]',
+      )?.textContent,
+    ).toContain('candidatos=1');
+    expect(fixture.nativeElement.textContent).toContain(
+      'Conjunto de contexto no seguro',
+    );
+  });
 });

@@ -44,6 +44,7 @@ describe('secret-scan-reader', () => {
       ok: true,
       kind: 'text',
       text: '',
+      bytes: Buffer.alloc(0),
       bytesRead: 0,
     });
   });

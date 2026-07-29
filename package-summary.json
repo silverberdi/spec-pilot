@@ -1,7 +1,7 @@
 {
   "project": "spec-pilot",
-  "generated": "2026-07-28",
-  "fileCount": 274,
+  "generated": "2026-07-29",
+  "fileCount": 279,
   "fileCountExcludesSelf": true,
   "semantics": {
     "fileCountExcludesSelf": true,
@@ -101,14 +101,19 @@
       "sha256": "d558b79114d3c23629f3682cb20f184228ac1218e2f00b7e988f6384363d121d"
     },
     {
+      "path": "apps/api/prisma/migrations/20260729000000_add_context_bundle/migration.sql",
+      "bytes": 1185,
+      "sha256": "feb140c5c51762f01209e88caf1759042abb052b78a3c84a199bd69341285111"
+    },
+    {
       "path": "apps/api/prisma/migrations/migration_lock.toml",
       "bytes": 24,
       "sha256": "1db17a8d051aa136110736752c5e1f8b7ed92b6ea8e803112fbbe2497047c210"
     },
     {
       "path": "apps/api/prisma/schema.prisma",
-      "bytes": 2020,
-      "sha256": "cb998086d939b886b66d284d744b3e45f8b1e1565bc2cde97a83db97b3349358"
+      "bytes": 3313,
+      "sha256": "f448fe3512e5eb2aef7b45a1d50b44f81004f3dafdd25da119bdaca91eab1334"
     },
     {
       "path": "apps/api/prisma.config.ts",
@@ -164,6 +169,31 @@
       "path": "apps/api/src/app/projects/configuration.service.ts",
       "bytes": 6866,
       "sha256": "ef19dbc12a492ca1ee682af308636bb64b2ccc64546f98d48e182933b878c598"
+    },
+    {
+      "path": "apps/api/src/app/projects/context-bundle-manifest.spec.ts",
+      "bytes": 4469,
+      "sha256": "ea2361dd40f5ffe857b341a9b5e4369445e6e99aac76e499928a088a41f45bd1"
+    },
+    {
+      "path": "apps/api/src/app/projects/context-bundle-manifest.ts",
+      "bytes": 4009,
+      "sha256": "58f59e35047cc868a8bafc0ff3ebb8c09e48bacf2895c471017ef391a742630f"
+    },
+    {
+      "path": "apps/api/src/app/projects/context-bundle.service.ts",
+      "bytes": 8808,
+      "sha256": "cf0bda0ed5f20dfc9c8339a271a0cfc7914280a889a035b6862577fde0f2c8d8"
+    },
+    {
+      "path": "apps/api/src/app/projects/context-scan-pipeline.spec.ts",
+      "bytes": 4109,
+      "sha256": "123715647b6759f4a6a5c242fe5cbe929237d562896a2b748f85d02dc3626736"
+    },
+    {
+      "path": "apps/api/src/app/projects/context-scan-pipeline.ts",
+      "bytes": 4440,
+      "sha256": "e792a88098cc776a46db14a844f6f377f7e656c40609fef00bbec91379d4ab02"
     },
     {
       "path": "apps/api/src/app/projects/context-source-resolution.service.ts",
@@ -232,8 +262,8 @@
     },
     {
       "path": "apps/api/src/app/projects/project-errors.ts",
-      "bytes": 5683,
-      "sha256": "e8fd0802e1c873fe1c7b3444759c9b11c33cd07941f381f21cf27fe13cd4dcf3"
+      "bytes": 6043,
+      "sha256": "553e8e2b5b04e884834e2a66a8aacb218ffab9116f0bb38d2c6d1fd01d3aa3b9"
     },
     {
       "path": "apps/api/src/app/projects/project-yaml-reader.ts",
@@ -252,18 +282,18 @@
     },
     {
       "path": "apps/api/src/app/projects/projects.controller.ts",
-      "bytes": 2425,
-      "sha256": "bde7dbeadaa76f1e47d37371fe22be0b36bce2e0e0b7d67c2132723697127dd7"
+      "bytes": 3229,
+      "sha256": "44f5a7a36230ccc087c552d3cdcd10edcef7b190dc76a0ec302b3cc92aa837a8"
     },
     {
       "path": "apps/api/src/app/projects/projects.integration.spec.ts",
-      "bytes": 26780,
-      "sha256": "8a7d875c210469096e93731f45022dd75243253e8b95dc8d1b390b6132b75628"
+      "bytes": 35552,
+      "sha256": "c05c285dfa835a017fbd4bf94926ae7407f13053f8c6696d2f7ea20282fd44f7"
     },
     {
       "path": "apps/api/src/app/projects/projects.module.ts",
-      "bytes": 1040,
-      "sha256": "57dbf39b119ee243ccd88153f411b120b9b83fe4a2b34b4acbed6b9754291950"
+      "bytes": 1131,
+      "sha256": "9a9810cb8da647ab5aae494a7098fe3323ea74c158a39ce48438f12eaf424313"
     },
     {
       "path": "apps/api/src/app/projects/projects.service.ts",
@@ -272,8 +302,8 @@
     },
     {
       "path": "apps/api/src/app/projects/secret-detection.service.ts",
-      "bytes": 6357,
-      "sha256": "343074e01467ce40c95862036f85e70c702f4a4f3da3f992160e37edbbe8c2c0"
+      "bytes": 4413,
+      "sha256": "32cecd193be852af8cb02d1fc61b6bf780045dfd4a1c6d3c554c01e903c917a2"
     },
     {
       "path": "apps/api/src/app/projects/secret-detectors.spec.ts",
@@ -287,13 +317,13 @@
     },
     {
       "path": "apps/api/src/app/projects/secret-scan-reader.spec.ts",
-      "bytes": 4659,
-      "sha256": "9435a68ae2f7d1a232a411865e6d0ed906c87e4205eedc9d660d3e1271e42438"
+      "bytes": 4689,
+      "sha256": "bbfa2348577426709fcc198ec4b806c3fa44c2b1d66964b3fe0ca354da77675f"
     },
     {
       "path": "apps/api/src/app/projects/secret-scan-reader.ts",
-      "bytes": 4636,
-      "sha256": "65520363eca5ba46b491702046b71e1cbabd19e96aa2d3ca08de9e5f5440bd61"
+      "bytes": 4739,
+      "sha256": "f1ed266bfefb2209e3cd0892bafef1f4c8715427525d5c849a42a66d6ab5634a"
     },
     {
       "path": "apps/api/src/app/projects/slug.ts",
@@ -377,18 +407,18 @@
     },
     {
       "path": "apps/web/src/app/app.html",
-      "bytes": 18691,
-      "sha256": "f7f2688aedc9d5c116fdec65b317ad83728a606367248ffcc5c5b36c08b4b85a"
+      "bytes": 23222,
+      "sha256": "35f3fa7e0dfc62d36c392ebdf77ae5caeb2f34521d439f3f09805df15d76a28a"
     },
     {
       "path": "apps/web/src/app/app.spec.ts",
-      "bytes": 23605,
-      "sha256": "28fab6adee25c95e170f8e5cc91944e692ea548fabc447638846ee43eaf770c5"
+      "bytes": 28217,
+      "sha256": "0cc404f29c147d8271e0ae53f49f3b545049321468e43f53367fd5290bbbe730"
     },
     {
       "path": "apps/web/src/app/app.ts",
-      "bytes": 18934,
-      "sha256": "2be17560db1b049b72b076d8bbf278b8b825056556fa32960d10ede0d1cf77a3"
+      "bytes": 23814,
+      "sha256": "d8fb4d5c4ef408b7bf210c725905ee94dc967473c4f6a4fa163dff2cfa93d9b0"
     },
     {
       "path": "apps/web/src/environments/environment.local.example.ts",
@@ -1122,8 +1152,8 @@
     },
     {
       "path": "docs/context/current-state.md",
-      "bytes": 1895,
-      "sha256": "bfb1df2abb07de88eb02e4eb5e00b1b7565526ced5a1c578122356e01c3d4686"
+      "bytes": 2174,
+      "sha256": "e6abc448c02d028b7736992c44bbdaf0f14db535c6610c8076e789431ed951a8"
     },
     {
       "path": "docs/context/file-index.md",
@@ -1326,11 +1356,6 @@
       "sha256": "89d063df835f8299370e7d33c713df5f2438c6331f632b37163390fe4f5757fe"
     },
     {
-      "path": "packages/shared-contracts/dist/README.md",
-      "bytes": 254,
-      "sha256": "89d063df835f8299370e7d33c713df5f2438c6331f632b37163390fe4f5757fe"
-    },
-    {
       "path": "packages/shared-contracts/dist/package.json",
       "bytes": 215,
       "sha256": "15aff87d39d9b736d490a8bb3833cd4864e22c3b325f48f920ebae7047d8639c"
@@ -1352,18 +1377,18 @@
     },
     {
       "path": "packages/shared-contracts/dist/src/lib/shared-contracts.d.ts",
-      "bytes": 12269,
-      "sha256": "fceb3c48b673b991aac33da501fa4fa95b651aa6b7b00c58cc0af13bb1d6fbfb"
+      "bytes": 15091,
+      "sha256": "39a63d28d0aaf84fb57d3e145743b70edf7024823ec06024cf55d6dabfaf257a"
     },
     {
       "path": "packages/shared-contracts/dist/src/lib/shared-contracts.js",
-      "bytes": 21775,
-      "sha256": "cf03f7d2945519fc69bf0695e55dac4caa7b53807a62a561e5efde8e3035eade"
+      "bytes": 29598,
+      "sha256": "dda868f5b8393d125cba82dd06312459dec470e7f6c7be2fa69fc9263499cf50"
     },
     {
       "path": "packages/shared-contracts/dist/src/lib/shared-contracts.js.map",
-      "bytes": 16977,
-      "sha256": "f540337d39e0750078cd1be6e5a1d609cdffeaafc8901bf7a66118f1a1c9d726"
+      "bytes": 23685,
+      "sha256": "cba724143d32f08b7e532efacbb226cfee75963628834b6193bc6fa2f90bd088"
     },
     {
       "path": "packages/shared-contracts/jest.config.cts",
@@ -1387,13 +1412,13 @@
     },
     {
       "path": "packages/shared-contracts/src/lib/shared-contracts.spec.ts",
-      "bytes": 13214,
-      "sha256": "5eea2ffaf8e0fe0cc16a9ba2190306e0d146cc0f87005eda2e33eb626fd28474"
+      "bytes": 17267,
+      "sha256": "cba68e7e2e0133382fb0bcee6775e24534ef34db13783ec49558fea8b1442021"
     },
     {
       "path": "packages/shared-contracts/src/lib/shared-contracts.ts",
-      "bytes": 25921,
-      "sha256": "8db961a7c3a45d5d002ec003089cd33ac05d6b9b5c348f6c2944e1120b5336dd"
+      "bytes": 35376,
+      "sha256": "f7beac98cdb59fe36b377c914700cdc6a5905ad215b0d1a6949f88396e1c684c"
     },
     {
       "path": "packages/shared-contracts/tsconfig.json",

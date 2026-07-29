@@ -10,6 +10,7 @@ export type SecretScanReadOk = {
   ok: true;
   kind: 'text';
   text: string;
+  bytes: Buffer;
   bytesRead: number;
 };
 
@@ -116,7 +117,13 @@ export async function readCandidateForSecretScan(options: {
     }
 
     if (fileSize === 0) {
-      return { ok: true, kind: 'text', text: '', bytesRead: 0 };
+      return {
+        ok: true,
+        kind: 'text',
+        text: '',
+        bytes: Buffer.alloc(0),
+        bytesRead: 0,
+      };
     }
 
     const buffer = Buffer.alloc(fileSize);
@@ -138,7 +145,7 @@ export async function readCandidateForSecretScan(options: {
     try {
       const decoder = new TextDecoder('utf-8', { fatal: true });
       const text = decoder.decode(buffer);
-      return { ok: true, kind: 'text', text, bytesRead };
+      return { ok: true, kind: 'text', text, bytes: buffer, bytesRead };
     } catch {
       return { ok: true, kind: 'unscannable', bytesRead };
     }

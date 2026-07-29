@@ -81,6 +81,12 @@ export const OPERATOR_MESSAGES: Record<ProjectErrorCode, string> = {
     'No se pudo leer un archivo candidato de forma segura durante el análisis de secretos.',
   secret_scan_failed:
     'Ocurrió un error interno al analizar secretos en las fuentes de contexto.',
+  context_bundle_failed:
+    'Ocurrió un error interno al crear el manifiesto de contexto.',
+  context_bundle_not_found:
+    'No se encontró el manifiesto de contexto solicitado.',
+  invalid_context_bundle_query:
+    'La consulta de manifiestos de contexto no es válida; use stage y limit=1.',
   internal_error: 'Ocurrió un error interno al registrar el proyecto.',
 };
 
@@ -110,7 +116,8 @@ export function notFound404(
   code:
     | 'project_not_found'
     | 'configuration_not_found'
-    | 'discovery_not_found' = 'project_not_found',
+    | 'discovery_not_found'
+    | 'context_bundle_not_found' = 'project_not_found',
 ): ProjectHttpError {
   return new ProjectHttpError(HttpStatus.NOT_FOUND, code);
 }
@@ -121,7 +128,8 @@ export function internal500(
     | 'configuration_refresh_failed'
     | 'discovery_refresh_failed'
     | 'context_resolve_failed'
-    | 'secret_scan_failed' = 'internal_error',
+    | 'secret_scan_failed'
+    | 'context_bundle_failed' = 'internal_error',
 ): ProjectHttpError {
   return new ProjectHttpError(HttpStatus.INTERNAL_SERVER_ERROR, code);
 }

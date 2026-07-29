@@ -467,6 +467,110 @@
                 </section>
               }
             </section>
+
+            <section class="shell__refresh" data-testid="context-bundle">
+              <p class="shell__tagline">{{ copy().contextBundleHint }}</p>
+              <p-button
+                [label]="copy().contextBundleCreateLabel"
+                (onClick)="createContextBundle()"
+                [loading]="contextBundleState() === 'loading'"
+                [disabled]="
+                  contextBundleState() === 'loading' || !selectedProjectId()
+                "
+              />
+              <p-button
+                [label]="copy().contextBundleLatestLabel"
+                (onClick)="loadLatestContextBundle()"
+                [loading]="contextBundleState() === 'loading'"
+                [disabled]="
+                  contextBundleState() === 'loading' || !selectedProjectId()
+                "
+              />
+
+              @if (contextBundleState() === 'idle' && !lastContextBundle()) {
+                <p data-testid="context-bundle-idle">{{
+                  copy().contextBundleIdle
+                }}</p>
+              }
+
+              @if (contextBundleState() === 'loading') {
+                <p data-testid="context-bundle-loading">{{ copy().loading }}</p>
+              }
+
+              @if (
+                contextBundleState() === 'success' && lastContextBundle();
+                as bundle
+              ) {
+                <section data-testid="context-bundle-success">
+                  <p-message severity="success">{{
+                    bundle.entryCount === 0
+                      ? copy().contextBundleEmptyTitle
+                      : copy().contextBundleSuccessTitle
+                  }}</p-message>
+                  <p>
+                    etapa={{ bundle.stage }} entradas={{ bundle.entryCount }}
+                    tokens≈{{ bundle.totalTokenEstimate }} schema={{
+                      bundle.manifestSchemaVersion
+                    }}
+                    policy={{ bundle.selectionPolicyId }} estimator={{
+                      bundle.tokenEstimatorId
+                    }}
+                    exclusiones={{ bundle.excludedPathCount }} manifiesto={{
+                      bundle.manifestHash.slice(0, 12)
+                    }}… hash={{ bundle.sourceHash.slice(0, 12) }}…
+                  </p>
+                  @if (bundleEntryCapCopy(); as cap) {
+                    <p data-testid="context-bundle-entry-cap">{{ cap }}</p>
+                  }
+                  <ul data-testid="context-bundle-entries">
+                    @for (entry of displayedBundleEntries(); track entry.path) {
+                      <li>
+                        {{ entry.path }} · {{ entry.contentHash.slice(0, 12) }}…
+                        · tokens={{ entry.tokenEstimate }}
+                        @if (entry.lineRanges.length === 1) {
+                          · líneas={{ entry.lineRanges[0].startLine }}-{{
+                            entry.lineRanges[0].endLine
+                          }}
+                        }
+                      </li>
+                    }
+                  </ul>
+                </section>
+              }
+
+              @if (
+                (contextBundleState() === 'blocked' ||
+                  contextBundleState() === 'error') &&
+                contextBundleMessage()
+              ) {
+                <section data-testid="context-bundle-blocked">
+                  <p-message
+                    [severity]="
+                      contextBundleState() === 'blocked' ? 'warn' : 'error'
+                    "
+                    >{{
+                      lastContextBundleBlocked()?.code ===
+                      'unsafe_context_bundle'
+                        ? copy().contextBundleUnsafeTitle
+                        : contextBundleState() === 'blocked'
+                          ? copy().contextBundleBlockedTitle
+                          : copy().contextBundleErrorTitle
+                    }}</p-message
+                  >
+                  <p>{{ contextBundleMessage() }}</p>
+                  @if (lastContextBundleBlocked(); as blocked) {
+                    @if (blocked.code === 'unsafe_context_bundle') {
+                      <p data-testid="context-bundle-unsafe-counts">
+                        candidatos={{ blocked.candidatePathCount }} hallazgos={{
+                          blocked.findingCount
+                        }}
+                        no-escaneables={{ blocked.unscannableCount }}
+                      </p>
+                    }
+                  }
+                </section>
+              }
+            </section>
           </section>
         }
       </p-card>

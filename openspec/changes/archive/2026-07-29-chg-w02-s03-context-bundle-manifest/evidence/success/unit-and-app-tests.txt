@@ -1,0 +1,2 @@
+wrote /Users/silveriobernal/Documents/Code/Development/spec-pilot/package-summary.json fileCount=280 (excludes self) candidates=7 waves=12 slices=42 stories=126
+QUALITY_GATES_OK already captured

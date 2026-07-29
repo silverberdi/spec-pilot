@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
+import { ContextBundleService } from './context-bundle.service';
 import { ContextSourceResolutionService } from './context-source-resolution.service';
 import { DiscoveryService } from './discovery.service';
 import { ProjectsService } from './projects.service';
@@ -12,6 +13,7 @@ export class ProjectsController {
     private readonly discovery: DiscoveryService,
     private readonly contextSources: ContextSourceResolutionService,
     private readonly secretDetection: SecretDetectionService,
+    private readonly contextBundles: ContextBundleService,
   ) {}
 
   @Post()
@@ -79,6 +81,33 @@ export class ProjectsController {
     const result = await this.secretDetection.scan(id, body);
     reply.code(200);
     return result;
+  }
+
+  @Post(':id/context-bundles')
+  async createContextBundle(
+    @Param('id') id: string,
+    @Body() body: unknown,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ) {
+    const result = await this.contextBundles.create(id, body);
+    reply.code(201);
+    return result;
+  }
+
+  @Get(':id/context-bundles/:bundleId')
+  async getContextBundle(
+    @Param('id') id: string,
+    @Param('bundleId') bundleId: string,
+  ) {
+    return this.contextBundles.get(id, bundleId);
+  }
+
+  @Get(':id/context-bundles')
+  async listContextBundles(
+    @Param('id') id: string,
+    @Query() query: Record<string, unknown>,
+  ) {
+    return this.contextBundles.latest(id, query);
   }
 
   @Get(':id')

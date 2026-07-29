@@ -1,0 +1,5 @@
+archive: PASS
+timestamp_utc: 2026-07-29T14:27:57Z
+change: chg-w02-s03-context-bundle-manifest
+archived_to: openspec/changes/archive/2026-07-29-chg-w02-s03-context-bundle-manifest
+active_changes: 0

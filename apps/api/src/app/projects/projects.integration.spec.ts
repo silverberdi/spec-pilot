@@ -17,7 +17,7 @@ import {
 } from '@nestjs/platform-fastify';
 import { AppModule } from '../app.module';
 import { PrismaService } from '../prisma.service';
-import { DISPLAY_NAME_MAX_LENGTH } from '@specpilot/shared-contracts';
+import { DISPLAY_NAME_MAX_LENGTH, SECRET_SCAN_MAX_FILE_BYTES } from '@specpilot/shared-contracts';
 import { validProjectYaml } from './valid-project-yaml.fixture';
 
 const apiRoot = join(__dirname, '../../..');
@@ -770,5 +770,248 @@ describe('Project registration and configuration (Testcontainers)', () => {
     expect(body.candidatePathCount).toBe(0);
     expect(body.eligiblePaths).toEqual([]);
     expect(body.findings).toEqual([]);
+  });
+
+  it('creates context bundle for clean candidates (201)', async () => {
+    const repo = await makeEligibleRepo('bundle-clean');
+    await writeFile(join(repo, 'AGENTS.md'), 'agents clean\n', 'utf8');
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    expect(register.statusCode).toBe(201);
+    const project = JSON.parse(register.body) as { id: string };
+
+    const create = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-bundles`,
+      payload: { stage: 'planning' },
+    });
+    expect(create.statusCode).toBe(201);
+    const body = JSON.parse(create.body) as {
+      status: string;
+      id: string;
+      manifestHash: string;
+      entryCount: number;
+      selectionPolicyId: string;
+      tokenEstimatorId: string;
+      manifestSchemaVersion: number;
+      entries: Array<{ path: string; contentHash: string; tokenEstimate: number }>;
+      exclusions: unknown[];
+    };
+    expect(body.status).toBe('ok');
+    expect(body.entryCount).toBe(1);
+    expect(body.entries[0]?.path).toBe('AGENTS.md');
+    expect(body.entries[0]?.contentHash).toMatch(/^[a-f0-9]{64}$/);
+    expect(body.selectionPolicyId).toBe('full-file-lines-v1');
+    expect(body.tokenEstimatorId).toBe('unicode-codepoints-div-4-v1');
+    expect(body.manifestSchemaVersion).toBe(1);
+    expect(body.exclusions).toEqual([]);
+    expect(body).not.toHaveProperty('contentTransmitted');
+
+    const get = await app.inject({
+      method: 'GET',
+      url: `/projects/${project.id}/context-bundles/${body.id}`,
+    });
+    expect(get.statusCode).toBe(200);
+    expect(JSON.parse(get.body).manifestHash).toBe(body.manifestHash);
+
+    const latest = await app.inject({
+      method: 'GET',
+      url: `/projects/${project.id}/context-bundles?stage=planning&limit=1`,
+    });
+    expect(latest.statusCode).toBe(200);
+    const latestBody = JSON.parse(latest.body) as {
+      status: string;
+      items: Array<{ id: string }>;
+    };
+    expect(latestBody.status).toBe('ok');
+    expect(latestBody.items).toHaveLength(1);
+    expect(latestBody.items[0]?.id).toBe(body.id);
+
+    const recreate = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-bundles`,
+      payload: { stage: 'planning' },
+    });
+    expect(recreate.statusCode).toBe(201);
+    const recreateBody = JSON.parse(recreate.body) as {
+      id: string;
+      manifestHash: string;
+    };
+    expect(recreateBody.id).not.toBe(body.id);
+    expect(recreateBody.manifestHash).toBe(body.manifestHash);
+  });
+
+  it('creates empty context bundle when no candidates match (201)', async () => {
+    const yaml = validProjectYaml({
+      projectId: 'bundle-empty',
+      exclude: ['AGENTS.md'],
+    });
+    const repo = await makeEligibleRepo('bundle-empty', yaml);
+    await writeFile(join(repo, 'AGENTS.md'), 'agents', 'utf8');
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    const project = JSON.parse(register.body) as { id: string };
+
+    const create = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-bundles`,
+      payload: { stage: 'new' },
+    });
+    expect(create.statusCode).toBe(201);
+    const body = JSON.parse(create.body) as {
+      entryCount: number;
+      entries: unknown[];
+      exclusions: unknown[];
+      totalTokenEstimate: number;
+      candidatePathCount: number;
+    };
+    expect(body.candidatePathCount).toBe(0);
+    expect(body.entryCount).toBe(0);
+    expect(body.entries).toEqual([]);
+    expect(body.exclusions).toEqual([]);
+    expect(body.totalTokenEstimate).toBe(0);
+  });
+
+  it('creates bundle with oversize exclusion alongside clean entry (201)', async () => {
+    const yaml = validProjectYaml({
+      projectId: 'bundle-mixed',
+      exclude: [],
+    });
+    const repo = await makeEligibleRepo('bundle-mixed', yaml);
+    await mkdir(join(repo, 'docs'), { recursive: true });
+    await writeFile(join(repo, 'AGENTS.md'), 'clean\n', 'utf8');
+    const big = Buffer.alloc(SECRET_SCAN_MAX_FILE_BYTES + 1, 0x61);
+    await writeFile(join(repo, 'docs', 'big.txt'), big);
+
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    const project = JSON.parse(register.body) as { id: string };
+
+    const prisma = app.get(PrismaService);
+    const version = await prisma.projectConfigurationVersion.findUniqueOrThrow({
+      where: { id: (JSON.parse(register.body) as { configurationVersionId: string }).configurationVersionId },
+    });
+    const normalized = version.normalizedConfig as {
+      context: { include: string[]; exclude: string[] };
+    };
+    normalized.context.include = ['AGENTS.md', 'docs/big.txt'];
+    await prisma.projectConfigurationVersion.update({
+      where: { id: version.id },
+      data: { normalizedConfig: normalized },
+    });
+
+    const create = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-bundles`,
+      payload: { stage: 'planning' },
+    });
+    expect(create.statusCode).toBe(201);
+    const body = JSON.parse(create.body) as {
+      entryCount: number;
+      entries: Array<{ path: string }>;
+      exclusions: Array<{ path: string; reason: string }>;
+      unscannableCount: number;
+    };
+    expect(body.entryCount).toBe(1);
+    expect(body.entries[0]?.path).toBe('AGENTS.md');
+    expect(body.exclusions).toEqual([
+      { path: 'docs/big.txt', reason: 'unscannable_content' },
+    ]);
+    expect(body.unscannableCount).toBe(1);
+
+    const scan = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-sources/secret-scan`,
+      payload: { stage: 'planning' },
+    });
+    expect(scan.statusCode).toBe(200);
+    const scanBody = JSON.parse(scan.body) as {
+      eligiblePaths: string[];
+      unscannable: Array<{ path: string }>;
+    };
+    expect(scanBody.eligiblePaths).toEqual(['AGENTS.md']);
+    expect(scanBody.unscannable).toEqual([
+      { path: 'docs/big.txt', reason: 'unscannable_content' },
+    ]);
+  });
+
+  it('blocks sole oversize candidate with unsafe_context_bundle and no row', async () => {
+    const yaml = validProjectYaml({
+      projectId: 'bundle-oversize-only',
+      exclude: ['AGENTS.md'],
+    });
+    const repo = await makeEligibleRepo('bundle-oversize-only', yaml);
+    const big = Buffer.alloc(SECRET_SCAN_MAX_FILE_BYTES + 1, 0x61);
+    await writeFile(join(repo, 'big-only.txt'), big);
+
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    const project = JSON.parse(register.body) as { id: string };
+
+    const prisma = app.get(PrismaService);
+    const version = await prisma.projectConfigurationVersion.findUniqueOrThrow({
+      where: { id: (JSON.parse(register.body) as { configurationVersionId: string }).configurationVersionId },
+    });
+    const normalized = version.normalizedConfig as {
+      context: { include: string[]; exclude: string[] };
+    };
+    normalized.context.include = ['big-only.txt'];
+    await prisma.projectConfigurationVersion.update({
+      where: { id: version.id },
+      data: { normalizedConfig: normalized },
+    });
+
+    const create = await app.inject({
+      method: 'POST',
+      url: `/projects/${project.id}/context-bundles`,
+      payload: { stage: 'planning' },
+    });
+    expect(create.statusCode).toBe(422);
+    const body = JSON.parse(create.body) as {
+      status: string;
+      code: string;
+      candidatePathCount: number;
+      findingCount: number;
+      unscannableCount: number;
+    };
+    expect(body.status).toBe('blocked');
+    expect(body.code).toBe('unsafe_context_bundle');
+    expect(body.candidatePathCount).toBe(1);
+    expect(body.findingCount).toBe(0);
+    expect(body.unscannableCount).toBe(1);
+
+    const count = await prisma.contextBundle.count({
+      where: { projectId: project.id },
+    });
+    expect(count).toBe(0);
+  });
+
+  it('rejects invalid latest context-bundle query', async () => {
+    const repo = await makeEligibleRepo('bundle-query');
+    const register = await app.inject({
+      method: 'POST',
+      url: '/projects',
+      payload: { repositoryPath: await realpath(repo) },
+    });
+    const project = JSON.parse(register.body) as { id: string };
+
+    const badLimit = await app.inject({
+      method: 'GET',
+      url: `/projects/${project.id}/context-bundles?stage=planning&limit=2`,
+    });
+    expect(badLimit.statusCode).toBe(422);
+    expect(JSON.parse(badLimit.body).code).toBe('invalid_context_bundle_query');
   });
 });

@@ -1,26 +1,22 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import type {
   ReviewStage,
-  SecretFindingDto,
   SecretScanBlockedCode,
   SecretScanBlockedDto,
   SecretScanOkDto,
-  UnscannablePathDto,
 } from '@specpilot/shared-contracts';
 import {
   isContextSourceResolveBlockedCode,
   parseSecretScanRequest,
-  SECRET_SCAN_TIMEOUT_MS,
 } from '@specpilot/shared-contracts';
 import { ContextSourceResolutionService } from './context-source-resolution.service';
+import { runContextScanPipeline } from './context-scan-pipeline';
 import {
   internal500,
   notFound404,
   OPERATOR_MESSAGES,
   ProjectHttpError,
 } from './project-errors';
-import { detectSecretsInText, sortFindings } from './secret-detectors';
-import { readCandidateForSecretScan } from './secret-scan-reader';
 import { PrismaService } from '../prisma.service';
 
 @Injectable()
@@ -54,81 +50,28 @@ export class SecretDetectionService {
     if (!project) {
       throw notFound404('project_not_found');
     }
-    const repositoryRoot = project.repositoryPath;
-
-    const scanStartedAt = Date.now();
-    let totalBytesRead = 0;
-    const findings: SecretFindingDto[] = [];
-    const unscannable: UnscannablePathDto[] = [];
-    const excluded = new Set<string>();
 
     try {
-      for (const relativePath of resolveOk.paths) {
-        if (Date.now() - scanStartedAt >= SECRET_SCAN_TIMEOUT_MS) {
-          throw this.blockedScan(projectId, stage, 'secret_scan_timeout');
-        }
-
-        const read = await readCandidateForSecretScan({
-          repositoryRoot,
-          relativePath,
-          totalBytesRead,
-          scanStartedAt,
-        });
-
-        if (!read.ok) {
-          throw this.blockedScan(projectId, stage, read.code);
-        }
-
-        totalBytesRead += read.bytesRead;
-
-        if (read.kind === 'unscannable') {
-          unscannable.push({
-            path: relativePath,
-            reason: 'unscannable_content',
-          });
-          excluded.add(relativePath);
-          continue;
-        }
-
-        if (Date.now() - scanStartedAt >= SECRET_SCAN_TIMEOUT_MS) {
-          throw this.blockedScan(projectId, stage, 'secret_scan_timeout');
-        }
-
-        const fileFindings = detectSecretsInText(relativePath, read.text);
-        if (fileFindings.length > 0) {
-          findings.push(...fileFindings);
-          excluded.add(relativePath);
-        }
-      }
-
-      const eligiblePaths = resolveOk.paths.filter(
-        (path) => !excluded.has(path),
-      );
-      const sortedFindings = sortFindings(findings);
-      const sortedUnscannable = unscannable
-        .slice()
-        .sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
-
-      if (resolveOk.pathCount >= 1 && eligiblePaths.length === 0) {
-        throw this.blockedScan(projectId, stage, 'unsafe_context_bundle', {
-          candidatePathCount: resolveOk.pathCount,
-          findingCount: sortedFindings.length,
-          unscannableCount: sortedUnscannable.length,
-        });
-      }
+      const pipeline = await runContextScanPipeline({
+        projectId,
+        stage,
+        resolveOk,
+        repositoryRoot: project.repositoryPath,
+        includeCleanBytes: false,
+      });
 
       return {
         status: 'ok',
-        projectId: resolveOk.projectId,
-        stage: resolveOk.stage,
-        configurationVersionId: resolveOk.configurationVersionId,
-        sourceHash: resolveOk.sourceHash,
+        projectId: pipeline.projectId,
+        stage: pipeline.stage,
+        configurationVersionId: pipeline.configurationVersionId,
+        sourceHash: pipeline.sourceHash,
         scannedAt: new Date().toISOString(),
-        candidatePathCount: resolveOk.pathCount,
-        eligiblePathCount: eligiblePaths.length,
-        eligiblePaths,
-        findings: sortedFindings,
-        unscannable: sortedUnscannable,
+        candidatePathCount: pipeline.candidatePathCount,
+        eligiblePathCount: pipeline.eligiblePathCount,
+        eligiblePaths: pipeline.eligiblePaths,
+        findings: pipeline.findings,
+        unscannable: pipeline.unscannable,
       };
     } catch (error: unknown) {
       if (error instanceof HttpException) {
@@ -157,7 +100,6 @@ export class SecretDetectionService {
       throw error;
     }
     if (status === HttpStatus.INTERNAL_SERVER_ERROR) {
-      // Resolve unexpected failures stay as context_resolve_failed.
       throw error;
     }
     if (status === HttpStatus.UNPROCESSABLE_ENTITY) {

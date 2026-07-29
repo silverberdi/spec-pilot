@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma.module';
+import { ContextBundleService } from './context-bundle.service';
 import { ConfigurationService } from './configuration.service';
 import { ContextSourceResolutionService } from './context-source-resolution.service';
 import { DiscoveryService } from './discovery.service';
@@ -19,6 +20,7 @@ import { SecretDetectionService } from './secret-detection.service';
     DiscoveryService,
     ContextSourceResolutionService,
     SecretDetectionService,
+    ContextBundleService,
     ProjectYamlReader,
     NodeFilesystemAdapter,
     { provide: FILESYSTEM_PORT, useExisting: NodeFilesystemAdapter },

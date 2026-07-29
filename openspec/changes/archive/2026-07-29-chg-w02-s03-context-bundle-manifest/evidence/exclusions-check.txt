@@ -1,0 +1,18 @@
+Exclusions check — chg-w02-s03-context-bundle-manifest
+Date: 2026-07-29
+
+Verified against proposal.md / design.md / specs / tasks.md:
+
+[x] No content preview UI or disclosure approval gates (w02-s04)
+[x] No DeepSeek product API calls
+[x] No budget reservation / enforcement
+[x] No review runs / findings ledger as product evidence
+[x] No delivery / Git-write / OpenSpec apply-verify-sync-archive from SpecPilot
+[x] No authentication / multiuser
+[x] No client-supplied paths, hashes, line ranges, or file bodies on create
+[x] No contentTransmitted field on ContextBundle / DTOs
+[x] No product update or delete endpoints for ContextBundle
+[x] No weakening of SpecPilot repo CI secret scanning / quality gates
+[x] No later-wave scope (Wave 3+)
+
+Result: PASS — exclusions held for this change scope.

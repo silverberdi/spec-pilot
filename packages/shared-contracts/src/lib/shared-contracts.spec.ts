@@ -6,6 +6,10 @@ import {
   isContextSourceResolveBlockedDto,
   isContextSourceResolveDto,
   isContextSourceResolveOkDto,
+  isContextBundleBlockedCode,
+  isContextBundleBlockedDto,
+  isContextBundleLatestListDto,
+  isContextBundleOkDto,
   isHealthResponse,
   isProjectDiscoveryDto,
   isProjectDto,
@@ -16,6 +20,8 @@ import {
   isSecretScanBlockedDto,
   isSecretScanOkDto,
   parseContextSourceResolveRequest,
+  parseContextBundleLatestQuery,
+  parseContextBundleRequest,
   parseSecretScanRequest,
   validateRegisterProjectRequest,
 } from './shared-contracts';
@@ -457,5 +463,137 @@ describe('shared-contracts secret-scan', () => {
   it('rejects unknown stages on secret-scan request', () => {
     expect(parseSecretScanRequest({ stage: 'deploy' }).ok).toBe(false);
     expect(parseSecretScanRequest({ stage: 'planning' }).ok).toBe(true);
+  });
+});
+
+describe('shared-contracts context-bundle', () => {
+  const okBundle = {
+    status: 'ok' as const,
+    id: '33333333-3333-3333-3333-333333333333',
+    projectId: '11111111-1111-1111-1111-111111111111',
+    stage: 'planning' as const,
+    configurationVersionId: '22222222-2222-2222-2222-222222222222',
+    sourceHash: 'a'.repeat(64),
+    createdAt: '2026-07-28T00:00:00.000Z',
+    manifestSchemaVersion: 1 as const,
+    selectionPolicyId: 'full-file-lines-v1' as const,
+    tokenEstimatorId: 'unicode-codepoints-div-4-v1' as const,
+    manifestHash: 'b'.repeat(64),
+    entryCount: 1,
+    totalTokenEstimate: 1,
+    candidatePathCount: 1,
+    eligiblePathCount: 1,
+    excludedPathCount: 0,
+    findingCount: 0,
+    unscannableCount: 0,
+    entries: [
+      {
+        path: 'AGENTS.md',
+        contentHash: 'c'.repeat(64),
+        lineRanges: [{ startLine: 1, endLine: 1 }],
+        tokenEstimate: 1,
+      },
+    ],
+    exclusions: [] as Array<{ path: string; reason: string }>,
+  };
+
+  it('accepts a well-formed ContextBundleOkDto without contentTransmitted', () => {
+    expect(isContextBundleOkDto(okBundle)).toBe(true);
+  });
+
+  it('rejects contentTransmitted on ok and blocked payloads', () => {
+    expect(
+      isContextBundleOkDto({ ...okBundle, contentTransmitted: false }),
+    ).toBe(false);
+    expect(
+      isContextBundleBlockedDto({
+        status: 'blocked',
+        projectId: okBundle.projectId,
+        stage: 'planning',
+        code: 'unsafe_context_bundle',
+        message: 'unsafe',
+        candidatePathCount: 1,
+        findingCount: 0,
+        unscannableCount: 1,
+        contentTransmitted: true,
+      }),
+    ).toBe(false);
+  });
+
+  it('rejects removed bundle-only blocked codes', () => {
+    for (const code of [
+      'context_bundle_limit_exceeded',
+      'context_bundle_timeout',
+      'context_bundle_entry_unreadable',
+    ]) {
+      expect(isContextBundleBlockedCode(code)).toBe(false);
+      expect(
+        isContextBundleBlockedDto({
+          status: 'blocked',
+          projectId: okBundle.projectId,
+          stage: 'planning',
+          code,
+          message: 'nope',
+        }),
+      ).toBe(false);
+    }
+  });
+
+  it('accepts SecretScanBlockedCode members as ContextBundleBlockedCode', () => {
+    expect(isContextBundleBlockedCode('unsafe_context_bundle')).toBe(true);
+    expect(
+      isContextBundleBlockedDto({
+        status: 'blocked',
+        projectId: okBundle.projectId,
+        stage: 'planning',
+        code: 'secret_scan_timeout',
+        message: 'timeout',
+      }),
+    ).toBe(true);
+  });
+
+  it('requires unsafe counts on blocked unsafe_context_bundle', () => {
+    expect(
+      isContextBundleBlockedDto({
+        status: 'blocked',
+        projectId: okBundle.projectId,
+        stage: 'planning',
+        code: 'unsafe_context_bundle',
+        message: 'unsafe',
+        candidatePathCount: 1,
+        findingCount: 0,
+        unscannableCount: 1,
+      }),
+    ).toBe(true);
+    expect(
+      isContextBundleBlockedDto({
+        status: 'blocked',
+        projectId: okBundle.projectId,
+        stage: 'planning',
+        code: 'unsafe_context_bundle',
+        message: 'unsafe',
+      }),
+    ).toBe(false);
+  });
+
+  it('parses create request and latest query', () => {
+    expect(parseContextBundleRequest({ stage: 'planning' }).ok).toBe(true);
+    expect(parseContextBundleRequest({ stage: 'deploy' }).ok).toBe(false);
+    expect(
+      parseContextBundleLatestQuery({ stage: 'planning', limit: '1' }).ok,
+    ).toBe(true);
+    expect(
+      parseContextBundleLatestQuery({ stage: 'planning', limit: '2' }).ok,
+    ).toBe(false);
+    expect(parseContextBundleLatestQuery({ limit: '1' }).ok).toBe(false);
+  });
+
+  it('accepts latest list wrapper', () => {
+    expect(
+      isContextBundleLatestListDto({
+        status: 'ok',
+        items: [okBundle],
+      }),
+    ).toBe(true);
   });
 });

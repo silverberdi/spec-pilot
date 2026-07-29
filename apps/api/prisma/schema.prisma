@@ -30,8 +30,35 @@ model Project {
   configurationVersionId  String?   @map("configuration_version_id")
   configurationVersions   ProjectConfigurationVersion[] @relation("ProjectVersions")
   activeConfiguration     ProjectConfigurationVersion?  @relation("ActiveConfiguration", fields: [configurationVersionId], references: [id], onDelete: SetNull)
+  contextBundles          ContextBundle[]
 
   @@map("projects")
+}
+
+model ContextBundle {
+  id                     String   @id @default(uuid())
+  projectId              String   @map("project_id")
+  configurationVersionId String   @map("configuration_version_id")
+  stage                  String
+  sourceHash             String   @map("source_hash")
+  manifestSchemaVersion  Int      @map("manifest_schema_version")
+  selectionPolicyId      String   @map("selection_policy_id")
+  tokenEstimatorId       String   @map("token_estimator_id")
+  manifestHash           String   @map("manifest_hash")
+  entryCount             Int      @map("entry_count")
+  totalTokenEstimate     Int      @map("total_token_estimate")
+  candidatePathCount     Int      @map("candidate_path_count")
+  eligiblePathCount      Int      @map("eligible_path_count")
+  excludedPathCount      Int      @map("excluded_path_count")
+  findingCount           Int      @map("finding_count")
+  unscannableCount       Int      @map("unscannable_count")
+  entries                Json
+  exclusions             Json
+  createdAt              DateTime @default(now()) @map("created_at")
+  project                Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, stage, createdAt])
+  @@map("context_bundles")
 }
 
 model ProjectConfigurationVersion {

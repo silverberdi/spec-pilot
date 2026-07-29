@@ -1,0 +1,105 @@
+
+=== w02-s03 operator human validation ===
+API_BASE=http://localhost:3000
+HOST_REPOS_ROOT=/Users/silveriobernal/Documents/Code/Development
+REPORT=/tmp/sp-w02-s03-operator-validation-20260729T085142.txt
+Started: 2026-07-29T13:51:42Z
+
+=== Runtime freshness ===
+PASS: GET /health HTTP == 200
+PASS: context-bundles route is live (project_not_found)
+PASS: no content_transmitted column == 0
+INFO: projects count before disposable work=1
+
+=== Scenario 1: clean manifest creation ===
+PASS: register w02-s03-clean-fixture HTTP == 201
+clean project id=d3e558f9-da88-49a3-9947-ce614b3e4647
+PASS: scenario1 HTTP == 201
+PASS: scenario1 clean create contract + independent hash/token checks
+INFO: entryCount=2 totalTokenEstimate=20
+INFO: unicode codePoints=7 utf16Units=12 utf8Bytes=22 token=2
+PASS: scenario1 clean create (bundle1 id=4ba251eb-c797-4427-9a46-08150364bccb)
+
+=== Scenario 2: GET by id ===
+PASS: scenario2 HTTP == 200
+PASS: scenario2 GET equals persisted create material
+
+=== Scenario 3: latest lookup ===
+PASS: scenario3 HTTP == 200
+PASS: scenario3 latest returns most recent bundle
+
+=== Scenario 4: append-only duplicate material ===
+PASS: scenario4 HTTP == 201
+PASS: scenario4 append-only duplicate material
+PASS: scenario4 append-only (bundle2 id=ca7a2911-21c6-4e4a-b8ea-d2b896c1b3a2)
+PASS: fetch bundle1 after duplicate HTTP == 200
+PASS: fetch bundle2 HTTP == 200
+PASS: clean project bundle row count == 2
+PASS: duplicate material shares one manifest_hash == 1
+
+=== Scenario 5: empty manifest success ===
+PASS: register w02-s03-empty-fixture HTTP == 201
+empty project id=465d0712-b86a-4d92-89df-594861c2004e
+PASS: scenario5 HTTP == 201
+PASS: scenario5 empty manifest success
+
+=== Scenario 6: oversize plus clean ===
+PASS: register w02-s03-oversize-fixture HTTP == 201
+oversize project id=4e63c359-16be-47ff-a39c-e49aeaca8e26
+PASS: scenario6 HTTP == 201
+PASS: scenario6 oversize+clean
+
+=== Scenario 7: unsafe_context_bundle (oversize-only) ===
+PASS: register w02-s03-unsafe-fixture HTTP == 201
+unsafe project id=cd8585ff-64f9-47c5-9c8d-bd9023fb17ab
+PASS: scenario7 HTTP == 422
+PASS: scenario7 unsafe_context_bundle counts-only
+INFO: counts candidate=1 finding=0 unscannable=1
+PASS: unsafe project persisted zero bundles == 0
+
+=== Scenario 8: invalid latest query ===
+PASS: scenario8 HTTP == 422
+PASS: scenario8 invalid_context_bundle_query
+PASS: invalid query did not create rows == 2
+
+=== Scenario 9: persistence and immutability (read-only SQL) ===
+PASS: scenario9 persistence invariants
+INFO: projects count mid-run=5 (includes disposables)
+
+=== Summary before cleanup trap ===
+PASS_COUNT=23 (shell asserts; Python asserts logged above)
+FAIL_COUNT=0
+RESULT=PASS (scenarios complete; cleanup follows via trap)
+Sanitized report copied to clipboard via pbcopy
+Report path: /tmp/sp-w02-s03-operator-validation-20260729T085142.txt
+
+=== Cleanup (exact commands) ===
+docker compose -f /Users/silveriobernal/Documents/Code/Development/spec-pilot/compose.yaml exec -T postgres psql -U specpilot -d specpilot -v ON_ERROR_STOP=1 -c "DELETE FROM projects WHERE id = 'd3e558f9-da88-49a3-9947-ce614b3e4647';"
+docker compose -f /Users/silveriobernal/Documents/Code/Development/spec-pilot/compose.yaml exec -T postgres psql -U specpilot -d specpilot -v ON_ERROR_STOP=1 -c "DELETE FROM projects WHERE id = '465d0712-b86a-4d92-89df-594861c2004e';"
+docker compose -f /Users/silveriobernal/Documents/Code/Development/spec-pilot/compose.yaml exec -T postgres psql -U specpilot -d specpilot -v ON_ERROR_STOP=1 -c "DELETE FROM projects WHERE id = '4e63c359-16be-47ff-a39c-e49aeaca8e26';"
+docker compose -f /Users/silveriobernal/Documents/Code/Development/spec-pilot/compose.yaml exec -T postgres psql -U specpilot -d specpilot -v ON_ERROR_STOP=1 -c "DELETE FROM projects WHERE id = 'cd8585ff-64f9-47c5-9c8d-bd9023fb17ab';"
+rm -rf -- /Users/silveriobernal/Documents/Code/Development/sp-w02-s03-clean-20260729T085142-5119
+rm -rf -- /Users/silveriobernal/Documents/Code/Development/sp-w02-s03-empty-20260729T085142-5119
+rm -rf -- /Users/silveriobernal/Documents/Code/Development/sp-w02-s03-oversize-20260729T085142-5119
+rm -rf -- /Users/silveriobernal/Documents/Code/Development/sp-w02-s03-unsafe-20260729T085142-5119
+Executed DB delete for project id=d3e558f9-da88-49a3-9947-ce614b3e4647
+Executed DB delete for project id=465d0712-b86a-4d92-89df-594861c2004e
+Executed DB delete for project id=4e63c359-16be-47ff-a39c-e49aeaca8e26
+Executed DB delete for project id=cd8585ff-64f9-47c5-9c8d-bd9023fb17ab
+Executed rm -rf for disposable directory /Users/silveriobernal/Documents/Code/Development/sp-w02-s03-clean-20260729T085142-5119
+Executed rm -rf for disposable directory /Users/silveriobernal/Documents/Code/Development/sp-w02-s03-empty-20260729T085142-5119
+Executed rm -rf for disposable directory /Users/silveriobernal/Documents/Code/Development/sp-w02-s03-oversize-20260729T085142-5119
+Executed rm -rf for disposable directory /Users/silveriobernal/Documents/Code/Development/sp-w02-s03-unsafe-20260729T085142-5119
+PASS: disposable project GET returns 404 after cleanup (d3e558f9-da88-49a3-9947-ce614b3e4647)
+PASS: no context_bundles remain for project d3e558f9-da88-49a3-9947-ce614b3e4647
+PASS: disposable project GET returns 404 after cleanup (465d0712-b86a-4d92-89df-594861c2004e)
+PASS: no context_bundles remain for project 465d0712-b86a-4d92-89df-594861c2004e
+PASS: disposable project GET returns 404 after cleanup (4e63c359-16be-47ff-a39c-e49aeaca8e26)
+PASS: no context_bundles remain for project 4e63c359-16be-47ff-a39c-e49aeaca8e26
+PASS: disposable project GET returns 404 after cleanup (cd8585ff-64f9-47c5-9c8d-bd9023fb17ab)
+PASS: no context_bundles remain for project cd8585ff-64f9-47c5-9c8d-bd9023fb17ab
+PASS: disposable directory no longer exists (/Users/silveriobernal/Documents/Code/Development/sp-w02-s03-clean-20260729T085142-5119)
+PASS: disposable directory no longer exists (/Users/silveriobernal/Documents/Code/Development/sp-w02-s03-empty-20260729T085142-5119)
+PASS: disposable directory no longer exists (/Users/silveriobernal/Documents/Code/Development/sp-w02-s03-oversize-20260729T085142-5119)
+PASS: disposable directory no longer exists (/Users/silveriobernal/Documents/Code/Development/sp-w02-s03-unsafe-20260729T085142-5119)
+Cleanup finished (no volume reset; axioma-db-dev untouched).
