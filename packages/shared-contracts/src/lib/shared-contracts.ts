@@ -214,6 +214,21 @@ export const PROJECT_ERROR_CODES = [
   'deepseek_model_mismatch',
   'invalid_deepseek_probe_request',
   'deepseek_gateway_failed',
+  'invalid_review_run_request',
+  'review_run_not_found',
+  'review_run_in_progress',
+  'review_context_bundle_required',
+  'review_context_bundle_stage_mismatch',
+  'review_disclosure_approval_required',
+  'review_disclosure_policy_mismatch',
+  'review_context_integrity_mismatch',
+  'review_context_limit_exceeded',
+  'review_model_unresolved',
+  'review_run_invalid_transition',
+  'review_run_interrupted',
+  'review_schema_invalid',
+  'review_verdict_invalid',
+  'review_run_failed',
   'internal_error',
 ] as const;
 
@@ -1730,4 +1745,320 @@ export function parseDeepseekProbeRequest(
     return { ok: false, code: 'invalid_deepseek_probe_request' };
   }
   return { ok: true, stage: record['stage'] };
+}
+
+/**
+ * w03-s02: Review-run orchestration contracts.
+ */
+export const REVIEW_RUN_STATES = [
+  'requested',
+  'preparing_context',
+  'budget_check',
+  'running',
+  'validating_response',
+  'completed',
+  'blocked',
+  'failed',
+  'cancelled',
+] as const;
+
+export type ReviewRunState = (typeof REVIEW_RUN_STATES)[number];
+
+export const REVIEW_RUN_IN_FLIGHT_STATES = [
+  'requested',
+  'preparing_context',
+  'budget_check',
+  'running',
+  'validating_response',
+] as const;
+
+export type ReviewRunInFlightState = (typeof REVIEW_RUN_IN_FLIGHT_STATES)[number];
+
+export const REVIEW_RUN_ORCHESTRATION_SCHEMA_ID =
+  'review-run-orchestration-v1' as const;
+export const REVIEW_RUN_PROMPT_TEMPLATE_ID =
+  'review-run-orchestration-v1' as const;
+
+export const REVIEW_RUN_TRANSMISSION_OUTCOMES = [
+  'completed',
+  'provider_failed',
+  'response_invalid',
+] as const;
+
+export type ReviewRunTransmissionOutcome =
+  (typeof REVIEW_RUN_TRANSMISSION_OUTCOMES)[number];
+
+export const REVIEW_RUN_VERDICTS_BY_STAGE = {
+  new: ['ready_to_create', 'blocked', 'changes_required'],
+  planning: ['apply_ready', 'changes_required', 'blocked'],
+  applied: ['ready_for_verify', 'changes_required', 'blocked'],
+  verify: ['ready_for_sync', 'changes_required', 'blocked'],
+} as const satisfies Record<ReviewStage, readonly string[]>;
+
+export type ReviewRunVerdictForStage<S extends ReviewStage> =
+  (typeof REVIEW_RUN_VERDICTS_BY_STAGE)[S][number];
+
+export const CHANGE_ID_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+export const CHANGE_ID_MAX_LENGTH = 120;
+
+export type ReviewRunCreateRequest = {
+  stage: ReviewStage;
+  contextBundleId: string;
+  changeId?: string;
+};
+
+export type ReviewRunTransitionDto = {
+  id: string;
+  fromState: ReviewRunState | null;
+  toState: ReviewRunState;
+  code: string | null;
+  createdAt: string;
+};
+
+export type ReviewRunTransmissionSafeDto = {
+  id: string;
+  outcome: ReviewRunTransmissionOutcome;
+  promptTemplateId: string;
+  schemaId: string;
+  requestedModelAlias: string;
+  resolvedModelId: string | null;
+  attemptCount: number | null;
+  latencyMs: number | null;
+  promptTokens: number | null;
+  completionTokens: number | null;
+  totalTokens: number | null;
+  providerRequestId: string | null;
+  terminalCode: string | null;
+  createdAt: string;
+};
+
+export type ReviewRunOkDto = {
+  status: 'ok';
+  id: string;
+  projectId: string;
+  stage: ReviewStage;
+  changeId: string | null;
+  state: ReviewRunState;
+  contextBundleId: string | null;
+  manifestHash: string | null;
+  disclosureApprovalId: string | null;
+  previewSessionId: string | null;
+  previewIntegrityHash: string | null;
+  previewPolicyId: string | null;
+  approvalPolicyId: string | null;
+  budgetCheckStatus: string | null;
+  promptTemplateId: string | null;
+  modelAlias: string | null;
+  resolvedModelId: string | null;
+  schemaId: string | null;
+  verdict: string | null;
+  rationale: string | null;
+  attemptCount: number | null;
+  latencyMs: number | null;
+  promptTokens: number | null;
+  completionTokens: number | null;
+  totalTokens: number | null;
+  blockedCode: string | null;
+  failedCode: string | null;
+  createdAt: string;
+  updatedAt: string;
+  completedAt: string | null;
+  blockedAt: string | null;
+  failedAt: string | null;
+  transitions: ReviewRunTransitionDto[];
+  transmission?: ReviewRunTransmissionSafeDto | null;
+  hasTransmission?: boolean;
+  transmissionOutcome?: ReviewRunTransmissionOutcome | null;
+  transitionCount?: number;
+};
+
+export type ReviewRunListItemDto = Omit<ReviewRunOkDto, 'transitions' | 'transmission'> & {
+  transitionCount: number;
+  hasTransmission: boolean;
+  transmissionOutcome: ReviewRunTransmissionOutcome | null;
+};
+
+export type ReviewRunListDto = {
+  status: 'ok';
+  items: ReviewRunListItemDto[];
+};
+
+export type ReviewRunOrchestrationParsedDto = {
+  ok: true;
+  schema: typeof REVIEW_RUN_ORCHESTRATION_SCHEMA_ID;
+  stage: ReviewStage;
+  verdict: string;
+  rationale: string;
+};
+
+export function isReviewRunState(value: unknown): value is ReviewRunState {
+  return (
+    typeof value === 'string' &&
+    (REVIEW_RUN_STATES as readonly string[]).includes(value)
+  );
+}
+
+export function isStageValidVerdict(
+  stage: ReviewStage,
+  verdict: string,
+): boolean {
+  return (REVIEW_RUN_VERDICTS_BY_STAGE[stage] as readonly string[]).includes(
+    verdict,
+  );
+}
+
+export function isReviewRunOrchestrationParsedDto(
+  value: unknown,
+): value is ReviewRunOrchestrationParsedDto {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (record['ok'] !== true) {
+    return false;
+  }
+  if (record['schema'] !== REVIEW_RUN_ORCHESTRATION_SCHEMA_ID) {
+    return false;
+  }
+  if (!isReviewStage(record['stage'])) {
+    return false;
+  }
+  if (typeof record['verdict'] !== 'string' || record['verdict'].length === 0) {
+    return false;
+  }
+  if (!isStageValidVerdict(record['stage'], record['verdict'])) {
+    return false;
+  }
+  if (typeof record['rationale'] !== 'string') {
+    return false;
+  }
+  const rationale = record['rationale'];
+  return rationale.length > 0 && rationale.length <= 500;
+}
+
+export function parseReviewRunCreateRequest(
+  value: unknown,
+):
+  | { ok: true; stage: ReviewStage; contextBundleId: string; changeId?: string }
+  | { ok: false; code: 'invalid_review_run_request' } {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return { ok: false, code: 'invalid_review_run_request' };
+  }
+  const record = value as Record<string, unknown>;
+  const keys = Object.keys(record);
+  for (const key of keys) {
+    if (key !== 'stage' && key !== 'contextBundleId' && key !== 'changeId') {
+      return { ok: false, code: 'invalid_review_run_request' };
+    }
+  }
+  if (!isReviewStage(record['stage'])) {
+    return { ok: false, code: 'invalid_review_run_request' };
+  }
+  if (
+    typeof record['contextBundleId'] !== 'string' ||
+    record['contextBundleId'].trim().length === 0
+  ) {
+    return { ok: false, code: 'invalid_review_run_request' };
+  }
+  const stage = record['stage'];
+  const contextBundleId = record['contextBundleId'].trim();
+  const hasChangeId = 'changeId' in record && record['changeId'] !== undefined;
+
+  if (stage === 'new') {
+    if (hasChangeId) {
+      return { ok: false, code: 'invalid_review_run_request' };
+    }
+    return { ok: true, stage, contextBundleId };
+  }
+
+  if (!hasChangeId || typeof record['changeId'] !== 'string') {
+    return { ok: false, code: 'invalid_review_run_request' };
+  }
+  const changeId = record['changeId'];
+  if (
+    changeId.length === 0 ||
+    changeId.length > CHANGE_ID_MAX_LENGTH ||
+    !CHANGE_ID_REGEX.test(changeId)
+  ) {
+    return { ok: false, code: 'invalid_review_run_request' };
+  }
+  return { ok: true, stage, contextBundleId, changeId };
+}
+
+function isIsoDateString(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0 && !Number.isNaN(Date.parse(value));
+}
+
+export function isReviewRunTransitionDto(
+  value: unknown,
+): value is ReviewRunTransitionDto {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if (typeof record['id'] !== 'string' || record['id'].length === 0) {
+    return false;
+  }
+  if (record['fromState'] !== null && !isReviewRunState(record['fromState'])) {
+    return false;
+  }
+  if (!isReviewRunState(record['toState'])) {
+    return false;
+  }
+  if (record['code'] !== null && typeof record['code'] !== 'string') {
+    return false;
+  }
+  return isIsoDateString(record['createdAt']);
+}
+
+export function isReviewRunTransmissionSafeDto(
+  value: unknown,
+): value is ReviewRunTransmissionSafeDto {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if ('excerpt' in record || 'prompt' in record || 'rawResponse' in record) {
+    return false;
+  }
+  if (typeof record['id'] !== 'string' || record['id'].length === 0) {
+    return false;
+  }
+  if (
+    !(REVIEW_RUN_TRANSMISSION_OUTCOMES as readonly string[]).includes(
+      record['outcome'] as string,
+    )
+  ) {
+    return false;
+  }
+  return isIsoDateString(record['createdAt']);
+}
+
+export function isReviewRunOkDto(value: unknown): value is ReviewRunOkDto {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+  const record = value as Record<string, unknown>;
+  if ('excerpt' in record || 'prompt' in record || 'rawResponse' in record) {
+    return false;
+  }
+  if (record['status'] !== 'ok') {
+    return false;
+  }
+  if (typeof record['id'] !== 'string' || record['id'].length === 0) {
+    return false;
+  }
+  if (typeof record['projectId'] !== 'string' || record['projectId'].length === 0) {
+    return false;
+  }
+  if (!isReviewStage(record['stage'])) {
+    return false;
+  }
+  if (!isReviewRunState(record['state'])) {
+    return false;
+  }
+  if (!Array.isArray(record['transitions'])) {
+    return false;
+  }
+  return record['transitions'].every(isReviewRunTransitionDto);
 }

@@ -2,7 +2,11 @@ import {
   buildProbeOutboundBody,
   validateProviderEnvelope,
 } from './deepseek-envelope';
-import { resolveDeepseekModelAlias, modelFromProbeStage } from './deepseek-model-catalog';
+import {
+  resolveDeepseekModelAlias,
+  modelFromProbeStage,
+  modelFromReviewStage,
+} from './deepseek-model-catalog';
 import { DeepseekHttpAdapter } from './deepseek-http.adapter';
 import { DEEPSEEK_GATEWAY_PROBE_SCHEMA_ID } from '@specpilot/shared-contracts';
 import { DEEPSEEK_MAX_TOKENS, DEEPSEEK_PRODUCTION_BASE_URL } from './deepseek.constants';
@@ -35,6 +39,22 @@ describe('deepseek-model-catalog', () => {
     expect(modelFromProbeStage(review, 'verify')?.resolvedModelId).toBe(
       'deepseek-v4-pro',
     );
+  });
+
+  it('maps review stage new to discovery model key', () => {
+    const review = {
+      provider: 'deepseek',
+      models: {
+        discovery: 'deepseek-flash',
+        planning: 'deepseek-pro',
+        applied: 'deepseek-pro',
+        verify: 'deepseek-pro',
+      },
+    };
+    expect(modelFromReviewStage(review, 'new')?.resolvedModelId).toBe(
+      'deepseek-v4-flash',
+    );
+    expect(modelFromReviewStage(review, 'planning')?.alias).toBe('deepseek-pro');
   });
 });
 
@@ -198,11 +218,14 @@ describe('deepseek-http.adapter retries', () => {
 
     const result = await adapter.completeStructured({
       resolvedModelId: 'deepseek-v4-flash',
+      requestedModelAlias: 'deepseek-flash',
       apiKey: 'test-key',
+      profile: 'probe',
     });
-    expect(result.ok).toBe(true);
-    if (result.ok) {
+    expect(result.status).toBe('ok');
+    if (result.status === 'ok') {
       expect(result.attemptCount).toBe(3);
+      expect(result.invocationBegan).toBe(true);
     }
     expect(sleeps).toEqual([500, 1000]);
     expect(DEEPSEEK_PRODUCTION_BASE_URL).toBe('https://api.deepseek.com');
@@ -225,9 +248,15 @@ describe('deepseek-http.adapter retries', () => {
     });
     const result = await adapter.completeStructured({
       resolvedModelId: 'deepseek-v4-flash',
+      requestedModelAlias: 'deepseek-flash',
       apiKey: 'test-key',
+      profile: 'probe',
     });
-    expect(result.ok).toBe(false);
+    expect(result.status).toBe('failed');
+    if (result.status === 'failed') {
+      expect(result.invocationBegan).toBe(true);
+      expect(result.attemptCount).toBe(1);
+    }
     expect(calls).toBe(1);
   });
 
@@ -242,13 +271,39 @@ describe('deepseek-http.adapter retries', () => {
     });
     const result = await adapter.completeStructured({
       resolvedModelId: 'deepseek-v4-flash',
+      requestedModelAlias: 'deepseek-flash',
       apiKey: 'test-key',
+      profile: 'probe',
     });
     expect(result).toMatchObject({
-      ok: false,
+      status: 'failed',
+      invocationBegan: true,
       code: 'deepseek_insufficient_balance',
       attemptCount: 1,
     });
     expect(calls).toBe(1);
+  });
+
+  it('returns invocationBegan false and attemptCount 0 when key missing', async () => {
+    let calls = 0;
+    const adapter = new DeepseekHttpAdapter({
+      fetchImpl: (async () => {
+        calls += 1;
+        return new Response('x', { status: 200 });
+      }) as unknown as typeof fetch,
+    });
+    const result = await adapter.completeStructured({
+      resolvedModelId: 'deepseek-v4-flash',
+      requestedModelAlias: 'deepseek-flash',
+      apiKey: '  ',
+      profile: 'probe',
+    });
+    expect(result).toMatchObject({
+      status: 'failed',
+      invocationBegan: false,
+      code: 'deepseek_not_configured',
+      attemptCount: 0,
+    });
+    expect(calls).toBe(0);
   });
 });

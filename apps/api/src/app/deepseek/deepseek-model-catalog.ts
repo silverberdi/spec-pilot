@@ -1,6 +1,7 @@
 import type {
   DeepseekProbeStage,
   DeepseekResolvedModelId,
+  ReviewStage,
 } from '@specpilot/shared-contracts';
 
 const ALIAS_TO_RESOLVED: Record<string, DeepseekResolvedModelId> = {
@@ -23,6 +24,22 @@ export function modelFromProbeStage(
   review: Record<string, unknown>,
   stage: DeepseekProbeStage,
 ): { alias: string; resolvedModelId: DeepseekResolvedModelId } | null {
+  return modelFromConfigStage(review, stage);
+}
+
+/** ReviewStage `new` resolves via `review.models.discovery`. */
+export function modelFromReviewStage(
+  review: Record<string, unknown>,
+  stage: ReviewStage,
+): { alias: string; resolvedModelId: DeepseekResolvedModelId } | null {
+  const modelKey = stage === 'new' ? 'discovery' : stage;
+  return modelFromConfigStage(review, modelKey);
+}
+
+function modelFromConfigStage(
+  review: Record<string, unknown>,
+  stageKey: string,
+): { alias: string; resolvedModelId: DeepseekResolvedModelId } | null {
   if (review['provider'] !== 'deepseek') {
     return null;
   }
@@ -30,7 +47,7 @@ export function modelFromProbeStage(
   if (models === null || typeof models !== 'object' || Array.isArray(models)) {
     return null;
   }
-  const alias = (models as Record<string, unknown>)[stage];
+  const alias = (models as Record<string, unknown>)[stageKey];
   if (typeof alias !== 'string' || alias.length === 0) {
     return null;
   }
@@ -48,7 +65,6 @@ export function isResolvedModelCompatible(
   if (responseModel === resolvedModelId) {
     return true;
   }
-  // Accept exact alias forms that map to the same resolved id.
   const mapped = resolveDeepseekModelAlias(responseModel);
   return mapped === resolvedModelId;
 }

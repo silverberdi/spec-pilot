@@ -145,6 +145,35 @@ export const OPERATOR_MESSAGES: Record<ProjectErrorCode, string> = {
     'La solicitud de sonda DeepSeek no es válida; use solo stage discovery|planning|applied|verify.',
   deepseek_gateway_failed:
     'Ocurrió un error interno en la pasarela DeepSeek.',
+  invalid_review_run_request:
+    'La solicitud de revisión no es válida; revise stage, contextBundleId y changeId.',
+  review_run_not_found: 'No se encontró la ejecución de revisión solicitada.',
+  review_run_in_progress:
+    'Ya hay una ejecución de revisión en curso para este proyecto.',
+  review_context_bundle_required:
+    'Se requiere un manifiesto de contexto explícito y válido para iniciar la revisión.',
+  review_context_bundle_stage_mismatch:
+    'La etapa del manifiesto de contexto no coincide con la etapa de la revisión.',
+  review_disclosure_approval_required:
+    'Se requiere una aprobación de divulgación vigente que cubra el manifiesto de contexto.',
+  review_disclosure_policy_mismatch:
+    'La política de divulgación cambió; se requiere una nueva vista previa y aprobación.',
+  review_context_integrity_mismatch:
+    'El contenido en disco ya no coincide con la aprobación; no se invoca al proveedor.',
+  review_context_limit_exceeded:
+    'Se superó el límite de bytes o de puntos de código al reconstruir el contexto aprobado.',
+  review_model_unresolved:
+    'No se pudo resolver el modelo DeepSeek para la etapa de revisión solicitada.',
+  review_run_invalid_transition:
+    'La transición de estado de la ejecución de revisión no es válida.',
+  review_run_interrupted:
+    'La ejecución de revisión anterior quedó interrumpida por tiempo de espera.',
+  review_schema_invalid:
+    'La respuesta del proveedor no cumple el esquema local de orquestación de revisión.',
+  review_verdict_invalid:
+    'El veredicto devuelto no es válido para la etapa de revisión.',
+  review_run_failed:
+    'Ocurrió un error interno al orquestar la ejecución de revisión.',
   internal_error: 'Ocurrió un error interno al registrar el proyecto.',
 };
 
@@ -166,7 +195,12 @@ export function blocked422(code: ProjectErrorCode): ProjectHttpError {
   return new ProjectHttpError(HttpStatus.UNPROCESSABLE_ENTITY, code);
 }
 
-export function conflict409(code: 'duplicate_repository_path' | 'duplicate_project_slug'): ProjectHttpError {
+export function conflict409(
+  code:
+    | 'duplicate_repository_path'
+    | 'duplicate_project_slug'
+    | 'review_run_in_progress',
+): ProjectHttpError {
   return new ProjectHttpError(HttpStatus.CONFLICT, code);
 }
 
@@ -175,7 +209,8 @@ export function notFound404(
     | 'project_not_found'
     | 'configuration_not_found'
     | 'discovery_not_found'
-    | 'context_bundle_not_found' = 'project_not_found',
+    | 'context_bundle_not_found'
+    | 'review_run_not_found' = 'project_not_found',
 ): ProjectHttpError {
   return new ProjectHttpError(HttpStatus.NOT_FOUND, code);
 }
@@ -190,7 +225,8 @@ export function internal500(
     | 'context_bundle_failed'
     | 'disclosure_preview_failed'
     | 'disclosure_approval_failed'
-    | 'deepseek_gateway_failed' = 'internal_error',
+    | 'deepseek_gateway_failed'
+    | 'review_run_failed' = 'internal_error',
 ): ProjectHttpError {
   return new ProjectHttpError(HttpStatus.INTERNAL_SERVER_ERROR, code);
 }

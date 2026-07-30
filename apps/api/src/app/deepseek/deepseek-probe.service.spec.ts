@@ -37,7 +37,10 @@ describe('DeepseekProbeService', () => {
   it('returns ok DTO from fake gateway without reading repository paths', async () => {
     process.env['DEEPSEEK_API_KEY'] = 'unit-test-key';
     const completeStructured = jest.fn(async () => ({
-      ok: true as const,
+      status: 'ok' as const,
+      invocationBegan: true as const,
+      requestedModelAlias: 'deepseek-pro',
+      resolvedModelId: 'deepseek-v4-pro' as const,
       parsed: {
         ok: true as const,
         probe: DEEPSEEK_GATEWAY_PROBE_SCHEMA_ID,

@@ -1,7 +1,8 @@
 // SpecPilot persistence: AppMetadata probe + Project registration + ProjectConfigurationVersion (w01-s02)
 // + latest discovery snapshot on Project (w01-s03) + ContextBundle manifest (w02-s03)
-// + disclosure preview session / approval audit aggregates (w02-s04).
-// Reviews, findings, budgets, prompts, auth, and users remain later-slice scope.
+// + disclosure preview session / approval audit aggregates (w02-s04)
+// + ReviewRun / ReviewRunTransition / ContextDisclosureTransmission (w03-s02).
+// Budgets, findings, prompt-history, auth, and users remain later-slice scope.
 generator client {
   provider = "prisma-client-js"
 }
@@ -34,6 +35,8 @@ model Project {
   contextBundles                   ContextBundle[]
   contextDisclosurePreviewSessions ContextDisclosurePreviewSession[]
   contextDisclosureApprovals       ContextDisclosureApproval[]
+  reviewRuns                       ReviewRun[]
+  contextDisclosureTransmissions   ContextDisclosureTransmission[]
 
   @@map("projects")
 }
@@ -61,6 +64,8 @@ model ContextBundle {
   project                   Project                           @relation(fields: [projectId], references: [id], onDelete: Cascade)
   disclosurePreviewSessions ContextDisclosurePreviewSession[]
   disclosureApprovals       ContextDisclosureApproval[]
+  reviewRuns                ReviewRun[]
+  transmissions             ContextDisclosureTransmission[]
 
   @@index([projectId, stage, createdAt])
   @@map("context_bundles")
@@ -88,6 +93,7 @@ model ContextDisclosurePreviewSession {
   project                 Project                     @relation(fields: [projectId], references: [id], onDelete: Cascade)
   contextBundle           ContextBundle               @relation(fields: [contextBundleId], references: [id], onDelete: Cascade)
   approvals               ContextDisclosureApproval[]
+  transmissions           ContextDisclosureTransmission[]
 
   @@index([projectId, contextBundleId, createdAt])
   @@map("context_disclosure_preview_sessions")
@@ -114,14 +120,107 @@ model ContextDisclosureApproval {
   decision               String
   contentTransmitted     Boolean                         @map("content_transmitted")
   createdAt              DateTime                        @default(now()) @map("created_at")
-  project                Project                         @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  contextBundle          ContextBundle                   @relation(fields: [contextBundleId], references: [id], onDelete: Cascade)
-  previewSession         ContextDisclosurePreviewSession @relation(fields: [previewSessionId], references: [id], onDelete: Restrict)
+  project                Project                           @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  contextBundle          ContextBundle                     @relation(fields: [contextBundleId], references: [id], onDelete: Cascade)
+  previewSession         ContextDisclosurePreviewSession   @relation(fields: [previewSessionId], references: [id], onDelete: Restrict)
+  reviewRuns             ReviewRun[]
+  transmissions          ContextDisclosureTransmission[]
 
   @@index([projectId, stage, createdAt])
   @@index([contextBundleId])
   @@index([previewSessionId])
   @@map("context_disclosure_approvals")
+}
+
+model ReviewRun {
+  id                     String                        @id @default(uuid())
+  projectId              String                        @map("project_id")
+  configurationVersionId String                        @map("configuration_version_id")
+  stage                  String
+  changeId               String?                       @map("change_id")
+  state                  String
+  contextBundleId        String?                       @map("context_bundle_id")
+  manifestHash           String?                       @map("manifest_hash")
+  disclosureApprovalId   String?                       @map("disclosure_approval_id")
+  previewSessionId       String?                       @map("preview_session_id")
+  previewIntegrityHash   String?                       @map("preview_integrity_hash")
+  previewPolicyId        String?                       @map("preview_policy_id")
+  approvalPolicyId       String?                       @map("approval_policy_id")
+  budgetCheckStatus      String?                       @map("budget_check_status")
+  promptTemplateId       String?                       @map("prompt_template_id")
+  modelAlias             String?                       @map("model_alias")
+  resolvedModelId        String?                       @map("resolved_model_id")
+  schemaId               String?                       @map("schema_id")
+  verdict                String?
+  rationale              String?
+  attemptCount           Int?                          @map("attempt_count")
+  latencyMs              Int?                          @map("latency_ms")
+  promptTokens           Int?                          @map("prompt_tokens")
+  completionTokens       Int?                          @map("completion_tokens")
+  totalTokens            Int?                          @map("total_tokens")
+  blockedCode            String?                       @map("blocked_code")
+  failedCode             String?                       @map("failed_code")
+  createdAt              DateTime                      @default(now()) @map("created_at")
+  updatedAt              DateTime                      @updatedAt @map("updated_at")
+  completedAt            DateTime?                     @map("completed_at")
+  blockedAt              DateTime?                     @map("blocked_at")
+  failedAt               DateTime?                     @map("failed_at")
+  project                Project                       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  contextBundle          ContextBundle?                @relation(fields: [contextBundleId], references: [id], onDelete: Restrict)
+  disclosureApproval     ContextDisclosureApproval?    @relation(fields: [disclosureApprovalId], references: [id], onDelete: Restrict)
+  transitions            ReviewRunTransition[]
+  transmission           ContextDisclosureTransmission?
+
+  @@index([projectId, createdAt])
+  @@index([projectId, stage, createdAt])
+  @@map("review_runs")
+}
+
+model ReviewRunTransition {
+  id          String    @id @default(uuid())
+  reviewRunId String    @map("review_run_id")
+  fromState   String?   @map("from_state")
+  toState     String    @map("to_state")
+  code        String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+  reviewRun   ReviewRun @relation(fields: [reviewRunId], references: [id], onDelete: Cascade)
+
+  @@index([reviewRunId, createdAt])
+  @@map("review_run_transitions")
+}
+
+model ContextDisclosureTransmission {
+  id                   String                          @id @default(uuid())
+  projectId            String                          @map("project_id")
+  reviewRunId          String                          @unique @map("review_run_id")
+  contextBundleId      String                          @map("context_bundle_id")
+  disclosureApprovalId String                          @map("disclosure_approval_id")
+  previewSessionId     String                          @map("preview_session_id")
+  manifestHash         String                          @map("manifest_hash")
+  previewIntegrityHash String                          @map("preview_integrity_hash")
+  previewPolicyId      String                          @map("preview_policy_id")
+  approvalPolicyId     String                          @map("approval_policy_id")
+  promptTemplateId     String                          @map("prompt_template_id")
+  schemaId             String                          @map("schema_id")
+  requestedModelAlias  String                          @map("requested_model_alias")
+  resolvedModelId      String?                         @map("resolved_model_id")
+  outcome              String
+  attemptCount         Int?                            @map("attempt_count")
+  latencyMs            Int?                            @map("latency_ms")
+  promptTokens         Int?                            @map("prompt_tokens")
+  completionTokens     Int?                            @map("completion_tokens")
+  totalTokens          Int?                            @map("total_tokens")
+  providerRequestId    String?                         @map("provider_request_id")
+  terminalCode         String?                         @map("terminal_code")
+  createdAt            DateTime                        @default(now()) @map("created_at")
+  project              Project                         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  reviewRun            ReviewRun                       @relation(fields: [reviewRunId], references: [id], onDelete: Cascade)
+  contextBundle        ContextBundle                   @relation(fields: [contextBundleId], references: [id], onDelete: Restrict)
+  disclosureApproval   ContextDisclosureApproval       @relation(fields: [disclosureApprovalId], references: [id], onDelete: Restrict)
+  previewSession       ContextDisclosurePreviewSession @relation(fields: [previewSessionId], references: [id], onDelete: Restrict)
+
+  @@index([projectId, createdAt])
+  @@map("context_disclosure_transmissions")
 }
 
 model ProjectConfigurationVersion {

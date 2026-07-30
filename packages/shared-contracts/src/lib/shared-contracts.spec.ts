@@ -3,6 +3,7 @@ import {
   createHealthResponse,
   createReadyResponse,
   DEEPSEEK_GATEWAY_PROBE_SCHEMA_ID,
+  REVIEW_RUN_ORCHESTRATION_SCHEMA_ID,
   DISPLAY_NAME_MAX_LENGTH,
   isContextDisclosureApprovalLatestListDto,
   isContextDisclosureApprovalOkDto,
@@ -23,6 +24,8 @@ import {
   isProjectErrorResponse,
   isReadyResponse,
   isRegisterProjectResponse,
+  isReviewRunOkDto,
+  isReviewRunOrchestrationParsedDto,
   isSecretScanBlockedCode,
   isSecretScanBlockedDto,
   isSecretScanOkDto,
@@ -32,6 +35,7 @@ import {
   parseDeepseekProbeRequest,
   parseDisclosureApprovalLatestQuery,
   parseDisclosureApprovalRequest,
+  parseReviewRunCreateRequest,
   parseSecretScanRequest,
   PREVIEW_POLICY_ID,
   validateRegisterProjectRequest,
@@ -859,5 +863,129 @@ describe('deepseek probe contracts', () => {
   it('does not treat DeepSeek codes as context-bundle blocked members', () => {
     expect(isContextBundleBlockedCode('deepseek_not_configured')).toBe(false);
     expect(isSecretScanBlockedCode('deepseek_schema_invalid')).toBe(false);
+  });
+});
+
+describe('review-run orchestration contracts', () => {
+  it('parses new without changeId and rejects new with changeId', () => {
+    expect(
+      parseReviewRunCreateRequest({
+        stage: 'new',
+        contextBundleId: 'bundle-1',
+      }),
+    ).toEqual({ ok: true, stage: 'new', contextBundleId: 'bundle-1' });
+    expect(
+      parseReviewRunCreateRequest({
+        stage: 'new',
+        contextBundleId: 'bundle-1',
+        changeId: 'chg-x',
+      }),
+    ).toEqual({ ok: false, code: 'invalid_review_run_request' });
+  });
+
+  it('requires valid kebab changeId for planning/applied/verify', () => {
+    expect(
+      parseReviewRunCreateRequest({
+        stage: 'planning',
+        contextBundleId: 'bundle-1',
+        changeId: 'chg-w03-s02-review-run-orchestration',
+      }),
+    ).toEqual({
+      ok: true,
+      stage: 'planning',
+      contextBundleId: 'bundle-1',
+      changeId: 'chg-w03-s02-review-run-orchestration',
+    });
+    expect(
+      parseReviewRunCreateRequest({
+        stage: 'planning',
+        contextBundleId: 'bundle-1',
+      }),
+    ).toEqual({ ok: false, code: 'invalid_review_run_request' });
+    expect(
+      parseReviewRunCreateRequest({
+        stage: 'applied',
+        contextBundleId: 'bundle-1',
+        changeId: 'Bad_Id',
+      }),
+    ).toEqual({ ok: false, code: 'invalid_review_run_request' });
+  });
+
+  it('rejects unknown fields and empty contextBundleId', () => {
+    expect(
+      parseReviewRunCreateRequest({
+        stage: 'new',
+        contextBundleId: 'bundle-1',
+        extra: true,
+      }),
+    ).toEqual({ ok: false, code: 'invalid_review_run_request' });
+    expect(
+      parseReviewRunCreateRequest({
+        stage: 'new',
+        contextBundleId: '  ',
+      }),
+    ).toEqual({ ok: false, code: 'invalid_review_run_request' });
+  });
+
+  it('rejects review-run ok DTO that includes excerpt fields', () => {
+    expect(
+      isReviewRunOkDto({
+        status: 'ok',
+        id: 'run-1',
+        projectId: 'p1',
+        stage: 'new',
+        changeId: null,
+        state: 'completed',
+        contextBundleId: 'b1',
+        manifestHash: null,
+        disclosureApprovalId: null,
+        previewSessionId: null,
+        previewIntegrityHash: null,
+        previewPolicyId: null,
+        approvalPolicyId: null,
+        budgetCheckStatus: 'not_enforced',
+        promptTemplateId: null,
+        modelAlias: null,
+        resolvedModelId: null,
+        schemaId: null,
+        verdict: null,
+        rationale: null,
+        attemptCount: null,
+        latencyMs: null,
+        promptTokens: null,
+        completionTokens: null,
+        totalTokens: null,
+        blockedCode: null,
+        failedCode: null,
+        createdAt: '2026-07-29T00:00:00.000Z',
+        updatedAt: '2026-07-29T00:00:00.000Z',
+        completedAt: null,
+        blockedAt: null,
+        failedAt: null,
+        transitions: [],
+        excerpt: 'secret',
+      }),
+    ).toBe(false);
+  });
+
+  it('validates orchestration parsed schema and stage-valid verdicts', () => {
+    expect(
+      isReviewRunOrchestrationParsedDto({
+        ok: true,
+        schema: REVIEW_RUN_ORCHESTRATION_SCHEMA_ID,
+        stage: 'planning',
+        verdict: 'apply_ready',
+        rationale: 'ok enough',
+      }),
+    ).toBe(true);
+    expect(
+      isReviewRunOrchestrationParsedDto({
+        ok: true,
+        schema: REVIEW_RUN_ORCHESTRATION_SCHEMA_ID,
+        stage: 'planning',
+        verdict: 'ready_for_sync',
+        rationale: 'wrong verdict',
+      }),
+    ).toBe(false);
   });
 });

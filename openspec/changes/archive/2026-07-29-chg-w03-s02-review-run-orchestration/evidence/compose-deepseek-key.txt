@@ -1,0 +1,6 @@
+compose-deepseek-key: PASS
+
+compose.yaml API service forwards only DEEPSEEK_API_KEY from gitignored local env (${DEEPSEEK_API_KEY:-}).
+No DEEPSEEK_BASE_URL operator/Compose configuration present.
+No foreign Docker resources touched (including axioma-db-dev).
+Confirmed for chg-w03-s02-review-run-orchestration (probe + review-run orchestration share the same key wiring).

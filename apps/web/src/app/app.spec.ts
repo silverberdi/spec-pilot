@@ -1246,4 +1246,166 @@ describe('App shell and registration', () => {
       'Prueba DeepSeek bloqueada',
     );
   });
+
+  it('shows review-run idle, loading, success, and blocked outcomes', async () => {
+    const fixture = TestBed.createComponent(App);
+    fixture.componentRef.setInput('bootstrapMode', 'ok');
+    fixture.detectChanges();
+    await flushMicrotasks();
+    flushProjectsList([
+      {
+        id: '11111111-1111-1111-1111-111111111111',
+        slug: 'demo-repo',
+        displayName: 'demo-repo',
+        repositoryPath: '/tmp/demo-repo',
+        status: 'registered',
+        registeredAt: '2026-07-27T00:00:00.000Z',
+        lastInspectedAt: null,
+        configurationVersionId: '22222222-2222-2222-2222-222222222222',
+        discoveryHealth: neverInspectedHealth,
+      },
+    ]);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="review-run-idle"]'),
+    ).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('Iniciar revisión');
+    expect(fixture.nativeElement.textContent).toContain('not_enforced');
+
+    fixture.componentInstance.reviewRunContextBundleId.set('bundle-1');
+    fixture.componentInstance.startReviewRun();
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="review-run-loading"]'),
+    ).toBeTruthy();
+
+    const createReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/review-runs`,
+    );
+    expect(createReq.request.method).toBe('POST');
+    expect(createReq.request.body).toEqual({
+      stage: 'new',
+      contextBundleId: 'bundle-1',
+    });
+    createReq.flush({
+      status: 'ok',
+      id: 'run-1',
+      projectId: '11111111-1111-1111-1111-111111111111',
+      stage: 'new',
+      changeId: null,
+      state: 'completed',
+      contextBundleId: 'bundle-1',
+      manifestHash: 'm'.repeat(64),
+      disclosureApprovalId: 'a1',
+      previewSessionId: 's1',
+      previewIntegrityHash: 'h'.repeat(64),
+      previewPolicyId: 'bounded-selected-text-v1',
+      approvalPolicyId: 'explicit-disclosure-approval-v1',
+      budgetCheckStatus: 'not_enforced',
+      promptTemplateId: 'review-run-orchestration-v1',
+      modelAlias: 'deepseek-flash',
+      resolvedModelId: 'deepseek-v4-flash',
+      schemaId: 'review-run-orchestration-v1',
+      verdict: 'ready_to_create',
+      rationale: 'listo',
+      attemptCount: 1,
+      latencyMs: 12,
+      promptTokens: 1,
+      completionTokens: 1,
+      totalTokens: 2,
+      blockedCode: null,
+      failedCode: null,
+      createdAt: '2026-07-29T00:00:00.000Z',
+      updatedAt: '2026-07-29T00:00:01.000Z',
+      completedAt: '2026-07-29T00:00:01.000Z',
+      blockedAt: null,
+      failedAt: null,
+      transitions: [
+        {
+          id: 't1',
+          fromState: null,
+          toState: 'requested',
+          code: null,
+          createdAt: '2026-07-29T00:00:00.000Z',
+        },
+      ],
+      hasTransmission: true,
+      transmissionOutcome: 'completed',
+      transmission: {
+        id: 'tr1',
+        outcome: 'completed',
+        promptTemplateId: 'review-run-orchestration-v1',
+        schemaId: 'review-run-orchestration-v1',
+        requestedModelAlias: 'deepseek-flash',
+        resolvedModelId: 'deepseek-v4-flash',
+        attemptCount: 1,
+        latencyMs: 12,
+        promptTokens: 1,
+        completionTokens: 1,
+        totalTokens: 2,
+        providerRequestId: null,
+        terminalCode: null,
+        createdAt: '2026-07-29T00:00:01.000Z',
+      },
+    });
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="review-run-result"]'),
+    ).toBeTruthy();
+    expect(
+      fixture.nativeElement.querySelector('[data-testid="review-run-verdict"]')
+        ?.textContent,
+    ).toContain('ready_to_create');
+
+    fixture.componentInstance.startReviewRun();
+    fixture.detectChanges();
+    const blockedReq = httpMock.expectOne(
+      `${environment.apiBaseUrl}/projects/11111111-1111-1111-1111-111111111111/review-runs`,
+    );
+    blockedReq.flush({
+      status: 'ok',
+      id: 'run-2',
+      projectId: '11111111-1111-1111-1111-111111111111',
+      stage: 'new',
+      changeId: null,
+      state: 'blocked',
+      contextBundleId: null,
+      manifestHash: null,
+      disclosureApprovalId: null,
+      previewSessionId: null,
+      previewIntegrityHash: null,
+      previewPolicyId: null,
+      approvalPolicyId: null,
+      budgetCheckStatus: null,
+      promptTemplateId: null,
+      modelAlias: null,
+      resolvedModelId: null,
+      schemaId: null,
+      verdict: null,
+      rationale: null,
+      attemptCount: null,
+      latencyMs: null,
+      promptTokens: null,
+      completionTokens: null,
+      totalTokens: null,
+      blockedCode: 'review_disclosure_approval_required',
+      failedCode: null,
+      createdAt: '2026-07-29T00:00:00.000Z',
+      updatedAt: '2026-07-29T00:00:01.000Z',
+      completedAt: null,
+      blockedAt: '2026-07-29T00:00:01.000Z',
+      failedAt: null,
+      transitions: [],
+      hasTransmission: false,
+      transmissionOutcome: null,
+      transmission: null,
+    });
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector(
+        '[data-testid="review-run-blocked-code"]',
+      )?.textContent,
+    ).toContain('review_disclosure_approval_required');
+  });
 });

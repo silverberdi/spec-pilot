@@ -1,0 +1,20 @@
+exclusions-check: PASS
+
+Confirmed excluded from chg-w03-s02-review-run-orchestration scope:
+- no w03-s03 budget estimate/reserve/reconcile/hard-block (budget_check = not_enforced only)
+- no w03-s04 findings ledger / consolidated prompts / run-history product surfaces
+- no Waves 4–7 stage-depth product logic
+- no ReviewRun.transmissionId scalar (UNIQUE ContextDisclosureTransmission.reviewRunId only)
+- no mutation of ContextBundle / ContextDisclosurePreviewSession / ContextDisclosureApproval
+- never set approval.contentTransmitted to true
+- no client-supplied excerpts, paths, ranges, prompts, schemas, messages, or bodies
+- no silent latest-bundle substitution; contextBundleId required explicitly
+- no automatic bundle recreation
+- no apps/worker / SSE / cancel endpoint requirement
+- no auth/multiuser
+- no target-repo writes
+- no delivery / Git-write / OpenSpec apply-verify-sync-archive controls from SpecPilot
+- no alternate LLM providers
+- no weakening of SpecPilot repository CI secret scanning
+
+Checked against proposal.md, design.md, and specs/** for this change.

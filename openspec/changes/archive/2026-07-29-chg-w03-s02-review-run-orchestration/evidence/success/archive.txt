@@ -1,0 +1,7 @@
+archive: PASS
+timestamp_utc: 2026-07-30T01:51:33Z
+source: openspec/changes/chg-w03-s02-review-run-orchestration
+archive_path: openspec/changes/archive/2026-07-29-chg-w03-s02-review-run-orchestration
+active_changes_remaining: 0
+contains: proposal.md design.md tasks.md specs/ evidence/
+generated_integrations_manually_edited: no

@@ -1,0 +1,15 @@
+sync-specs: PASS
+change: chg-w03-s02-review-run-orchestration
+timestamp_utc: 2026-07-30T01:51:00Z
+Synced eleven capability specs to canonical openspec/specs/:
+- review-run-orchestration: created; added 12 requirements
+- deepseek-api-gateway: updated; modified 1; added 1
+- shared-libraries-baseline: updated; modified 1; added 1
+- nestjs-fastify-api-baseline: updated; modified 0; added 1
+- postgresql-prisma-persistence-baseline: updated; modified 1; added 0
+- local-project-registration: updated; modified 0; added 1
+- context-bundle-manifest: updated; modified 1; added 0
+- context-preview-and-approval: updated; modified 0; added 1
+- angular-web-console-baseline: updated; modified 0; added 1
+- application-test-baseline: updated; modified 0; added 1
+- docker-compose-local-runtime: updated; modified 0; added 1

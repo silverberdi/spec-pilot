@@ -34,10 +34,12 @@ Canonical context index for operator orientation. Formal integrity/generation ru
 | Context-source resolution (API) | `apps/api/src/app/projects/context-source-*.ts`, `POST /projects/:id/context-sources/resolve` |
 | Context-bundle / disclosure (API) | `apps/api/src/app/projects/context-bundle*.ts`, `context-disclosure*.ts`, `POST .../context-bundles`, `POST .../preview`, `POST .../disclosure-approvals` |
 | DeepSeek gateway (API) | `apps/api/src/app/deepseek/**`, `POST /projects/:id/deepseek/probe` |
-| Project registration / resolve / disclosure / DeepSeek probe (web) | `apps/web` operator surfaces in `apps/web/src/app/*` |
+| Review-run orchestration (API) | `apps/api/src/app/review-runs/**`, `POST/GET /projects/:id/review-runs` |
+| Project registration / resolve / disclosure / DeepSeek probe / review-run (web) | `apps/web` operator surfaces in `apps/web/src/app/*` |
 | Canonical capability: context-source-resolution | `openspec/specs/context-source-resolution/spec.md` |
 | Canonical capability: context-bundle-manifest | `openspec/specs/context-bundle-manifest/spec.md` |
 | Canonical capability: deepseek-api-gateway | `openspec/specs/deepseek-api-gateway/spec.md` |
+| Canonical capability: review-run-orchestration | `openspec/specs/review-run-orchestration/spec.md` |
 | Local Compose runtime | `compose.yaml`, `compose.override.example.yaml` (local `compose.override.yaml` gitignored), `apps/api/Dockerfile`, `apps/web/Dockerfile`, `.dockerignore`, `.env.example` |
 | Portable project contract (this repo) | `.specpilot/project.yaml` |
 | Quality-gate orchestrator | `scripts/run-quality-gates.sh` (`npm run quality-gates`) |
@@ -75,5 +77,5 @@ Refresh only with `openspec update`. Generated Codex and OpenCode inventories ar
 ## Active change
 
 - Active: none
-- Latest archived: `openspec/changes/archive/2026-07-29-chg-w03-s01-deepseek-api-gateway`
+- Latest archived: `openspec/changes/archive/2026-07-29-chg-w03-s02-review-run-orchestration`
 - Prior archived: `openspec/changes/archive/2026-07-29-chg-w02-s04-context-preview-and-approval`, `openspec/changes/archive/2026-07-29-chg-w02-s03-context-bundle-manifest`, `openspec/changes/archive/2026-07-28-chg-w02-s02-secret-detection-and-exclusion`, `openspec/changes/archive/2026-07-28-chg-w02-s01-context-source-resolution`, Wave 1 and Wave 0 archives under `openspec/changes/archive/`

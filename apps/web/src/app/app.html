@@ -947,6 +947,178 @@
                 </section>
               }
             </section>
+
+            <section class="shell__refresh" data-testid="review-run">
+              <p class="shell__tagline">{{ copy().reviewRunHint }}</p>
+
+              @if (!selectedProjectId()) {
+                <p class="shell__empty" data-testid="review-run-need-project">
+                  {{ copy().reviewRunNeedProjectHint }}
+                </p>
+              }
+
+              <label for="review-run-stage">{{
+                copy().reviewRunStageLabel
+              }}</label>
+              <select
+                id="review-run-stage"
+                data-testid="review-run-stage-select"
+                [ngModel]="reviewRunStage()"
+                (ngModelChange)="reviewRunStage.set($event)"
+              >
+                @for (stage of reviewStages; track stage) {
+                  <option [value]="stage">{{ stage }}</option>
+                }
+              </select>
+
+              <label for="review-run-bundle-id">{{
+                copy().reviewRunBundleIdLabel
+              }}</label>
+              <input
+                pInputText
+                id="review-run-bundle-id"
+                data-testid="review-run-bundle-id"
+                [ngModel]="reviewRunContextBundleId()"
+                (ngModelChange)="reviewRunContextBundleId.set($event)"
+              />
+
+              @if (reviewRunStage() !== 'new') {
+                <label for="review-run-change-id">{{
+                  copy().reviewRunChangeIdLabel
+                }}</label>
+                <input
+                  pInputText
+                  id="review-run-change-id"
+                  data-testid="review-run-change-id"
+                  [ngModel]="reviewRunChangeId()"
+                  (ngModelChange)="reviewRunChangeId.set($event)"
+                />
+              }
+
+              <p-button
+                [label]="copy().reviewRunLabel"
+                (onClick)="startReviewRun()"
+                [loading]="reviewRunState() === 'loading'"
+                [disabled]="
+                  reviewRunState() === 'loading' || !selectedProjectId()
+                "
+              />
+
+              @if (reviewRunState() === 'idle' && !lastReviewRun()) {
+                <p data-testid="review-run-idle">{{ copy().reviewRunIdle }}</p>
+              }
+
+              @if (reviewRunState() === 'empty') {
+                <p data-testid="review-run-empty">{{
+                  copy().reviewRunEmpty
+                }}</p>
+              }
+
+              @if (reviewRunState() === 'loading') {
+                <p data-testid="review-run-loading">{{ copy().loading }}</p>
+              }
+
+              @if (lastReviewRun(); as run) {
+                <section
+                  data-testid="review-run-result"
+                  [attr.data-state]="run.state"
+                >
+                  @if (run.state === 'completed') {
+                    <p-message severity="success">{{
+                      copy().reviewRunSuccessTitle
+                    }}</p-message>
+                  } @else if (run.state === 'blocked') {
+                    <p-message severity="warn">{{
+                      copy().reviewRunBlockedTitle
+                    }}</p-message>
+                  } @else if (run.state === 'failed') {
+                    <p-message severity="error">{{
+                      copy().reviewRunFailedTitle
+                    }}</p-message>
+                  }
+                  <p>
+                    id={{ run.id }} etapa={{ run.stage }} estado={{
+                      run.state
+                    }}
+                    @if (run.changeId) {
+                      cambio={{ run.changeId }}
+                    }
+                  </p>
+                  <p>
+                    bundle={{ run.contextBundleId ?? '—' }} hash={{
+                      run.manifestHash ?? '—'
+                    }}
+                    aprobación={{ run.disclosureApprovalId ?? '—' }}
+                  </p>
+                  <p data-testid="review-run-budget">
+                    {{ copy().reviewRunBudgetNotEnforced }} ({{
+                      run.budgetCheckStatus ?? '—'
+                    }})
+                  </p>
+                  <p>
+                    modelo={{ run.resolvedModelId ?? '—' }} schema={{
+                      run.schemaId ?? '—'
+                    }}
+                    plantilla={{ run.promptTemplateId ?? '—' }}
+                    latenciaMs={{ run.latencyMs ?? '—' }}
+                  </p>
+                  @if (run.verdict) {
+                    <p data-testid="review-run-verdict">
+                      veredicto={{ run.verdict }}
+                    </p>
+                    <p data-testid="review-run-rationale">{{
+                      run.rationale
+                    }}</p>
+                  }
+                  @if (run.blockedCode) {
+                    <p data-testid="review-run-blocked-code">{{
+                      run.blockedCode
+                    }}</p>
+                  }
+                  @if (run.failedCode) {
+                    <p data-testid="review-run-failed-code">{{
+                      run.failedCode
+                    }}</p>
+                  }
+                  <p data-testid="review-run-transmission">
+                    transmisión={{
+                      run.hasTransmission
+                        ? run.transmissionOutcome ?? 'sí'
+                        : 'no'
+                    }}
+                  </p>
+                  <ul data-testid="review-run-transitions">
+                    @for (t of run.transitions; track t.id) {
+                      <li>
+                        {{ t.fromState ?? 'null' }} → {{ t.toState
+                        }}{{ t.code ? ' (' + t.code + ')' : '' }}
+                      </li>
+                    }
+                  </ul>
+                </section>
+              }
+
+              @if (
+                (reviewRunState() === 'blocked' ||
+                  reviewRunState() === 'error') &&
+                reviewRunMessage() &&
+                !lastReviewRun()
+              ) {
+                <section data-testid="review-run-error">
+                  <p-message
+                    [severity]="
+                      reviewRunState() === 'blocked' ? 'warn' : 'error'
+                    "
+                    >{{
+                      reviewRunState() === 'blocked'
+                        ? copy().reviewRunBlockedTitle
+                        : copy().reviewRunErrorTitle
+                    }}</p-message
+                  >
+                  <p>{{ reviewRunMessage() }}</p>
+                </section>
+              }
+            </section>
           </section>
         }
       </p-card>

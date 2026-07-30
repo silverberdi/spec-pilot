@@ -2,42 +2,74 @@ import type {
   DeepseekGatewayProbeParsedDto,
   DeepseekResolvedModelId,
   ProjectErrorCode,
+  ReviewStage,
+  ReviewRunOrchestrationParsedDto,
 } from '@specpilot/shared-contracts';
+
+export type DeepseekGatewayProfile = 'probe' | 'review_run_orchestration';
+
+export type DeepseekOrchestrationContextItem = {
+  path: string;
+  contentHash: string;
+  lineRanges: ReadonlyArray<{ startLine: number; endLine: number }>;
+  excerpt: string;
+};
 
 export type DeepseekStructuredRequest = {
   resolvedModelId: DeepseekResolvedModelId;
+  requestedModelAlias: string;
   apiKey: string;
-};
-
-export type DeepseekStructuredSuccess = {
-  ok: true;
-  parsed: DeepseekGatewayProbeParsedDto;
-  attemptCount: number;
-  providerHttpStatus: 200;
-  providerRequestId?: string;
-  latencyMs: number;
-  usage?: {
-    promptTokens?: number;
-    completionTokens?: number;
-    totalTokens?: number;
+  profile: DeepseekGatewayProfile;
+  orchestration?: {
+    stage: ReviewStage;
+    changeId?: string;
+    promptTemplateId: 'review-run-orchestration-v1';
+    schemaId: 'review-run-orchestration-v1';
+    contextItems: ReadonlyArray<DeepseekOrchestrationContextItem>;
   };
 };
 
-export type DeepseekStructuredFailure = {
-  ok: false;
-  code: ProjectErrorCode;
-  attemptCount: number;
-  latencyMs: number;
-};
+export type DeepseekStructuredExecutionResult =
+  | {
+      status: 'ok';
+      invocationBegan: true;
+      requestedModelAlias: string;
+      resolvedModelId: DeepseekResolvedModelId;
+      attemptCount: number;
+      latencyMs: number;
+      providerHttpStatus: number;
+      providerRequestId?: string;
+      usage?: {
+        promptTokens?: number;
+        completionTokens?: number;
+        totalTokens?: number;
+      };
+      parsed: DeepseekGatewayProbeParsedDto | ReviewRunOrchestrationParsedDto | unknown;
+    }
+  | {
+      status: 'failed';
+      invocationBegan: boolean;
+      code: ProjectErrorCode;
+      requestedModelAlias?: string;
+      resolvedModelId?: DeepseekResolvedModelId;
+      attemptCount: number;
+      latencyMs: number;
+      providerHttpStatus?: number;
+      providerRequestId?: string;
+      usage?: {
+        promptTokens?: number;
+        completionTokens?: number;
+        totalTokens?: number;
+      };
+    };
 
-export type DeepseekStructuredResult =
-  | DeepseekStructuredSuccess
-  | DeepseekStructuredFailure;
+/** @deprecated Prefer DeepseekStructuredExecutionResult; kept for transitional test imports. */
+export type DeepseekStructuredResult = DeepseekStructuredExecutionResult;
 
 export interface DeepseekGatewayPort {
   completeStructured(
     input: DeepseekStructuredRequest,
-  ): Promise<DeepseekStructuredResult>;
+  ): Promise<DeepseekStructuredExecutionResult>;
 }
 
 export type DeepseekClock = {

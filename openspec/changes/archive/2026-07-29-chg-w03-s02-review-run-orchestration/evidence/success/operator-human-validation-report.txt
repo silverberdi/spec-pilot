@@ -1,0 +1,130 @@
+
+=== Runtime diagnosis ===
+axioma-db-dev snapshot: status=running started=2026-07-27T19:03:39.767345875Z finished=2026-07-27T19:03:39.418091875Z restarts=0
+NAME                 IMAGE                COMMAND                  SERVICE    CREATED          STATUS                PORTS
+specpilot-api        specpilot-api        "docker-entrypoint.s…"   api        38 minutes ago   Up 38 minutes         0.0.0.0:3000->3000/tcp
+specpilot-postgres   postgres:16-alpine   "docker-entrypoint.s…"   postgres   2 days ago       Up 2 days (healthy)   0.0.0.0:5441->5432/tcp
+specpilot-web        specpilot-web        "/docker-entrypoint.…"   web        6 hours ago      Up 6 hours            0.0.0.0:8081->80/tcp
+DEEPSEEK_API_KEY presence (main api): present
+PASS: DEEPSEEK_API_KEY present in main api == present
+
+=== Wait health (main-api) http://localhost:3000/health ===
+PASS: main-api GET /health == 200 (attempt 1)
+PASS: review-runs route live (project_not_found path)
+PASS: migration 20260729200000 applied == 1
+PASS: table review_runs == t
+PASS: table review_run_transitions == t
+PASS: table context_disclosure_transmissions == t
+PASS: partial unique index present == 1
+PASS: no ReviewRun.transmission_id scalar == 0
+PASS: no budget/findings/prompt/auth/user tables == 0
+
+=== Disposable project + Wave2 prerequisites ===
+PASS: register sp-w03-s02-hv HTTP == 201
+PASS: created disposable project (id length=36)
+PASS: resolve HTTP == 200
+PASS: secret-scan HTTP == 200
+PASS: bundle HTTP == 201
+PASS: bundle created id_len=36 hash_len=64
+PASS: bundle2 HTTP == 201
+PASS: preview HTTP == 200
+PASS: preview session id_len=36
+PASS: approval HTTP == 201
+PASS: approval contentTransmitted false == False
+PASS: disclosure approval id_len=36
+PASS: approval content_transmitted DB false == false
+
+=== A. Successful review-run (real DeepSeek) ===
+PASS: success create HTTP == 201
+PASS: successful run completed id_len=36
+success.attemptCount=1
+success.budgetCheckStatus=not_enforced
+success.contextBundleId_len=36
+success.disclosureApprovalId_len=36
+success.id_len=36
+success.latencyMs=1211
+success.manifestHash_len=64
+success.modelAlias=deepseek-flash
+success.projectId_len=36
+success.promptTemplateId=review-run-orchestration-v1
+success.rationaleLength=49
+success.resolvedModelId=deepseek-v4-flash
+success.schemaId=review-run-orchestration-v1
+success.stage=new
+success.state=completed
+success.transitionCount=6
+success.transmissionOutcome=completed
+success.usagePresent=True
+success.verdict=blocked
+PASS: exactly one transmission delta == 1
+PASS: unique transmission per success run == 1
+PASS: transmission outcome completed == completed
+PASS: GET run HTTP == 200
+PASS: GET transitions ordered + complete sequence
+PASS: LIST HTTP == 200
+PASS: list returns array without excerpts/full transmission
+PASS: bundle manifest_hash unchanged == 7523ac858054e7acff05a74098bfd75cb4fb2f1817e1a5a654eb4fb9dd2bbb17
+PASS: approval content_transmitted still false == false
+PASS: Wave 2 immutability after successful transmission
+
+=== B. Blocked path (approval required) before provider ===
+PASS: blocked HTTP == 201
+PASS: blocked state == blocked
+PASS: blocked path zero new transmissions == 1
+
+=== C. Failed path after provider (invalid key temp container) ===
+
+=== Wait health (badkey-api) http://localhost:3002/health ===
+PASS: badkey-api GET /health == 200 (attempt 3)
+PASS: main key still present during badkey harness == present
+PASS: badkey create HTTP == 201
+PASS: failed-after-provider run id_len=36
+PASS: failed path exactly one transmission == 1
+PASS: no second logical gateway invocation (events=1)
+Removed temporary container specpilot-api-badkey-hv
+
+=== Wait health (main-api-after-badkey) http://localhost:3000/health ===
+PASS: main-api-after-badkey GET /health == 200 (attempt 1)
+
+=== D. Missing-key path (empty key temp container) ===
+
+=== Wait health (nokey-api) http://localhost:3001/health ===
+PASS: nokey-api GET /health == 200 (attempt 3)
+
+=== Wait health (main-api-during-nokey) http://localhost:3000/health ===
+PASS: main-api-during-nokey GET /health == 200 (attempt 1)
+PASS: nokey /health HTTP == 200
+PASS: nokey create HTTP == 201
+PASS: missing-key failed deepseek_not_configured attemptCount=0
+PASS: missing-key zero transmission delta == 2
+Removed temporary container specpilot-api-nokey-hv
+PASS: main key present after nokey harness == present
+
+=== Wait health (main-api-restored) http://localhost:3000/health ===
+PASS: main-api-restored GET /health == 200 (attempt 1)
+
+=== E. Concurrency + stale recovery ===
+PASS: non-stale conflict HTTP == 409
+PASS: non-stale in-flight → 409 review_run_in_progress
+PASS: after-stale create HTTP == 201
+PASS: stale run failed == failed
+PASS: stale failed_code interrupted == review_run_interrupted
+PASS: stale interrupted transition present == 1
+PASS: stale recovery then new run created (HTTP 201)
+PASS: stale run zero transmissions / no replay == 0
+
+=== F. Persistence / immutability summary ===
+PASS: transmission.review_run_id column exists == 1
+PASS: UNIQUE review_run_id enforced
+PASS: success run still completed == completed
+
+=== Summary ===
+PASS_COUNT=64
+FAIL_COUNT=0
+PASS: all human-validation checks PASS
+
+=== Cleanup ===
+Deleted disposable project id=ce72f6a7-a5ac-42cf-8fbe-18493c0ffe1f
+Removed disposable directory /Users/silveriobernal/Documents/Code/Development/sp-w03-s02-hv-20260729T204508
+PASS: main API /health still 200 after cleanup
+PASS: axioma-db-dev untouched (status=running started=2026-07-27T19:03:39.767345875Z finished=2026-07-27T19:03:39.418091875Z restarts=0)

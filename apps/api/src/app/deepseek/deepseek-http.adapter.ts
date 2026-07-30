@@ -1,15 +1,17 @@
 import type { ProjectErrorCode } from '@specpilot/shared-contracts';
 import {
+  buildOrchestrationOutboundBody,
   buildProbeOutboundBody,
   extractSafeProviderRequestId,
+  validateOrchestrationEnvelope,
   validateProviderEnvelope,
 } from './deepseek-envelope';
 import type {
   DeepseekClock,
   DeepseekGatewayPort,
   DeepseekSleeper,
+  DeepseekStructuredExecutionResult,
   DeepseekStructuredRequest,
-  DeepseekStructuredResult,
 } from './deepseek-gateway.port';
 import { defaultClock, defaultSleeper } from './deepseek-gateway.port';
 import {
@@ -91,10 +93,48 @@ export class DeepseekHttpAdapter implements DeepseekGatewayPort {
 
   async completeStructured(
     input: DeepseekStructuredRequest,
-  ): Promise<DeepseekStructuredResult> {
+  ): Promise<DeepseekStructuredExecutionResult> {
     const started = this.clock.now();
+    const apiKey = input.apiKey?.trim() ?? '';
+    if (!apiKey) {
+      return {
+        status: 'failed',
+        invocationBegan: false,
+        code: 'deepseek_not_configured',
+        requestedModelAlias: input.requestedModelAlias,
+        resolvedModelId: input.resolvedModelId,
+        attemptCount: 0,
+        latencyMs: this.clock.now() - started,
+      };
+    }
+
+    if (
+      input.profile === 'review_run_orchestration' &&
+      (!input.orchestration || input.orchestration.contextItems.length === 0)
+    ) {
+      return {
+        status: 'failed',
+        invocationBegan: false,
+        code: 'deepseek_request_rejected',
+        requestedModelAlias: input.requestedModelAlias,
+        resolvedModelId: input.resolvedModelId,
+        attemptCount: 0,
+        latencyMs: this.clock.now() - started,
+      };
+    }
+
+    const body =
+      input.profile === 'review_run_orchestration'
+        ? buildOrchestrationOutboundBody({
+            resolvedModelId: input.resolvedModelId,
+            stage: input.orchestration!.stage,
+            changeId: input.orchestration!.changeId,
+            contextItems: input.orchestration!.contextItems,
+          })
+        : buildProbeOutboundBody(input.resolvedModelId);
+
     let attemptCount = 0;
-    let lastFailure: DeepseekStructuredResult | null = null;
+    let lastFailure: DeepseekStructuredExecutionResult | null = null;
 
     for (let attempt = 1; attempt <= DEEPSEEK_MAX_ATTEMPTS; attempt += 1) {
       attemptCount = attempt;
@@ -124,44 +164,57 @@ export class DeepseekHttpAdapter implements DeepseekGatewayPort {
             method: 'POST',
             headers: {
               'content-type': 'application/json',
-              authorization: `Bearer ${input.apiKey}`,
+              authorization: `Bearer ${apiKey}`,
             },
-            body: buildProbeOutboundBody(input.resolvedModelId),
+            body,
             signal: controller.signal,
           },
         );
 
         if (response.status >= 200 && response.status < 300) {
           const buf = Buffer.from(await response.arrayBuffer());
-          const validated = validateProviderEnvelope(
-            buf,
-            input.resolvedModelId,
-          );
+          const validated =
+            input.profile === 'review_run_orchestration'
+              ? validateOrchestrationEnvelope(buf, input.resolvedModelId)
+              : validateProviderEnvelope(buf, input.resolvedModelId);
           if (!validated.ok) {
             return {
-              ok: false,
+              status: 'failed',
+              invocationBegan: true,
               code: validated.code,
+              requestedModelAlias: input.requestedModelAlias,
+              resolvedModelId: input.resolvedModelId,
               attemptCount,
               latencyMs: this.clock.now() - started,
+              providerHttpStatus: response.status,
+              providerRequestId: extractSafeProviderRequestId(response.headers),
             };
           }
           return {
-            ok: true,
-            parsed: validated.parsed,
+            status: 'ok',
+            invocationBegan: true,
+            requestedModelAlias: input.requestedModelAlias,
+            resolvedModelId: input.resolvedModelId,
             attemptCount,
             providerHttpStatus: 200,
             providerRequestId: extractSafeProviderRequestId(response.headers),
             latencyMs: this.clock.now() - started,
             usage: validated.usage,
+            parsed: validated.parsed,
           };
         }
 
         const classified = classifyHttpStatus(response.status);
         lastFailure = {
-          ok: false,
+          status: 'failed',
+          invocationBegan: true,
           code: classified.code,
+          requestedModelAlias: input.requestedModelAlias,
+          resolvedModelId: input.resolvedModelId,
           attemptCount,
           latencyMs: this.clock.now() - started,
+          providerHttpStatus: response.status,
+          providerRequestId: extractSafeProviderRequestId(response.headers),
         };
         if (!classified.retry || attempt === DEEPSEEK_MAX_ATTEMPTS) {
           return lastFailure;
@@ -179,8 +232,11 @@ export class DeepseekHttpAdapter implements DeepseekGatewayPort {
           err instanceof Error &&
           (err.name === 'AbortError' || /aborted/i.test(err.message));
         lastFailure = {
-          ok: false,
+          status: 'failed',
+          invocationBegan: true,
           code: aborted ? 'deepseek_timeout' : 'deepseek_transport_failed',
+          requestedModelAlias: input.requestedModelAlias,
+          resolvedModelId: input.resolvedModelId,
           attemptCount,
           latencyMs: this.clock.now() - started,
         };
@@ -194,8 +250,11 @@ export class DeepseekHttpAdapter implements DeepseekGatewayPort {
 
     return (
       lastFailure ?? {
-        ok: false,
+        status: 'failed',
+        invocationBegan: true,
         code: 'deepseek_transport_failed',
+        requestedModelAlias: input.requestedModelAlias,
+        resolvedModelId: input.resolvedModelId,
         attemptCount,
         latencyMs: this.clock.now() - started,
       }

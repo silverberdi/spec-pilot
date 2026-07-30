@@ -166,7 +166,6 @@ The registered-project API surface MUST expose `POST /projects/:id/context-sourc
 - **WHEN** an operator registers a project or lists projects
 - **THEN** context-source resolution is not invoked as part of those operations
 
-
 ### Requirement: Project-scoped secret-scan endpoint is exposed under projects
 The registered-project API surface MUST expose `POST /projects/:id/context-sources/secret-scan` as defined by `secret-detection-and-exclusion` without changing realpath identity, presence-only eligibility, registration create/list semantics, configuration attach/refresh/get, discovery refresh/get, or context-source resolve semantics. Secret scan MUST NOT run automatically on `POST /projects`, `GET /projects`, or `POST /projects/:id/context-sources/resolve`.
 
@@ -210,3 +209,14 @@ The registered-project API surface MUST expose `POST /projects/:id/deepseek/prob
 #### Scenario: Registration and context workflows do not auto-probe
 - **WHEN** an operator registers a project, resolves context, secret-scans, creates a bundle, previews, or approves disclosure
 - **THEN** DeepSeek probe is not invoked as part of those operations
+
+### Requirement: Project-scoped review-run endpoints are exposed under projects
+The registered-project API surface MUST expose `POST /projects/:id/review-runs`, `GET /projects/:id/review-runs/:runId`, and `GET /projects/:id/review-runs` without changing realpath identity or registration semantics. Unknown projects MUST continue to return HTTP 404 `project_not_found` on these routes.
+
+#### Scenario: Review-run create is project-scoped
+- **WHEN** an operator posts a review-run create for a registered project id
+- **THEN** the route is handled under `/projects/:id/review-runs` and does not alter project registration identity rules
+
+#### Scenario: Unknown project on review-run create returns 404
+- **WHEN** create is posted for an unknown project id
+- **THEN** the response is HTTP 404 `project_not_found`

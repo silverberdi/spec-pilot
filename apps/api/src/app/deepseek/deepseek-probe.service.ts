@@ -94,7 +94,9 @@ export class DeepseekProbeService {
     try {
       result = await this.gateway.completeStructured({
         resolvedModelId: resolved.resolvedModelId,
+        requestedModelAlias: resolved.alias,
         apiKey,
+        profile: 'probe',
       });
     } catch {
       throw internal500('deepseek_gateway_failed');
@@ -109,12 +111,12 @@ export class DeepseekProbeService {
         resolvedModel: resolved.resolvedModelId,
         attemptCount: result.attemptCount,
         latencyMs: result.latencyMs,
-        statusClass: result.ok ? '2xx' : 'error',
-        code: result.ok ? 'ok' : result.code,
+        statusClass: result.status === 'ok' ? '2xx' : 'error',
+        code: result.status === 'ok' ? 'ok' : result.code,
       }),
     );
 
-    if (!result.ok) {
+    if (result.status !== 'ok') {
       throw this.mapFailure(result.code);
     }
 
@@ -129,7 +131,7 @@ export class DeepseekProbeService {
       attemptCount: result.attemptCount,
       providerHttpStatus: 200,
       latencyMs: result.latencyMs,
-      parsed: result.parsed,
+      parsed: result.parsed as DeepseekProbeOkDto['parsed'],
     };
     if (result.providerRequestId) {
       dto.providerRequestId = result.providerRequestId;

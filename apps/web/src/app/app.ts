@@ -25,6 +25,7 @@ import type {
   SecretScanOkDto,
   DeepseekProbeOkDto,
   DeepseekProbeStage,
+  ReviewRunOkDto,
 } from '@specpilot/shared-contracts';
 import {
   DEEPSEEK_PROBE_STAGES,
@@ -39,6 +40,7 @@ import {
   isDeepseekProbeOkDto,
   isProjectDto,
   isProjectErrorResponse,
+  isReviewRunOkDto,
   isSecretScanBlockedDto,
   isSecretScanOkDto,
   REVIEW_STAGES,
@@ -111,6 +113,13 @@ export type DeepseekProbeUiState =
   | 'loading'
   | 'success'
   | 'blocked'
+  | 'error';
+export type ReviewRunUiState =
+  | 'idle'
+  | 'loading'
+  | 'success'
+  | 'blocked'
+  | 'empty'
   | 'error';
 export type DashboardListState = 'idle' | 'loading' | 'success' | 'error';
 
@@ -226,6 +235,24 @@ export const shellCopy = {
     deepseekProbeErrorTitle: 'Error al probar DeepSeek',
     deepseekProbeNeedProjectHint:
       'Seleccione un proyecto registrado para probar DeepSeek.',
+    reviewRunTitle: 'Ejecución de revisión',
+    reviewRunHint:
+      'Inicia una revisión orquestada con el manifiesto y la aprobación de divulgación explícitos. El presupuesto aún no se aplica (not_enforced).',
+    reviewRunLabel: 'Iniciar revisión',
+    reviewRunStageLabel: 'Etapa de revisión',
+    reviewRunBundleIdLabel: 'Identificador del manifiesto de contexto',
+    reviewRunChangeIdLabel: 'Identificador del cambio (kebab-case)',
+    reviewRunIdle:
+      'Aún no se ha iniciado una ejecución de revisión para este proyecto.',
+    reviewRunEmpty: 'No hay ejecuciones de revisión para mostrar.',
+    reviewRunSuccessTitle: 'Ejecución de revisión completada',
+    reviewRunBlockedTitle: 'Ejecución de revisión bloqueada',
+    reviewRunFailedTitle: 'Ejecución de revisión fallida',
+    reviewRunErrorTitle: 'Error al iniciar la revisión',
+    reviewRunNeedProjectHint:
+      'Seleccione un proyecto registrado para iniciar una revisión.',
+    reviewRunBudgetNotEnforced:
+      'Comprobación de presupuesto: not_enforced (aún no se aplica en este corte).',
     dashboardTitle: 'Proyectos',
     dashboardHint:
       'Estado de descubrimiento según la última inspección persistida (sin re-probar al cargar).',
@@ -322,6 +349,13 @@ export class App implements OnInit {
   readonly deepseekProbeState = signal<DeepseekProbeUiState>('idle');
   readonly deepseekProbeMessage = signal<string | null>(null);
   readonly lastDeepseekProbe = signal<DeepseekProbeOkDto | null>(null);
+
+  readonly reviewRunStage = signal<ReviewStage>('new');
+  readonly reviewRunContextBundleId = signal('');
+  readonly reviewRunChangeId = signal('');
+  readonly reviewRunState = signal<ReviewRunUiState>('idle');
+  readonly reviewRunMessage = signal<string | null>(null);
+  readonly lastReviewRun = signal<ReviewRunOkDto | null>(null);
 
   readonly displayedContextPaths = computed(() => {
     const result = this.lastContextResolve();
@@ -960,6 +994,72 @@ export class App implements OnInit {
             payload?.message ?? 'No se pudo completar la prueba DeepSeek.',
           );
           this.deepseekProbeState.set(
+            this.blockedOrError(this.extractStatus(err)),
+          );
+        },
+      });
+  }
+
+  startReviewRun(): void {
+    const id = this.selectedProjectId();
+    if (!id) {
+      return;
+    }
+    this.reviewRunState.set('loading');
+    this.reviewRunMessage.set(null);
+    this.lastReviewRun.set(null);
+
+    const stage = this.reviewRunStage();
+    const body: Record<string, string> = {
+      stage,
+      contextBundleId: this.reviewRunContextBundleId().trim(),
+    };
+    if (stage !== 'new') {
+      body['changeId'] = this.reviewRunChangeId().trim();
+    }
+
+    this.http
+      .post<unknown>(
+        `${environment.apiBaseUrl}/projects/${id}/review-runs`,
+        body,
+      )
+      .subscribe({
+        next: (payload) => {
+          if (!isReviewRunOkDto(payload)) {
+            this.reviewRunState.set('error');
+            this.reviewRunMessage.set(
+              'La respuesta de la ejecución de revisión no es válida.',
+            );
+            return;
+          }
+          this.lastReviewRun.set(payload);
+          if (payload.state === 'completed') {
+            this.reviewRunState.set('success');
+          } else if (payload.state === 'blocked') {
+            this.reviewRunState.set('blocked');
+            this.reviewRunMessage.set(
+              payload.blockedCode ??
+                'La ejecución de revisión quedó bloqueada.',
+            );
+          } else if (payload.state === 'failed') {
+            this.reviewRunState.set('error');
+            this.reviewRunMessage.set(
+              payload.failedCode ??
+                'La ejecución de revisión falló.',
+            );
+          } else {
+            this.reviewRunState.set('error');
+            this.reviewRunMessage.set(
+              'La ejecución no terminó en un estado esperado.',
+            );
+          }
+        },
+        error: (err: unknown) => {
+          const payload = this.extractError(err);
+          this.reviewRunMessage.set(
+            payload?.message ?? 'No se pudo iniciar la ejecución de revisión.',
+          );
+          this.reviewRunState.set(
             this.blockedOrError(this.extractStatus(err)),
           );
         },

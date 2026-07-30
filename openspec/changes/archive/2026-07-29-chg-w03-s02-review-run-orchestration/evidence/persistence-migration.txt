@@ -1,0 +1,9 @@
+persistence-migration: PASS
+
+Additive migration: apps/api/prisma/migrations/20260729200000_add_review_run_orchestration/migration.sql
+Tables: review_runs, review_run_transitions, context_disclosure_transmissions
+UNIQUE context_disclosure_transmissions.review_run_id
+Partial unique index review_runs_one_inflight_per_project on project_id WHERE state IN (requested, preparing_context, budget_check, running, validating_response)
+No ReviewRun.transmission_id scalar
+No budget / finding / prompt-history / auth / user tables
+Prisma schema validate: PASS
